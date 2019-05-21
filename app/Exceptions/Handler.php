@@ -3,10 +3,14 @@
 namespace App\Exceptions;
 
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Knovators\Support\Helpers\HTTPCode;
+use Knovators\Support\Traits\APIResponse;
 
 class Handler extends ExceptionHandler
 {
+    use APIResponse;
     /**
      * A list of the exception types that are not reported.
      *
@@ -42,10 +46,15 @@ class Handler extends ExceptionHandler
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Exception  $exception
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response|\Symfony\Component\HttpFoundation\Response
      */
-    public function render($request, Exception $exception)
-    {
+    public function render($request, Exception $exception) {
+        if ($exception instanceof ModelNotFoundException) {
+
+            return $this->sendResponse(null,
+                $exception->getMessage(), HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+
         return parent::render($request, $exception);
     }
 }
