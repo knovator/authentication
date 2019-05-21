@@ -5,26 +5,11 @@
     "minimum-stability": "dev",
     "require": {
         "laravel/passport": "^7.2",
-        "prettus/l5-repository": "^2.6",
-        "knovators/media": "1.*",
-        "knovators/support": "1.*"
+        "prettus/l5-repository": "^2.6"
     },
     "autoload": {
         "psr-4": {
             "Knovators\\Authentication\\": "src/"
         }
-    },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "http://git.knovator.in/knovators/media.git"
-        },
-        {
-            "type": "vcs",
-            "url": "http://git.knovator.in/knovators/support.git"
-        }
-    ],
-    "config": {
-        "secure-http": false
     }
 }
