@@ -1,8 +1,8 @@
 <?php
 
+use App\User;
 use Knovators\Authentication\Models\Permission;
 use Knovators\Authentication\Models\Role;
-use Knovators\Authentication\Models\User;
 use Knovators\Authentication\Http\Resources\User as UserResource;
 
 return [
