@@ -7,7 +7,7 @@ use Knovators\Authentication\Http\Resources\User as UserResource;
 
 return [
 
-    'front_url' => env('APP_URL'),
+    'front_url' => env('FRONT_URL'),
 
     'models' => [
 
