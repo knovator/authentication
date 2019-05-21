@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "13dbe12bed88b3d5c65cbabd579e2340",
+    "content-hash": "e904fad67473d380a41155f54a3f359b",
     "packages": [
         {
             "name": "arcanedev/log-viewer",
@@ -1284,11 +1284,11 @@
         },
         {
             "name": "knovators/authentication",
-            "version": "v1.0",
+            "version": "v1.1",
             "source": {
                 "type": "git",
-                "url": "http://git.knovator.in/knovators/authentication.git",
-                "reference": "12d7f94c19270114253f9bac53b538318904ad62"
+                "url": "git@git.knovator.in:knovators/authentication.git",
+                "reference": "d82c7f10e1477562d45630912bebeea8367a5a09"
             },
             "require": {
                 "laravel/passport": "^7.2",
@@ -1301,14 +1301,14 @@
                 }
             },
             "description": "This is authentication module description",
-            "time": "2019-05-21T09:38:54+00:00"
+            "time": "2019-05-21T12:49:17+00:00"
         },
         {
             "name": "knovators/httplogger",
             "version": "v1.0.10",
             "source": {
                 "type": "git",
-                "url": "http://git.knovator.in/knovators/logger.git",
+                "url": "git@git.knovator.in:knovators/logger.git",
                 "reference": "6eb3b86b6f12a6b34784c0ffdbef0ad0cb8c5a2b"
             },
             "type": "project",
@@ -1322,11 +1322,11 @@
         },
         {
             "name": "knovators/masters",
-            "version": "v1.0",
+            "version": "v1.1",
             "source": {
                 "type": "git",
-                "url": "http://git.knovator.in/knovators/master.git",
-                "reference": "9a89954b97d0bb680ff50b6510d8533cbf601150"
+                "url": "git@git.knovator.in:knovators/master.git",
+                "reference": "307fe4856a8fda3ffccf11d49daebdf22a527705"
             },
             "require": {
                 "prettus/l5-repository": "^2.6"
@@ -1338,14 +1338,14 @@
                 }
             },
             "description": "This is master module description",
-            "time": "2019-05-21T09:15:01+00:00"
+            "time": "2019-05-21T12:49:17+00:00"
         },
         {
             "name": "knovators/media",
-            "version": "v1.0",
+            "version": "v1.1",
             "source": {
                 "type": "git",
-                "url": "http://git.knovator.in/knovators/media.git",
+                "url": "git@git.knovator.in:knovators/media.git",
                 "reference": "0b8b7f37a5fe4ece826fa76d393767ab7f278a2c"
             },
             "require": {
@@ -1362,11 +1362,11 @@
         },
         {
             "name": "knovators/support",
-            "version": "v1.0",
+            "version": "v1.1",
             "source": {
                 "type": "git",
-                "url": "http://git.knovator.in/knovators/support.git",
-                "reference": "6854651568b1f52814a18690232e075054584d17"
+                "url": "git@git.knovator.in:knovators/support.git",
+                "reference": "72a481dfe2ead1bbcd183a06686900eadf6a8dc8"
             },
             "type": "library",
             "autoload": {
@@ -1383,7 +1383,7 @@
                 }
             },
             "description": "Support helpers",
-            "time": "2019-05-21T09:16:17+00:00"
+            "time": "2019-05-21T12:49:17+00:00"
         },
         {
             "name": "laravel/framework",
@@ -1775,16 +1775,16 @@
         },
         {
             "name": "league/flysystem",
-            "version": "1.0.51",
+            "version": "1.0.52",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/flysystem.git",
-                "reference": "755ba7bf3fb9031e6581d091db84d78275874396"
+                "reference": "c5a5097156387970e6f0ccfcdf03f752856f3391"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/flysystem/zipball/755ba7bf3fb9031e6581d091db84d78275874396",
-                "reference": "755ba7bf3fb9031e6581d091db84d78275874396",
+                "url": "https://api.github.com/repos/thephpleague/flysystem/zipball/c5a5097156387970e6f0ccfcdf03f752856f3391",
+                "reference": "c5a5097156387970e6f0ccfcdf03f752856f3391",
                 "shasum": ""
             },
             "require": {
@@ -1855,7 +1855,7 @@
                 "sftp",
                 "storage"
             ],
-            "time": "2019-03-30T13:22:34+00:00"
+            "time": "2019-05-20T20:21:14+00:00"
         },
         {
             "name": "league/oauth2-server",
@@ -2014,16 +2014,16 @@
         },
         {
             "name": "nesbot/carbon",
-            "version": "2.17.1",
+            "version": "2.18.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/briannesbitt/Carbon.git",
-                "reference": "96acbc0c03782e8115156dd4dd8b736267155066"
+                "reference": "8322b7bd1805be31867c13bf3cdaab948a0dd406"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/briannesbitt/Carbon/zipball/96acbc0c03782e8115156dd4dd8b736267155066",
-                "reference": "96acbc0c03782e8115156dd4dd8b736267155066",
+                "url": "https://api.github.com/repos/briannesbitt/Carbon/zipball/8322b7bd1805be31867c13bf3cdaab948a0dd406",
+                "reference": "8322b7bd1805be31867c13bf3cdaab948a0dd406",
                 "shasum": ""
             },
             "require": {
@@ -2070,7 +2070,7 @@
                 "datetime",
                 "time"
             ],
-            "time": "2019-04-27T18:04:27+00:00"
+            "time": "2019-05-16T18:44:35+00:00"
         },
         {
             "name": "nikic/php-parser",
