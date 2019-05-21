@@ -14,7 +14,7 @@ return [
             'prefix' => 'api/v1/admin',
 
             'middleware' => env('MASTER_MIDDLEWARE') ? explode(',',
-                env('MASTER_MIDDLEWARE')) : ['api'],
+                env('MASTER_MIDDLEWARE')) : ['api','auth_active'],
         ],
 
         'client_attributes' => [
