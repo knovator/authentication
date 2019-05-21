@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "13535d3ff49e9e552a74725cffb04616",
+    "content-hash": "13dbe12bed88b3d5c65cbabd579e2340",
     "packages": [
         {
             "name": "arcanedev/log-viewer",
@@ -1283,6 +1283,27 @@
             "time": "2018-09-29T18:48:56+00:00"
         },
         {
+            "name": "knovators/authentication",
+            "version": "v1.0",
+            "source": {
+                "type": "git",
+                "url": "http://git.knovator.in/knovators/authentication.git",
+                "reference": "12d7f94c19270114253f9bac53b538318904ad62"
+            },
+            "require": {
+                "laravel/passport": "^7.2",
+                "prettus/l5-repository": "^2.6"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Knovators\\Authentication\\": "src/"
+                }
+            },
+            "description": "This is authentication module description",
+            "time": "2019-05-21T09:38:54+00:00"
+        },
+        {
             "name": "knovators/httplogger",
             "version": "v1.0.10",
             "source": {
@@ -1298,6 +1319,71 @@
             },
             "description": "This is http logger description",
             "time": "2019-02-14T11:19:47+00:00"
+        },
+        {
+            "name": "knovators/masters",
+            "version": "v1.0",
+            "source": {
+                "type": "git",
+                "url": "http://git.knovator.in/knovators/master.git",
+                "reference": "9a89954b97d0bb680ff50b6510d8533cbf601150"
+            },
+            "require": {
+                "prettus/l5-repository": "^2.6"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Knovators\\Masters\\": "src/"
+                }
+            },
+            "description": "This is master module description",
+            "time": "2019-05-21T09:15:01+00:00"
+        },
+        {
+            "name": "knovators/media",
+            "version": "v1.0",
+            "source": {
+                "type": "git",
+                "url": "http://git.knovator.in/knovators/media.git",
+                "reference": "0b8b7f37a5fe4ece826fa76d393767ab7f278a2c"
+            },
+            "require": {
+                "prettus/l5-repository": "^2.6"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Knovators\\Media\\": "src/"
+                }
+            },
+            "description": "This is media module description",
+            "time": "2019-05-21T09:13:18+00:00"
+        },
+        {
+            "name": "knovators/support",
+            "version": "v1.0",
+            "source": {
+                "type": "git",
+                "url": "http://git.knovator.in/knovators/support.git",
+                "reference": "6854651568b1f52814a18690232e075054584d17"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Knovators\\Support\\": "src/"
+                },
+                "files": [
+                    "helpers.php"
+                ]
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Knovators\\Support\\Tests\\": "tests/"
+                }
+            },
+            "description": "Support helpers",
+            "time": "2019-05-21T09:16:17+00:00"
         },
         {
             "name": "laravel/framework",

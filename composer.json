@@ -14,7 +14,11 @@
         "caffeinated/modules": "5.1.*",
         "doctrine/dbal": "^2.9",
         "fideloper/proxy": "^4.0",
+        "knovators/authentication": "1.*",
         "knovators/httplogger": "1.0.*",
+        "knovators/masters": "1.*",
+        "knovators/media": "1.*",
+        "knovators/support": "1.*",
         "laravel/framework": "5.8.*",
         "laravel/passport": "^7.2",
         "laravel/tinker": "^1.0",
@@ -34,7 +38,7 @@
         "optimize-autoloader": true,
         "preferred-install": "dist",
         "sort-packages": true,
-        "secure-http":false
+        "secure-http": false
     },
     "extra": {
         "laravel": {
@@ -45,6 +49,22 @@
         {
             "type": "vcs",
             "url": "http://git.knovator.in/knovators/logger.git"
+        },
+        {
+            "type": "vcs",
+            "url": "http://git.knovator.in/knovators/authentication.git"
+        },
+        {
+            "type": "vcs",
+            "url": "http://git.knovator.in/knovators/media.git"
+        },
+        {
+            "type": "vcs",
+            "url": "http://git.knovator.in/knovators/support.git"
+        },
+        {
+            "type": "vcs",
+            "url": "http://git.knovator.in/knovators/master.git"
         }
     ],
     "autoload": {
