@@ -26,7 +26,7 @@ return [
             'prefix' => 'api/v1/media',
 
             'middleware' => env('MEDIA_MIDDLEWARE') ? explode(',',
-                env('MEDIA_MIDDLEWARE')) : ['api'],
+                env('MEDIA_MIDDLEWARE')) : ['api','auth_active'],
         ],
     ],
 
