@@ -15,7 +15,7 @@ return [
 
         'admin_attributes' => [
 
-            'prefix' => 'api/v1/media',
+            'prefix' => 'api/v1/admin/media',
 
             'middleware' => env('MEDIA_ADMIN_MIDDLEWARE') ? explode(',',
                 env('MEDIA_ADMIN_MIDDLEWARE')) : ['api','auth_active'],
