@@ -8,7 +8,6 @@ use Knovators\Authentication\Http\Routes\AuthRoute;
 
 /**
  * Class     RouteServiceProvider
- *
  * @package  Knovators\Authentication\Providers
  */
 class RouteServiceProvider extends ServiceProvider

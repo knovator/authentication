@@ -2,6 +2,7 @@
 
 namespace Knovators\Authentication\Middleware;
 
+
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

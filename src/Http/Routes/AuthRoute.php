@@ -8,8 +8,6 @@ use Knovators\Support\Routing\RouteRegistrar;
  * Class MasterRoute
  *
  * @package  Knovators\Authentication\Http\Routes
- *
- * @codeCoverageIgnore
  */
 class AuthRoute extends RouteRegistrar
 {
