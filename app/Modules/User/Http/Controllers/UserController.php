@@ -16,6 +16,7 @@ use Exception;
 use Hash;
 use Illuminate\Http\JsonResponse;
 use App\Http\Requests\PartiallyUpdateRequest;
+use Knovators\Authentication\Repository\RoleRepository;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;
@@ -29,16 +30,20 @@ class UserController extends Controller
 
     use DestroyObject;
 
-    private $userRepository;
+    protected $userRepository;
+
+    protected $roleRepository;
 
     /**
      * UserController constructor.
      * @param UserRepository $userRepository
      */
     public function __construct(
-        UserRepository $userRepository
+        UserRepository $userRepository,
+        RoleRepository $roleRepository
     ) {
         $this->userRepository = $userRepository;
+        $this->roleRepository = $roleRepository;
     }
 
     /**
@@ -53,6 +58,7 @@ class UserController extends Controller
     /**
      * @param CreateRequest $request
      * @return mixed
+     * @throws Exception
      */
     public function store(CreateRequest $request) {
         $input = $request->all();
@@ -87,7 +93,7 @@ class UserController extends Controller
             $users = $this->userRepository->getUserList();
 
             return $this->sendResponse($users,
-                __('messages.retrieved', ['module' => 'Employees']),
+                __('messages.retrieved', ['module' => 'Users']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
             Log::error($exception);
@@ -110,6 +116,7 @@ class UserController extends Controller
      * @param User          $user
      * @param UpdateRequest $request
      * @return JsonResponse
+     * @throws Exception
      */
     public function update(User $user, UpdateRequest $request) {
         $input = $request->all();
@@ -235,6 +242,25 @@ class UserController extends Controller
 
             return $this->sendResponse(null, __('messages.something_wrong'),
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
+
+
+    /**
+     * @return JsonResponse
+     */
+    public function roleList() {
+        try {
+            $roles = $this->roleRepository->makeModel()->orderBy('weight')
+                                          ->pluck('name', 'id');
+            return $this->sendResponse($roles,
+                __('messages.retrieved', ['module' => 'Roles']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
         }
     }
 

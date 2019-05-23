@@ -18,4 +18,12 @@ Route::group([
     });
 
 
+Route::group([
+    'prefix' => 'users'
+],
+    function () {
+        Route::get('role-list', 'UserController@roleList');
+    });
+
+
 Route::model('user', User::class);
