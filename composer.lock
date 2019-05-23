@@ -1346,7 +1346,7 @@
             "source": {
                 "type": "git",
                 "url": "git@git.knovator.in:knovators/media.git",
-                "reference": "ee375000e9584938eef82a20afcb0720bd0b64de"
+                "reference": "e3462465ca2985a99e0f0acf419ecc6b471f5fe6"
             },
             "require": {
                 "prettus/l5-repository": "^2.6"
@@ -1358,7 +1358,7 @@
                 }
             },
             "description": "This is media module description",
-            "time": "2019-05-22T08:38:17+00:00"
+            "time": "2019-05-23T05:37:52+00:00"
         },
         {
             "name": "knovators/support",
@@ -1366,7 +1366,7 @@
             "source": {
                 "type": "git",
                 "url": "git@git.knovator.in:knovators/support.git",
-                "reference": "0507b1e0a6f6294cf757e186fd0f905f690d9670"
+                "reference": "8b4c3aedc3a882401ae1e2bb78e19ad6246acd67"
             },
             "type": "library",
             "autoload": {
@@ -1383,7 +1383,7 @@
                 }
             },
             "description": "Support helpers",
-            "time": "2019-05-22T08:36:12+00:00"
+            "time": "2019-05-23T05:21:05+00:00"
         },
         {
             "name": "laravel/framework",
@@ -1667,32 +1667,29 @@
         },
         {
             "name": "lcobucci/jwt",
-            "version": "3.2.5",
+            "version": "3.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/lcobucci/jwt.git",
-                "reference": "82be04b4753f8b7693b62852b7eab30f97524f9b"
+                "reference": "8866a58fa866f6872f2a6ea0e04ad56480f0f440"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lcobucci/jwt/zipball/82be04b4753f8b7693b62852b7eab30f97524f9b",
-                "reference": "82be04b4753f8b7693b62852b7eab30f97524f9b",
+                "url": "https://api.github.com/repos/lcobucci/jwt/zipball/8866a58fa866f6872f2a6ea0e04ad56480f0f440",
+                "reference": "8866a58fa866f6872f2a6ea0e04ad56480f0f440",
                 "shasum": ""
             },
             "require": {
+                "ext-mbstring": "*",
                 "ext-openssl": "*",
-                "php": ">=5.5"
+                "php": "^5.6 || ^7.0"
             },
             "require-dev": {
-                "mdanter/ecc": "~0.3.1",
                 "mikey179/vfsstream": "~1.5",
                 "phpmd/phpmd": "~2.2",
                 "phpunit/php-invoker": "~1.1",
-                "phpunit/phpunit": "~4.5",
+                "phpunit/phpunit": "^5.7 || ^7.3",
                 "squizlabs/php_codesniffer": "~2.3"
-            },
-            "suggest": {
-                "mdanter/ecc": "Required to use Elliptic Curves based algorithms."
             },
             "type": "library",
             "extra": {
@@ -1721,7 +1718,7 @@
                 "JWS",
                 "jwt"
             ],
-            "time": "2018-11-11T12:22:26+00:00"
+            "time": "2019-05-22T09:44:23+00:00"
         },
         {
             "name": "league/event",
