@@ -1,6 +1,6 @@
 <?php namespace App\Modules\User\Repositories;
 
-use App\Support\Criteria\OrderByDescId;
+use Knovators\Support\Criteria\OrderByDescId;
 use App\User;
 use Knovators\Authentication\Repository\UserRepository as BaseRepository;
 use Knovators\Support\Traits\StoreWithTrashedRecord;
