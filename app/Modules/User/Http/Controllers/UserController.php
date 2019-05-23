@@ -4,6 +4,7 @@ namespace App\Modules\User\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\User\Http\Requests\ChangePasswordRequest;
+use App\Modules\User\Http\Requests\ChangeProfileRequest;
 use App\Modules\User\Http\Requests\CreateRequest;
 use App\Modules\User\Http\Requests\UpdateRequest;
 use App\Modules\User\Http\Resources\User as UserResource;
@@ -189,7 +190,7 @@ class UserController extends Controller
 
     /**
      * @param ChangePasswordRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function changePassword(ChangePasswordRequest $request) {
         $input = $request->all();
@@ -212,7 +213,29 @@ class UserController extends Controller
             return $this->sendResponse(null, __('messages.something_wrong'),
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
+    }
 
+
+    /**
+     * @param User                 $user
+     * @param ChangeProfileRequest $request
+     * @return JsonResponse
+     */
+    public function changeProfile(User $user, ChangeProfileRequest $request) {
+        $input = $request->all();
+        try {
+            $user->update($input);
+            $user->fresh();
+
+            return $this->sendResponse($this->makeResource($user->load(['image'])),
+                __('messages.updated', ['module' => 'Profile']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
     }
 
 
