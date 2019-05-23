@@ -9,13 +9,13 @@ Route::group([
 ],
     function () {
         Route::resource('users', 'UserController');
-        Route::put('users/partiallyUpdate/{users}', 'UserController@partiallyUpdate')
+        Route::put('users/partiallyUpdate/{user}', 'UserController@partiallyUpdate')
              ->name('users.partially-update');
-        Route::put('users/{users}/change-password', 'UserController@changePassword')
+        Route::put('users/{user}/change-password', 'UserController@changePassword')
              ->name('users.change-password');
-        Route::put('users/{users}/change-profile', 'UserController@changeProfile')
+        Route::put('users/{user}/change-profile', 'UserController@changeProfile')
              ->name('users.change-profile');
     });
 
 
-Route::model('users', User::class);
+Route::model('user', User::class);
