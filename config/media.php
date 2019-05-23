@@ -15,10 +15,10 @@ return [
 
         'admin_attributes' => [
 
-            'prefix' => 'api/v1/media',
+            'prefix' => 'api/v1/admin/media',
 
             'middleware' => env('MEDIA_ADMIN_MIDDLEWARE') ? explode(',',
-                env('MEDIA_ADMIN_MIDDLEWARE')) : ['api'],
+                env('MEDIA_ADMIN_MIDDLEWARE')) : ['api','auth_active'],
         ],
 
         'client_attributes' => [
@@ -26,7 +26,7 @@ return [
             'prefix' => 'api/v1/media',
 
             'middleware' => env('MEDIA_MIDDLEWARE') ? explode(',',
-                env('MEDIA_MIDDLEWARE')) : ['api'],
+                env('MEDIA_MIDDLEWARE')) : ['api','auth_active'],
         ],
     ],
 
