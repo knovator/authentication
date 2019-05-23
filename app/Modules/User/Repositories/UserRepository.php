@@ -12,6 +12,7 @@ use Prettus\Repository\Exceptions\RepositoryException;
  */
 class UserRepository extends BaseRepository
 {
+
     use StoreWithTrashedRecord;
 
     /**
@@ -27,6 +28,18 @@ class UserRepository extends BaseRepository
      **/
     public function model() {
         return User::class;
+    }
+
+    /**
+     * @return mixed
+     * @throws RepositoryException
+     */
+    public function getUserList() {
+        $this->applyCriteria();
+        $users = datatables()->of($this->model)->make(true);
+        $this->resetModel();
+
+        return $users;
     }
 
 }

@@ -3,16 +3,18 @@
 namespace App\Modules\User\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\User\Http\Requests\ChangePasswordRequest;
 use App\Modules\User\Http\Requests\CreateRequest;
 use App\Modules\User\Http\Requests\UpdateRequest;
 use App\Modules\User\Http\Resources\User as UserResource;
 use App\Modules\User\Repositories\UserRepository;
 use App\User;
+use Auth;
 use DB;
 use Exception;
 use Hash;
 use Illuminate\Http\JsonResponse;
-use Knovators\Masters\Http\Requests\Masters\PartiallyUpdateRequest;
+use App\Http\Requests\PartiallyUpdateRequest;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;
@@ -75,6 +77,26 @@ class UserController extends Controller
         }
     }
 
+
+    /**
+     * @return JsonResponse
+     */
+    public function index() {
+        try {
+            $users = $this->userRepository->getUserList();
+
+            return $this->sendResponse($users,
+                __('messages.retrieved', ['module' => 'Employees']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+    }
+
+
     /**
      * @param User $user
      * @return UserResource
@@ -97,10 +119,10 @@ class UserController extends Controller
             DB::beginTransaction();
             $user->update($input);
             $user->roles()->sync($input['role_ids']);
-            $user->fresh(['image', 'roles']);
+            $user->fresh();
             DB::commit();
 
-            return $this->sendResponse($this->makeResource($user),
+            return $this->sendResponse($this->makeResource($user->load(['image', 'roles'])),
                 __('messages.updated', ['module' => 'User']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -138,16 +160,59 @@ class UserController extends Controller
     /**
      * @param User                   $user
      * @param PartiallyUpdateRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
 
     public function partiallyUpdate(User $user, PartiallyUpdateRequest $request) {
         $input = $request->all();
         $user->update($input);
-        $user->fresh(['image', 'roles']);
-        return $this->sendResponse($this->makeResource($user->fresh()),
+        $user->fresh();
+
+        return $this->sendResponse($this->makeResource($user->load(['image', 'roles'])),
             __('messages.updated', ['module' => 'User']),
             HTTPCode::OK);
+    }
+
+
+    /**
+     * @param User $user
+     * @return JsonResponse
+     */
+    public function show(User $user) {
+        $user->load(['image', 'roles']);
+
+        return $this->sendResponse($this->makeResource($user),
+            __('messages.retrieved', ['module' => 'User']),
+            HTTPCode::OK);
+    }
+
+
+    /**
+     * @param ChangePasswordRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function changePassword(ChangePasswordRequest $request) {
+        $input = $request->all();
+        try {
+            /** @var User $user */
+            $user = Auth::user();
+            if (!Hash::check($input['current_password'], $user->password)) {
+                return $this->sendResponse(null,
+                    __('messages.current_password_wrong'),
+                    HTTPCode::UNPROCESSABLE_ENTITY);
+            }
+            $user->update(['password' => $this->createHash($input['password'])]);
+
+            return $this->sendResponse(null,
+                __('messages.password_changed'),
+                HTTPCode::OK);
+        } catch (\Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+
     }
 
 
