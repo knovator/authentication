@@ -9,6 +9,7 @@ use App\Modules\Thread\Models\Thread;
 use App\Modules\Thread\Repositories\ThreadRepository;
 use DB;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
@@ -118,13 +119,15 @@ class ThreadController extends Controller
     public function show(Thread $thread) {
         $thread->load(['type', 'threadColors.color']);
 
+        // check
+
+        /** @var Collection $thread ->threadColors */
         $thread->threadColors->map(function ($threadColor) {
             $threadColor->updatable = true;
             if ($threadColor) {
                 $threadColor->updatable = false;
             }
         });
-
 
         return $this->sendResponse($this->makeResource($thread),
             __('messages.retrieved', ['module' => 'Thread']),
