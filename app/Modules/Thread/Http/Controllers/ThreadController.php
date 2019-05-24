@@ -118,6 +118,14 @@ class ThreadController extends Controller
     public function show(Thread $thread) {
         $thread->load(['type', 'threadColors.color']);
 
+        $thread->threadColors->map(function ($threadColor) {
+            $threadColor->updatable = true;
+            if ($threadColor) {
+                $threadColor->updatable = false;
+            }
+        });
+
+
         return $this->sendResponse($this->makeResource($thread),
             __('messages.retrieved', ['module' => 'Thread']),
             HTTPCode::OK);
