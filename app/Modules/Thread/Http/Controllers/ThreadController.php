@@ -111,10 +111,16 @@ class ThreadController extends Controller
     }
 
 
+    /**
+     * @param Thread $thread
+     * @return JsonResponse
+     */
+    public function show(Thread $thread) {
+        $thread->load(['type', 'threadColors.color']);
 
-
-
-
-
+        return $this->sendResponse($this->makeResource($thread),
+            __('messages.retrieved', ['module' => 'Thread']),
+            HTTPCode::OK);
+    }
 
 }
