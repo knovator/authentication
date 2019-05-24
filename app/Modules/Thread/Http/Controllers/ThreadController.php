@@ -101,7 +101,7 @@ class ThreadController extends Controller
             $threadColor = $thread->threadColors()->firstOrCreate(['color_id' => $colorId]);
             $ids[] = $threadColor->id;
         }
-        $thread->threadColors()->whereNotIn('color_id', $ids)->delete();
+        $thread->threadColors()->whereNotIn('id', $ids)->delete();
     }
 
     /**
