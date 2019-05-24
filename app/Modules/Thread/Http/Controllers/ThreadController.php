@@ -5,16 +5,16 @@ namespace App\Modules\Thread\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Modules\Thread\Http\Requests\CreateRequest;
 use App\Modules\Thread\Http\Requests\UpdateRequest;
+use App\Modules\Thread\Http\Resources\Thread as ThreadResource;
 use App\Modules\Thread\Models\Thread;
+use App\Modules\Thread\Models\ThreadColor;
 use App\Modules\Thread\Repositories\ThreadRepository;
 use DB;
 use Exception;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;
-use App\Modules\Thread\Http\Resources\Thread as ThreadResource;
 
 /**
  * Class ThreadController
@@ -118,13 +118,12 @@ class ThreadController extends Controller
      */
     public function show(Thread $thread) {
         $thread->load(['type', 'threadColors.color']);
-
-        // check
-
-        /** @var Collection $thread ->threadColors */
+        // check associated relations
         $thread->threadColors->map(function ($threadColor) {
+            /** @var ThreadColor $threadColor */
             $threadColor->updatable = true;
-            if ($threadColor) {
+            if (($threadColor->recipes()->exists()) || ($threadColor->salesOrderQuantities()
+                                                                    ->exists())) {
                 $threadColor->updatable = false;
             }
         });

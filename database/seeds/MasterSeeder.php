@@ -82,8 +82,8 @@ class MasterSeeder extends Seeder
                 ]
             ],
             1 => [
-                'name'        => 'Thread Color',
-                'code'        => 'THREAD_COLOR',
+                'name'        => 'Color',
+                'code'        => 'COLOR',
                 'is_active'   => true,
                 'sub_masters' => [
                     0 => [

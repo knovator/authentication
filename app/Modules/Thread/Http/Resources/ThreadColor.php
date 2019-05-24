@@ -23,6 +23,9 @@ class ThreadColor extends JsonResource
     public function toArray($request) {
         return [
             'id'     => $this->id,
+            $this->mergeWhen(isset($this->updatable), [
+                'updatable' => $this->updatable
+            ]),
             'color'  => new MasterResource($this->whenLoaded('color')),
             'thread' => new ThreadResource($this->whenLoaded('thread')),
         ];
