@@ -3,6 +3,7 @@
 namespace App\Modules\Thread\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\PartiallyUpdateRequest;
 use App\Modules\Thread\Http\Requests\CreateRequest;
 use App\Modules\Thread\Http\Requests\UpdateRequest;
 use App\Modules\Thread\Http\Resources\Thread as ThreadResource;
@@ -79,7 +80,7 @@ class ThreadController extends Controller
             $thread->fresh();
 
             return $this->sendResponse($this->makeResource($thread->load('type')),
-                __('messages.updated', ['module' => 'User']),
+                __('messages.updated', ['module' => 'Thread']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
             DB::rollBack();
@@ -131,6 +132,41 @@ class ThreadController extends Controller
         return $this->sendResponse($this->makeResource($thread),
             __('messages.retrieved', ['module' => 'Thread']),
             HTTPCode::OK);
+    }
+
+
+    /**
+     * @param Thread                 $thread
+     * @param PartiallyUpdateRequest $request
+     * @return JsonResponse
+     */
+
+    public function partiallyUpdate(Thread $thread, PartiallyUpdateRequest $request) {
+        $thread->update($request->all());
+        $thread->fresh();
+
+        return $this->sendResponse($this->makeResource($thread->load('type')),
+            __('messages.updated', ['module' => 'Thread']),
+            HTTPCode::OK);
+    }
+
+
+    /**
+     * @return JsonResponse
+     */
+    public function index() {
+        try {
+            $users = $this->threadRepository->getThreadList();
+
+            return $this->sendResponse($users,
+                __('messages.retrieved', ['module' => 'Threads']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
     }
 
 }

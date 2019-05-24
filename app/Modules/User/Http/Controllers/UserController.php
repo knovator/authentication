@@ -37,6 +37,7 @@ class UserController extends Controller
     /**
      * UserController constructor.
      * @param UserRepository $userRepository
+     * @param RoleRepository $roleRepository
      */
     public function __construct(
         UserRepository $userRepository,

@@ -30,6 +30,12 @@ class Thread extends Model
         'deleted_by',
     ];
 
+    protected $hidden = [
+        'deleted_at',
+        'created_by',
+        'deleted_by'
+    ];
+
     /**
      * @return mixed
      */

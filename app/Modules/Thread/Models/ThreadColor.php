@@ -27,6 +27,9 @@ class ThreadColor extends Model
         'thread_id',
     ];
 
+    protected $hidden = [
+        'deleted_at'
+    ];
 
     /**
      * @return mixed

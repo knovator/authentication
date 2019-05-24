@@ -31,4 +31,21 @@ class ThreadRepository extends BaseRepository
     }
 
 
+    /**
+     * @return mixed
+     * @throws RepositoryException
+     * @throws \Exception
+     */
+    public function getThreadList() {
+        $this->applyCriteria();
+        $threads = datatables()->of($this->model->with([
+            'type:id,name,code',
+            'threadColors.color:id,name,code'
+        ])->select('threads.*'))->make(true);
+        $this->resetModel();
+
+        return $threads;
+    }
+
+
 }
