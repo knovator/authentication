@@ -1326,7 +1326,7 @@
             "source": {
                 "type": "git",
                 "url": "git@git.knovator.in:knovators/master.git",
-                "reference": "b49ba0a363d6b971ad3f00c5d0faf2d5d8aa93c9"
+                "reference": "836a816582aeab2ab5bf05f05356c97efa381ac6"
             },
             "require": {
                 "prettus/l5-repository": "^2.6"
@@ -1338,7 +1338,7 @@
                 }
             },
             "description": "This is master module description",
-            "time": "2019-05-22T08:36:12+00:00"
+            "time": "2019-05-24T08:21:05+00:00"
         },
         {
             "name": "knovators/media",

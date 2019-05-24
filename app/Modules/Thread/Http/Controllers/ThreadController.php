@@ -4,12 +4,14 @@ namespace App\Modules\Thread\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Thread\Http\Requests\CreateRequest;
-use App\Modules\User\Repositories\ThreadRepository;
+use App\Modules\Thread\Models\Thread;
+use App\Modules\Thread\Repositories\ThreadRepository;
 use DB;
 use Exception;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;
+use App\Modules\Thread\Http\Resources\Thread as ThreadResource;
 
 /**
  * Class ThreadController
@@ -42,10 +44,11 @@ class ThreadController extends Controller
         try {
             DB::beginTransaction();
             $thread = $this->threadRepository->create($input);
+            $thread->colors()->attach($input['color_ids']);
             DB::commit();
 
-            return $this->sendResponse(/*$this->makeResource()*/ $thread,
-                __('messages.created', ['module' => 'User']),
+            return $this->sendResponse($this->makeResource($thread->load('type', 'colors')),
+                __('messages.created', ['module' => 'Thread']),
                 HTTPCode::CREATED);
         } catch (Exception $exception) {
             DB::rollBack();
@@ -54,6 +57,15 @@ class ThreadController extends Controller
             return $this->sendResponse(null, __('messages.something_wrong'),
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
+    }
+
+
+    /**
+     * @param Thread $thread
+     * @return ThreadResource
+     */
+    private function makeResource($thread) {
+        return new ThreadResource($thread);
     }
 
 

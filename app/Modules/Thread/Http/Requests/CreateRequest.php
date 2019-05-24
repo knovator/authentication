@@ -36,7 +36,7 @@ class CreateRequest extends FormRequest
             'price'       => 'required|integer',
             'is_active'   => 'required|boolean',
             'color_ids'   => 'required|array',
-            'color_ids.*' => 'required|exists:roles,id',
+            'color_ids.*' => 'required|exists:masters,id',
 
         ];
     }
