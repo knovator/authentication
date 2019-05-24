@@ -6,6 +6,8 @@ namespace App\Modules\Thread\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
+use Knovators\Masters\Models\Master;
+use Knovators\Support\Traits\HasModelEvent;
 
 /**
  * Class Thread
@@ -14,7 +16,7 @@ use Illuminate\Notifications\Notifiable;
 class Thread extends Model
 {
 
-    use SoftDeletes, Notifiable;
+    use SoftDeletes, Notifiable, HasModelEvent;
 
     protected $table = 'threads';
 
@@ -27,5 +29,28 @@ class Thread extends Model
         'created_by',
         'deleted_by',
     ];
+
+    /**
+     * @return mixed
+     */
+    public function type() {
+        return $this->belongsTo(Master::class, 'type_id', 'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function threadColors() {
+        return $this->hasMany(ThreadColor::class, 'thread_id', 'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function colors() {
+        return $this->belongsToMany(Master::class, 'threads_colors', 'thread_id', 'color_id');
+    }
 
 }

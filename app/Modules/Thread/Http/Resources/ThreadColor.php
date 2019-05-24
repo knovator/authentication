@@ -3,6 +3,7 @@
 namespace App\Modules\Thread\Http\Resources;
 
 use App\Modules\Thread\Http\Resources\Master as MasterResource;
+use App\Modules\Thread\Http\Resources\Thread as ThreadResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -10,7 +11,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * Class User
  * @package App\Modules\User\Http\Resources
  */
-class Thread extends JsonResource
+class ThreadColor extends JsonResource
 {
 
     /**
@@ -21,13 +22,9 @@ class Thread extends JsonResource
      */
     public function toArray($request) {
         return [
-            'id'           => $this->id,
-            'name'         => $this->name,
-            'denier'       => $this->denier,
-            'price'        => $this->price,
-            'is_active'    => $this->is_active,
-            'type'         => new MasterResource($this->whenLoaded('type')),
-            'threadColors' => ThreadColor::collection($this->whenLoaded('threadColors')),
+            'id'     => $this->id,
+            'color'  => new MasterResource($this->whenLoaded('color')),
+            'thread' => new ThreadResource($this->whenLoaded('thread')),
         ];
     }
 }
