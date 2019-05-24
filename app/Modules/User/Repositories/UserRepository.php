@@ -33,10 +33,18 @@ class UserRepository extends BaseRepository
     /**
      * @return mixed
      * @throws RepositoryException
+     * @throws \Exception
      */
     public function getUserList() {
         $this->applyCriteria();
-        $users = datatables()->of($this->model)->make(true);
+        $users = datatables()->of($this->model->with([
+            'image',
+            'roles' => function ($roles) {
+                $roles->select(['roles.id', 'roles.name', 'roles.code']);
+            }
+        ])
+                                              ->select('users.*'))
+                             ->make(true);
         $this->resetModel();
 
         return $users;
