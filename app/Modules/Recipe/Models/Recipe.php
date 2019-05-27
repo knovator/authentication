@@ -3,6 +3,7 @@
 namespace App\Modules\Recipe\Models;
 
 
+use App\Modules\Thread\Models\ThreadColor;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Knovators\Support\Traits\HasModelEvent;
@@ -27,11 +28,17 @@ class Recipe extends Model
     ];
 
 
+    protected $hidden = [
+        'created_by',
+        'deleted_by'
+    ];
+
+
     /**
      * @return mixed
      */
     public function fiddles() {
-        return $this->belongsToMany(Recipe::class, 'recipes_fiddles', 'recipe_id',
+        return $this->belongsToMany(ThreadColor::class, 'recipes_fiddles', 'recipe_id',
             'thread_color_id');
     }
 

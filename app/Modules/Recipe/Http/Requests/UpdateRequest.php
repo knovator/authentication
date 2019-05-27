@@ -6,10 +6,10 @@ use Illuminate\Foundation\Http\FormRequest;
 use Knovators\Support\Traits\APIResponse;
 
 /**
- * Class CreateRequest
+ * Class UpdateRequest
  * @package App\Modules\Recipe\Http\Requests
  */
-class CreateRequest extends FormRequest
+class UpdateRequest extends FormRequest
 {
 
     use APIResponse;
