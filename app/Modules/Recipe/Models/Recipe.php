@@ -20,10 +20,19 @@ class Recipe extends Model
 
     protected $fillable = [
         'name',
-        'fiddles',
+        'total_fiddles',
         'is_active',
         'created_by',
         'deleted_by',
     ];
+
+
+    /**
+     * @return mixed
+     */
+    public function fiddles() {
+        return $this->belongsToMany(Recipe::class, 'recipes_fiddles', 'recipe_id',
+            'thread_color_id');
+    }
 
 }

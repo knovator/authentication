@@ -4,15 +4,18 @@ namespace App\Modules\Thread\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PartiallyUpdateRequest;
+use App\Modules\Thread\Constants\ThreadType;
 use App\Modules\Thread\Http\Requests\CreateRequest;
 use App\Modules\Thread\Http\Requests\UpdateRequest;
 use App\Modules\Thread\Http\Resources\Thread as ThreadResource;
 use App\Modules\Thread\Models\Thread;
 use App\Modules\Thread\Models\ThreadColor;
+use App\Modules\Thread\Repositories\ThreadColorRepository;
 use App\Modules\Thread\Repositories\ThreadRepository;
 use DB;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Knovators\Masters\Repository\MasterRepository;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;
@@ -28,14 +31,24 @@ class ThreadController extends Controller
 
     protected $threadRepository;
 
+    protected $masterRepository;
+
+    protected $threadColorRepository;
+
     /**
      * ThreadController constructor.
-     * @param ThreadRepository $threadRepository
+     * @param ThreadRepository      $threadRepository
+     * @param ThreadColorRepository $threadColorRepository
+     * @param MasterRepository      $masterRepository
      */
     public function __construct(
-        ThreadRepository $threadRepository
+        ThreadRepository $threadRepository,
+        ThreadColorRepository $threadColorRepository,
+        MasterRepository $masterRepository
     ) {
         $this->threadRepository = $threadRepository;
+        $this->threadColorRepository = $threadColorRepository;
+        $this->masterRepository = $masterRepository;
     }
 
     /**
@@ -156,9 +169,9 @@ class ThreadController extends Controller
      */
     public function index() {
         try {
-            $users = $this->threadRepository->getThreadList();
+            $threads = $this->threadRepository->getThreadList();
 
-            return $this->sendResponse($users,
+            return $this->sendResponse($threads,
                 __('messages.retrieved', ['module' => 'Threads']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -168,5 +181,25 @@ class ThreadController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
     }
+
+    /**
+     * @return JsonResponse
+     */
+    public function threadColorsList() {
+        try {
+            $weftId = $this->masterRepository->findByCode(ThreadType::WEFT)->id;
+            $threadsColors = $this->threadColorRepository->getColorsList($weftId);
+
+            return $this->sendResponse($threadsColors,
+                __('messages.retrieved', ['module' => 'Threads colors']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+    }
+
 
 }
