@@ -99,28 +99,6 @@ class RecipeController extends Controller
 
 
     /**
-     * @param Recipe $recipe
-     * @return JsonResponse
-     */
-    public function destroy(Recipe $recipe) {
-        try {
-            // Recipe relations
-            $relations = [
-
-            ];
-
-            return $this->destroyModelObject($relations, $recipe, 'Recipe');
-
-        } catch (Exception $exception) {
-            Log::error($exception);
-
-            return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY);
-        }
-    }
-
-
-    /**
      * @param Recipe                 $recipe
      * @param PartiallyUpdateRequest $request
      * @return JsonResponse
@@ -141,10 +119,71 @@ class RecipeController extends Controller
 
     /**
      * @param Recipe $recipe
+     * @return JsonResponse
+     */
+    public function destroy(Recipe $recipe) {
+        try {
+            // Recipe relations
+            $relations = [
+
+            ];
+
+            return $this->destroyModelObject($relations, $recipe, 'Recipe');
+
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+    }
+
+    /**
+     * @param Recipe $recipe
      * @return RecipeResource
      */
     private function makeResource($recipe) {
         return new RecipeResource($recipe);
+    }
+
+
+    /**
+     * @return JsonResponse
+     */
+    public function index() {
+        try {
+            $recipes = $this->recipeRepository->getRecipeList();
+
+            return $this->sendResponse($recipes,
+                __('messages.retrieved', ['module' => 'Recipes']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+    }
+
+
+    /**
+     * @param Recipe $recipe
+     * @return JsonResponse
+     */
+    public function show(Recipe $recipe) {
+//        $recipe->load([
+//            'fiddles.thread',
+//            'fiddles.color'
+//        ]);
+
+        $recipe->editable = true;
+        if ($recipe->designBeams()->exist()) {
+            $recipe->editable = false;
+        }
+
+        return $this->sendResponse($this->makeResource($recipe),
+            __('messages.retrieved', ['module' => 'Recipe']),
+            HTTPCode::OK);
     }
 
 

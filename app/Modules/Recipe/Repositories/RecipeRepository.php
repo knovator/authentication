@@ -33,5 +33,21 @@ class RecipeRepository extends BaseRepository
     }
 
 
+    /**
+     * @return mixed
+     * @throws RepositoryException
+     * @throws \Exception
+     */
+    public function getRecipeList() {
+        $this->applyCriteria();
+        $recipes = datatables()->of($this->model/*->with([
+            'fiddles.thread:id,name,denier,price',
+            'fiddles.color:id,name,code'
+        ])*/->select('recipes.*'))->make(true);
+        $this->resetModel();
+
+        return $recipes;
+    }
+
 
 }

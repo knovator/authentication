@@ -30,7 +30,8 @@ class Recipe extends Model
 
     protected $hidden = [
         'created_by',
-        'deleted_by'
+        'deleted_by',
+        'deleted_at'
     ];
 
 
