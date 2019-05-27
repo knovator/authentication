@@ -3,6 +3,7 @@
 namespace App\Modules\Recipe\Models;
 
 
+use App\Modules\Design\Models\DesignBeams;
 use App\Modules\Thread\Models\ThreadColor;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -41,6 +42,15 @@ class Recipe extends Model
     public function fiddles() {
         return $this->belongsToMany(ThreadColor::class, 'recipes_fiddles', 'recipe_id',
             'thread_color_id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function designBeams() {
+        return $this->belongsToMany(DesignBeams::class, 'beams_recipes', 'recipe_id',
+            'design_beam_id');
     }
 
 }

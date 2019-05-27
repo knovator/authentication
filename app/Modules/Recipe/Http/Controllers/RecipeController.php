@@ -171,13 +171,13 @@ class RecipeController extends Controller
      * @return JsonResponse
      */
     public function show(Recipe $recipe) {
-//        $recipe->load([
-//            'fiddles.thread',
-//            'fiddles.color'
-//        ]);
-
+        $recipe->load([
+            'designBeams',
+            'fiddles.thread',
+            'fiddles.color'
+        ]);
         $recipe->editable = true;
-        if ($recipe->designBeams()->exist()) {
+        if ($recipe->designBeams->isNotEmpty()) {
             $recipe->editable = false;
         }
 
