@@ -3,7 +3,6 @@
 use App\Modules\Thread\Models\Thread;
 use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
-use Knovators\Support\Traits\StoreWithTrashedRecord;
 use Prettus\Repository\Exceptions\RepositoryException;
 
 /**
@@ -12,8 +11,6 @@ use Prettus\Repository\Exceptions\RepositoryException;
  */
 class ThreadRepository extends BaseRepository
 {
-
-    use StoreWithTrashedRecord;
 
     /**
      * @throws RepositoryException
