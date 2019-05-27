@@ -3,6 +3,7 @@
 namespace App\Modules\Recipe\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\PartiallyUpdateRequest;
 use App\Modules\Recipe\Http\Requests\CreateRequest;
 use App\Modules\Recipe\Http\Requests\UpdateRequest;
 use App\Modules\Recipe\Http\Resources\Recipe as RecipeResource;
@@ -10,6 +11,7 @@ use App\Modules\Recipe\Models\Recipe;
 use App\Modules\Recipe\Repositories\RecipeRepository;
 use DB;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;
@@ -68,7 +70,7 @@ class RecipeController extends Controller
     /**
      * @param Recipe        $recipe
      * @param UpdateRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      * @throws Exception
      */
     public function update(Recipe $recipe, UpdateRequest $request) {
@@ -94,6 +96,48 @@ class RecipeController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
     }
+
+
+    /**
+     * @param Recipe $recipe
+     * @return JsonResponse
+     */
+    public function destroy(Recipe $recipe) {
+        try {
+            // Recipe relations
+            $relations = [
+
+            ];
+
+            return $this->destroyModelObject($relations, $recipe, 'Recipe');
+
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+    }
+
+
+    /**
+     * @param Recipe                 $recipe
+     * @param PartiallyUpdateRequest $request
+     * @return JsonResponse
+     */
+
+    public function partiallyUpdate(Recipe $recipe, PartiallyUpdateRequest $request) {
+        $recipe->update($request->all());
+        $recipe->fresh();
+
+        return $this->sendResponse($this->makeResource($recipe->load([
+            'fiddles.thread',
+            'fiddles.color'
+        ])),
+            __('messages.updated', ['module' => 'Recipe']),
+            HTTPCode::OK);
+    }
+
 
     /**
      * @param Recipe $recipe

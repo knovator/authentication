@@ -76,6 +76,27 @@ class ThreadController extends Controller
         }
     }
 
+    /**
+     * @param Thread $thread
+     * @return JsonResponse
+     */
+    public function destroy(Thread $thread) {
+        try {
+            // thread relations
+            $relations = [
+
+            ];
+
+            return $this->destroyModelObject($relations, $thread, 'Thread');
+
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+    }
+
 
     /**
      * @param Thread        $thread
