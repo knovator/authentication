@@ -4,6 +4,8 @@ namespace App\Modules\Design\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Design\Http\Requests\CreateRequest;
+use App\Modules\Design\Models\Design;
+use App\Modules\Design\Models\DesignBeam;
 use App\Modules\Design\Repositories\DesignRepository;
 use DB;
 use Exception;
@@ -40,13 +42,11 @@ class DesignController extends Controller
      */
     public function store(CreateRequest $request) {
         $input = $request->all();
-        dd($input);
         try {
             DB::beginTransaction();
             $design = $this->designRepository->create($input);
             $this->storeDesignDetails($design, $input);
             DB::commit();
-
             return $this->sendResponse(null,
                 __('messages.created', ['module' => 'Design']),
                 HTTPCode::CREATED);
@@ -63,9 +63,24 @@ class DesignController extends Controller
      * @param $design
      * @param $input
      */
-    private function storeDesignDetails($design, $input) {
+    private function storeDesignDetails(Design $design, $input) {
+        $design->detail()->create($input);
+        $design->images()->createMany($input['images']);
+        $design->fiddlePicks()->createMany($input['fiddle_picks']);
+        $this->storeDesignBeams($design, $input);
+    }
 
 
+    /**
+     * @param Design $design
+     * @param        $input
+     */
+    private function storeDesignBeams(Design $design, $input) {
+        foreach ($input['design_beams'] as $data) {
+            $designBeam = $design->beams()->create(['thread_color_id' => $data['beam_id']]);
+            /** @var DesignBeam $designBeam */
+            $designBeam->recipes()->sync($data['recipes_id']);
+        }
     }
 }
 

@@ -31,35 +31,34 @@ class CreateRequest extends FormRequest
     public function rules() {
         return [
             // design details
-            'quality_name'                   => 'required|string|max:60',
-            'type_id'                        => 'required|exists:masters,id',
-            'fiddles'                        => 'required|integer',
-            'is_active'                      => 'required|boolean',
-            'designer_no'                    => 'required|string',
-            'avg_pick'                       => 'required|numeric',
-            'pick_on_loom'                   => 'required|numeric',
-            'panno'                          => 'required|integer',
-            'additional_panno'               => 'required|integer',
-            'reed'                           => 'required|string',
+            'quality_name'              => 'required|string|max:60',
+            'type'                      => 'required|string|max:60',
+            'fiddles'                   => 'required|integer',
+            'is_active'                 => 'required|boolean',
+            'designer_no'               => 'required|string|max:60',
+            'avg_pick'                  => 'required|numeric',
+            'pick_on_loom'              => 'required|numeric',
+            'panno'                     => 'required|integer',
+            'additional_panno'          => 'required|integer',
+            'reed'                      => 'required|string',
             // design images
-            'images'                         => 'required|array',
-            'images.*.image_id'              => 'required|integer',
-            'images.*.type'                  => 'required|in:MAIN,SUB',
+            'images'                    => 'required|array',
+            'images.*.image_id'         => 'required|integer',
+            'images.*.type'             => 'required|in:MAIN,SUB',
 
             // design fiddle picks
-            'fiddle_picks'                   => 'required|array',
-            'fiddle_picks.*.pick'            => 'required|numeric',
-            'fiddle_picks.*.fiddle_no'       => 'required|integer',
+            'fiddle_picks'              => 'required|array',
+            'fiddle_picks.*.pick'       => 'required|numeric',
+            'fiddle_picks.*.fiddle_no'  => 'required|integer',
 
             // design beams
-            'design_beams'                   => 'required|array',
-            'design_beams.*.thread_color_id' => 'required|integer',
-            'design_beams.*.recipes_id'      => 'required|array',
+            'design_beams'              => 'required|array',
+            'design_beams.*.beam_id'    => 'required|integer',
+            'design_beams.*.recipes_id' => 'required|array',
 
 
         ];
     }
-
 
 
 }

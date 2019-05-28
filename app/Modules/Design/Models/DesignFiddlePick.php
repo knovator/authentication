@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class DesignFiddlePick extends Model
 {
+    public $timestamps = false;
 
     use SoftDeletes;
 

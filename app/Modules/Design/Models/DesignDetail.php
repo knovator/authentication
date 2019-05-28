@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class DesignDetail extends Model
 {
 
+    public $timestamps = false;
+
     use SoftDeletes;
 
     protected $table = 'design_details';

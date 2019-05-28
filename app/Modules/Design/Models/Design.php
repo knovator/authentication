@@ -20,7 +20,7 @@ class Design extends Model
 
     protected $fillable = [
         'quality_name',
-        'type_id',
+        'type',
         'fiddles',
         'is_active',
         'is_approved',
