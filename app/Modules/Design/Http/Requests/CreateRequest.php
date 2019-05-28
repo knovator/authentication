@@ -30,18 +30,17 @@ class CreateRequest extends FormRequest
      */
     public function rules() {
         return [
-            'quality_name'       => 'required|string|max:60',
-            'type_id'            => 'required|exists:masters,id',
-            'designer_no'        => 'required|string',
-            'fiddle'             => 'required|integer',
-
-
-
-
-            'total_fiddles'      => 'required|integer',
-            'is_active'          => 'required|boolean',
-            'thread_color_ids'   => 'required|array',
-            'thread_color_ids.*' => 'required|exists:threads_colors,id',
+            // design details
+            'quality_name'     => 'required|string|max:60',
+            'type_id'          => 'required|exists:masters,id',
+            'designer_no'      => 'required|string',
+            'fiddles'          => 'required|integer',
+            'avg_pick'         => 'required|numeric',
+            'pick_on_loom'     => 'required|numeric',
+            'panno'            => 'required|integer',
+            'additional_panno' => 'required|integer',
+            'reed'             => 'required|string',
+            'is_active'        => 'required|boolean'
 
         ];
     }
