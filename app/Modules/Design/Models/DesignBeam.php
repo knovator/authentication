@@ -3,18 +3,20 @@
 namespace App\Modules\Design\Models;
 
 
+use App\Modules\Recipe\Models\Recipe;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Knovators\Support\Traits\HasModelEvent;
 
 /**
- * Class DesignBeams
+ * Class DesignBeam
  * @package App\Modules\Design\Models
  */
-class DesignBeams extends Model
+class DesignBeam extends Model
 {
 
-    use SoftDeletes, HasModelEvent;
+    use SoftDeletes;
+
+    public $timestamps = false;
 
     protected $table = 'design_beams';
 
@@ -27,5 +29,15 @@ class DesignBeams extends Model
     protected $hidden = [
         'deleted_at'
     ];
+
+
+    /**
+     * @return mixed
+     */
+    public function recipes() {
+        return $this->belongsToMany(Recipe::class, 'beams_recipes', 'thread_color_id',
+            'recipe_id');
+    }
+
 
 }

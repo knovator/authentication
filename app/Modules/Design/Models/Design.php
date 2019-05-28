@@ -20,7 +20,7 @@ class Design extends Model
 
     protected $fillable = [
         'quality_name',
-        'type_id',
+        'type',
         'fiddles',
         'is_active',
         'is_approved',
@@ -36,5 +36,35 @@ class Design extends Model
         'created_at',
         'updated_at'
     ];
+
+
+    /**
+     * @return mixed
+     */
+    public function beams() {
+        return $this->hasMany(DesignBeam::class, 'design_id', 'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function images() {
+        return $this->hasMany(DesignImage::class, 'design_id', 'id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function fiddlePicks() {
+        return $this->hasMany(DesignFiddlePick::class, 'design_id', 'id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function detail() {
+        return $this->hasOne(DesignDetail::class, 'design_id', 'id');
+    }
 
 }

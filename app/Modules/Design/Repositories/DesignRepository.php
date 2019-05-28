@@ -29,4 +29,5 @@ class DesignRepository extends BaseRepository
         return Design::class;
     }
 
+
 }
