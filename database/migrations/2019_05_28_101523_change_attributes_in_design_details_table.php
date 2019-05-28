@@ -16,9 +16,16 @@ class ChangeAttributesInDesignDetailsTable extends Migration
      * @return void
      */
     public function up() {
+
         Schema::table('design_details', function (Blueprint $table) {
             $table->renameColumn('pick', 'avg_pick');
             $table->softDeletes();
+        });
+
+        Schema::table('designs', function (Blueprint $table) {
+            $table->dropForeign('designs_type_id_foreign');
+            $table->dropColumn('type_id');
+            $table->string('type',60);
         });
     }
 
@@ -31,6 +38,12 @@ class ChangeAttributesInDesignDetailsTable extends Migration
         Schema::table('design_details', function (Blueprint $table) {
             $table->renameColumn('avg_pick', 'pick');
             $table->dropSoftDeletes();
+        });
+
+        Schema::table('design_details', function (Blueprint $table) {
+            $table->dropColumn('type');
+            $table->unsignedBigInteger('type_id')->after('quality_name');
+            $table->foreign('type_id')->references('id')->on('masters');
         });
     }
 }
