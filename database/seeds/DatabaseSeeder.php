@@ -16,5 +16,6 @@ class DatabaseSeeder extends Seeder
     {
          $this->call(RoleSeeder::class);
          $this->call(MasterSeeder::class);
+         $this->call(UniqueIdSeeder::class);
     }
 }

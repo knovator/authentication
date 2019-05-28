@@ -253,7 +253,7 @@ class UserController extends Controller
     public function roleList() {
         try {
             $roles = $this->roleRepository->makeModel()->orderBy('weight')
-                                          ->pluck('name', 'id');
+                                          ->get(['name', 'id']);
             return $this->sendResponse($roles,
                 __('messages.retrieved', ['module' => 'Roles']),
                 HTTPCode::OK);
