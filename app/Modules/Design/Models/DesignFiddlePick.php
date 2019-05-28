@@ -5,27 +5,25 @@ namespace App\Modules\Design\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Knovators\Support\Traits\HasModelEvent;
 
 /**
- * Class DesignBeams
- * @package App\Modules\Design\Models
+ * Class DesignFiddlePick
+ * @package App\Modules\DesignDetail\Models
  */
-class DesignBeams extends Model
+class DesignFiddlePick extends Model
 {
 
-    use SoftDeletes, HasModelEvent;
+    use SoftDeletes;
 
-    protected $table = 'design_beams';
+    protected $table = 'design_fiddle_picks';
 
     protected $fillable = [
         'design_id',
-        'thread_color_id',
+        'pick',
+        'fiddle_no'
     ];
-
 
     protected $hidden = [
         'deleted_at'
     ];
-
 }

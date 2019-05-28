@@ -37,4 +37,34 @@ class Design extends Model
         'updated_at'
     ];
 
+
+    /**
+     * @return mixed
+     */
+    public function beams() {
+        return $this->hasMany(DesignBeam::class, 'design_id', 'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function images() {
+        return $this->hasMany(DesignImage::class, 'design_id', 'id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function fiddlePicks() {
+        return $this->hasMany(DesignFiddlePick::class, 'design_id', 'id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function detail() {
+        return $this->hasOne(DesignDetail::class, 'design_id', 'id');
+    }
+
 }

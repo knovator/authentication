@@ -20,16 +20,16 @@ class DesignController extends Controller
 
     use DestroyObject;
 
-    protected $recipeRepository;
+    protected $designRepository;
 
     /**
      * DesignController constructor.
-     * @param DesignRepository $recipeRepository
+     * @param DesignRepository $designRepository
      */
     public function __construct(
-        DesignRepository $recipeRepository
+        DesignRepository $designRepository
     ) {
-        $this->recipeRepository = $recipeRepository;
+        $this->designRepository = $designRepository;
     }
 
 
@@ -40,10 +40,11 @@ class DesignController extends Controller
      */
     public function store(CreateRequest $request) {
         $input = $request->all();
+        dd($input);
         try {
             DB::beginTransaction();
-
-
+            $design = $this->designRepository->create($input);
+            $this->storeDesignDetails($design, $input);
             DB::commit();
 
             return $this->sendResponse(null,
@@ -57,4 +58,16 @@ class DesignController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
     }
+
+    /**
+     * @param $design
+     * @param $input
+     */
+    private function storeDesignDetails($design, $input) {
+
+
+    }
 }
+
+
+
