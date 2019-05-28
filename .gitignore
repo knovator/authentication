@@ -16,3 +16,6 @@ yarn-error.log
 /.phpstorm.meta.php
 /public/bower_components
 _ide_helper.php
+
+/public/uploads/*
+!/public/uploads/.gitKeep
