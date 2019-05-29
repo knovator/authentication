@@ -195,7 +195,6 @@ class DesignController extends Controller
             HTTPCode::OK);
     }
 
-
     /**
      * @param Design $design
      * @return JsonResponse
@@ -204,7 +203,7 @@ class DesignController extends Controller
         try {
             // Recipe relations
             $relations = [
-
+                'salesOrders'
             ];
             return $this->destroyModelObject($relations, $design, 'Design');
 
@@ -212,7 +211,7 @@ class DesignController extends Controller
             Log::error($exception);
 
             return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY);
+                HTTPCode::UNPROCESSABLE_ENTITY,$exception);
         }
     }
 

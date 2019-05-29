@@ -3,6 +3,7 @@
 namespace App\Modules\Design\Models;
 
 
+use App\Modules\SalesOrder\Models\SalesOrder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Knovators\Support\Traits\HasModelEvent;
@@ -28,6 +29,19 @@ class Design extends Model
         'created_by',
         'deleted_by',
     ];
+
+
+    public static function boot() {
+        parent::boot();
+        self::creatingEvent();
+        static::deleting(function (Design $model) {
+            $model->beams()->delete();
+            $model->images()->delete();
+            $model->fiddlePicks()->delete();
+            $model->detail()->delete();
+        });
+        self::deletedEvent();
+    }
 
 
     protected $hidden = [
@@ -59,6 +73,13 @@ class Design extends Model
      */
     public function fiddlePicks() {
         return $this->hasMany(DesignFiddlePick::class, 'design_id', 'id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function salesOrders() {
+        return $this->hasMany(SalesOrder::class, 'design_id', 'id');
     }
 
     /**
