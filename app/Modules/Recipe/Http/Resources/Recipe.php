@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Class User
+ * Class Design
  * @package App\Modules\User\Http\Resources
  */
 class Recipe extends JsonResource

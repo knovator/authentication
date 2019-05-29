@@ -2,6 +2,7 @@
 
 namespace App\Modules\Design\Http\Controllers;
 
+use App\Modules\Design\Http\Resources\Design as DesignResource;
 use App\Constants\GenerateNumber;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PartiallyUpdateRequest;
@@ -83,6 +84,7 @@ class DesignController extends Controller
      * @param Design        $design
      * @param UpdateRequest $request
      * @return JsonResponse
+     * @throws Exception
      */
     public function update(Design $design, UpdateRequest $request) {
         $input = $request->all();
@@ -216,6 +218,34 @@ class DesignController extends Controller
         }
     }
 
+    /**
+     * @param Design $design
+     * @return JsonResponse
+     */
+    public function show(Design $design) {
+        $design->load([
+            'detail',
+            'fiddlePicks',
+            'beams.recipes.fiddles.thread',
+            'beams.recipes.fiddles.color',
+            'images.file',
+        ]);
+
+
+
+        return $this->sendResponse($this->makeResource($design),
+            __('messages.retrieved', ['module' => 'Design']),
+            HTTPCode::OK);
+    }
+
+
+    /**
+     * @param Design $design
+     * @return DesignResource
+     */
+    private function makeResource($design) {
+        return new DesignResource($design);
+    }
 
 }
 
