@@ -21,7 +21,6 @@ class DesignDetail extends Model
 
     protected $fillable = [
         'design_id',
-        'design_no',
         'designer_no',
         'avg_pick',
         'pick_on_loom',

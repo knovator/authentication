@@ -19,6 +19,7 @@ class Design extends Model
     protected $table = 'designs';
 
     protected $fillable = [
+        'design_no',
         'quality_name',
         'type',
         'fiddles',
