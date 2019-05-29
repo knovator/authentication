@@ -89,9 +89,8 @@ class DesignController extends Controller
             $design->update($input);
             $this->storeDesignDetails($design, $input);
             DB::commit();
-            $design->fresh();
 
-            return $this->sendResponse(null,
+            return $this->sendResponse($design->fresh(),
                 __('messages.updated', ['module' => 'Design']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
