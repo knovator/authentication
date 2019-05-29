@@ -15,8 +15,8 @@ return [
 
     // Design Images
 
-    'can_not_edit_design'    => 'This design is approved by admin, so you can not edit this design.',
-
+    'can_not_edit_design'    => 'This design is approved by admin, so you can not update it.',
+    'in_active_design'       => 'This design is in active, so you can not update it.',
     // password messages
     'current_password_wrong' => 'Current password is incorrect.',
     'password_changed'       => 'Password changed successfully.',

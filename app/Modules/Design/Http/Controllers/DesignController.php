@@ -4,6 +4,8 @@ namespace App\Modules\Design\Http\Controllers;
 
 use App\Constants\GenerateNumber;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\PartiallyUpdateRequest;
+use App\Modules\Design\Http\Requests\ApproveRequest;
 use App\Modules\Design\Http\Requests\CreateRequest;
 use App\Modules\Design\Http\Requests\UpdateRequest;
 use App\Modules\Design\Models\Design;
@@ -128,7 +130,7 @@ class DesignController extends Controller
         $removableLabel = 'removed_' . $column . '_id';
 
         if (isset($input[$removableLabel]) && !empty($input[$removableLabel])) {
-            $design->images()->whereIn('id', $input[$removableLabel])->delete();
+            $design->$relation()->whereIn('id', $input[$removableLabel])->delete();
         }
     }
 
@@ -143,7 +145,10 @@ class DesignController extends Controller
                 $beamId = $beam['id'];
             }
             $designBeam = $design->beams()
-                                 ->updateOrCreate($beamId, ['thread_color_id' => $beam['beam_id']]);
+                                 ->updateOrCreate(['id' => $beamId], [
+                                     'thread_color_id' =>
+                                         $beam['beam_id']
+                                 ]);
             /** @var DesignBeam $designBeam */
             $designBeam->recipes()->sync($beam['recipes_id']);
         }
@@ -151,6 +156,43 @@ class DesignController extends Controller
             $design->beams()->whereIn('id', $input['removed_design_beams_id'])->delete();
         }
 
+    }
+
+
+    /**
+     * @param Design                 $design
+     * @param PartiallyUpdateRequest $request
+     * @return JsonResponse
+     */
+
+    public function partiallyUpdate(Design $design, PartiallyUpdateRequest $request) {
+        $design->update($request->all());
+        $design->fresh();
+
+        return $this->sendResponse($design,
+            __('messages.updated', ['module' => 'Design']),
+            HTTPCode::OK);
+    }
+
+    /**
+     * @param Design         $design
+     * @param ApproveRequest $request
+     * @return JsonResponse
+     */
+
+    public function partiallyApprove(Design $design, ApproveRequest $request) {
+        $input = $request->all();
+        if ($input['is_approved'] && (!$design->is_active)) {
+            return $this->sendResponse(null,
+                __('messages.in_active_design', ['module' => 'Design']),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+        $design->update($input);
+        $design->fresh();
+
+        return $this->sendResponse($design,
+            __('messages.updated', ['module' => 'Design']),
+            HTTPCode::OK);
     }
 }
 
