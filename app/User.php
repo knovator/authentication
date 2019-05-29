@@ -2,7 +2,9 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use \Knovators\Authentication\Models\User as Authenticatable;
+use Knovators\Media\Models\Media;
 
 /**
  * Class User
@@ -25,4 +27,16 @@ class User extends Authenticatable
         'deleted_by'
     ];
 
+    /**
+     * @return BelongsTo
+     */
+    public function image() {
+        return $this->belongsTo(Media::class, 'image_id', 'id')->select([
+            'id',
+            'name',
+            'type',
+            'mime_type',
+            'uri'
+        ]);
+    }
 }

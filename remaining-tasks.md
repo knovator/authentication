@@ -1,5 +1,6 @@
 ``` Thread```
 
-- Show Api 
+ delete relations check
 
-    Please attach associated relation for thread colors, so user can not edit associated colors. 
+- Thread
+- Recipe 

@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Class User
+ * Class Design
  * @package App\Modules\User\Http\Resources
  */
 class Recipe extends JsonResource
@@ -25,9 +25,6 @@ class Recipe extends JsonResource
             'name'          => $this->name,
             'total_fiddles' => $this->total_fiddles,
             'is_active'     => $this->is_active,
-            $this->mergeWhen(isset($this->editable), [
-                'editable' => $this->editable
-            ]),
             'fiddles'       => ThreadColor::collection($this->whenLoaded('fiddles')),
         ];
     }

@@ -30,8 +30,6 @@ class MasterSeeder extends Seeder
      * @throws ValidatorException
      */
     public function run() {
-
-
         foreach ($this->masters() as $master) {
 
             $parentMaster = $this->masterRepository->findBy('code', $master['code']);
@@ -75,8 +73,8 @@ class MasterSeeder extends Seeder
                         'is_active' => true,
                     ],
                     1 => [
-                        'name'      => 'Warf',
-                        'code'      => 'WARF',
+                        'name'      => 'Warp',
+                        'code'      => 'WARP',
                         'is_active' => true,
                     ]
                 ]

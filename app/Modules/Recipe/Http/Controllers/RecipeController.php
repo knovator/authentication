@@ -120,14 +120,14 @@ class RecipeController extends Controller
     /**
      * @param Recipe $recipe
      * @return JsonResponse
+     * @throws Exception
      */
     public function destroy(Recipe $recipe) {
         try {
             // Recipe relations
             $relations = [
-
+                'designBeams'
             ];
-
             return $this->destroyModelObject($relations, $recipe, 'Recipe');
 
         } catch (Exception $exception) {
@@ -172,14 +172,9 @@ class RecipeController extends Controller
      */
     public function show(Recipe $recipe) {
         $recipe->load([
-            'designBeams',
             'fiddles.thread',
             'fiddles.color'
         ]);
-        $recipe->editable = true;
-        if ($recipe->designBeams->isNotEmpty()) {
-            $recipe->editable = false;
-        }
 
         return $this->sendResponse($this->makeResource($recipe),
             __('messages.retrieved', ['module' => 'Recipe']),

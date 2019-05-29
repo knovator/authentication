@@ -35,7 +35,7 @@ class DesignBeam extends Model
      * @return mixed
      */
     public function recipes() {
-        return $this->belongsToMany(Recipe::class, 'beams_recipes', 'thread_color_id',
+        return $this->belongsToMany(Recipe::class, 'beams_recipes', 'design_beam_id',
             'recipe_id');
     }
 
