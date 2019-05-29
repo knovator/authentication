@@ -124,18 +124,13 @@ class RecipeController extends Controller
      */
     public function destroy(Recipe $recipe) {
         try {
-            DB::beginTransaction();
             // Recipe relations
             $relations = [
                 'designBeams'
             ];
-            $recipe->fiddles()->delete();
-            $response = $this->destroyModelObject($relations, $recipe, 'Recipe');
-            DB::commit();
+            return $this->destroyModelObject($relations, $recipe, 'Recipe');
 
-            return $response;
         } catch (Exception $exception) {
-            DB::rollBack();
             Log::error($exception);
 
             return $this->sendResponse(null, __('messages.something_wrong'),

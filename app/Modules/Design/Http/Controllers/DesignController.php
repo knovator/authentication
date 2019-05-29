@@ -196,6 +196,27 @@ class DesignController extends Controller
     }
 
 
+    /**
+     * @param Design $design
+     * @return JsonResponse
+     */
+    public function destroy(Design $design) {
+        try {
+            // Recipe relations
+            $relations = [
+
+            ];
+            return $this->destroyModelObject($relations, $design, 'Design');
+
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+    }
+
+
 }
 
 
