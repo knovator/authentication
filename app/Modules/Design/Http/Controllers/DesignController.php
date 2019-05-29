@@ -84,6 +84,10 @@ class DesignController extends Controller
      */
     public function update(Design $design, UpdateRequest $request) {
         $input = $request->all();
+        if ($design->is_approved) {
+            return $this->sendResponse(null, __('messages.can_not_edit_design'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
         try {
             DB::beginTransaction();
             $design->update($input);
