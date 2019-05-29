@@ -201,17 +201,18 @@ class DesignController extends Controller
      */
     public function destroy(Design $design) {
         try {
-            // Recipe relations
+            // Design associated relations
             $relations = [
                 'salesOrders'
             ];
+
             return $this->destroyModelObject($relations, $design, 'Design');
 
         } catch (Exception $exception) {
             Log::error($exception);
 
             return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY,$exception);
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
     }
 
