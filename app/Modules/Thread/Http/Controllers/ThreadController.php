@@ -84,7 +84,7 @@ class ThreadController extends Controller
         try {
             // thread relations
             $relations = [
-
+                'recipes'
             ];
 
             return $this->destroyModelObject($relations, $thread, 'Thread');
