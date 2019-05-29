@@ -20,7 +20,7 @@ class DesignImage extends Model
 
     protected $fillable = [
         'design_id',
-        'image_id',
+        'file_id',
         'type'
     ];
     protected $hidden = [

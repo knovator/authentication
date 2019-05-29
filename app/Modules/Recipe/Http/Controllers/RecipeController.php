@@ -120,17 +120,25 @@ class RecipeController extends Controller
     /**
      * @param Recipe $recipe
      * @return JsonResponse
+     * @throws Exception
      */
     public function destroy(Recipe $recipe) {
         try {
+            DB::beginTransaction();
+
             // Recipe relations
             $relations = [
-
+                'designBeams'
             ];
+            $recipe->fiddles()->delete();
 
-            return $this->destroyModelObject($relations, $recipe, 'Recipe');
+            $response = $this->destroyModelObject($relations, $recipe, 'Recipe');
 
+            DB::commit();
+
+            return $response;
         } catch (Exception $exception) {
+            DB::rollBack();
             Log::error($exception);
 
             return $this->sendResponse(null, __('messages.something_wrong'),
@@ -175,6 +183,7 @@ class RecipeController extends Controller
             'fiddles.thread',
             'fiddles.color'
         ]);
+
         return $this->sendResponse($this->makeResource($recipe),
             __('messages.retrieved', ['module' => 'Recipe']),
             HTTPCode::OK);

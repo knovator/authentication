@@ -43,7 +43,7 @@ class CreateRequest extends FormRequest
             'reed'                      => 'required|string',
             // design images
             'images'                    => 'required|array',
-            'images.*.image_id'         => 'required|integer',
+            'images.*.file_id'          => 'required|integer',
             'images.*.type'             => 'required|in:MAIN,SUB',
 
             // design fiddle picks
