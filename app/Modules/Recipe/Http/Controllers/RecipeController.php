@@ -172,15 +172,9 @@ class RecipeController extends Controller
      */
     public function show(Recipe $recipe) {
         $recipe->load([
-            'designBeams',
             'fiddles.thread',
             'fiddles.color'
         ]);
-        $recipe->editable = true;
-        if ($recipe->designBeams->isNotEmpty()) {
-            $recipe->editable = false;
-        }
-
         return $this->sendResponse($this->makeResource($recipe),
             __('messages.retrieved', ['module' => 'Recipe']),
             HTTPCode::OK);

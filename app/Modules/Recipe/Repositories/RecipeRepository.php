@@ -43,7 +43,7 @@ class RecipeRepository extends BaseRepository
         $recipes = datatables()->of($this->model/*->with([
             'fiddles.thread:id,name,denier,price',
             'fiddles.color:id,name,code'
-        ])*/->select('recipes.*'))->make(true);
+        ])*/ ->withCount('designBeams as associated_count'))->make(true);
         $this->resetModel();
 
         return $recipes;
