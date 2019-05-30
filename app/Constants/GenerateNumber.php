@@ -12,4 +12,5 @@ class GenerateNumber
 {
 
     const DESIGN = 'DESIGN';
+    const PURCHASE = 'PURCHASE';
 }

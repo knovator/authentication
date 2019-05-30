@@ -35,5 +35,11 @@ class PurchaseOrder extends Model
         'updated_at'
     ];
 
+    /**
+     * @return mixed
+     */
+    public function threads() {
+        return $this->hasMany(PurchaseOrderThread::class, 'purchase_order_id', 'id');
+    }
 
 }

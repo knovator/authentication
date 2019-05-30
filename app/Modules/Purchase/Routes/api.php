@@ -1,18 +1,15 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Modules\Purchase\Models\PurchaseOrder;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your module. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
-*/
+Route::group([
+    'prefix'     => 'admin',
+    'middleware' => 'auth_active'
+],
+    function () {
+        Route::resource('purchases', 'PurchaseController');
+        Route::put('purchases/partiallyUpdate/{purchase}', 'PurchaseController@partiallyUpdate')
+             ->name('purchase.partially-update');
+    });
 
-Route::get('/purchase', function (Request $request) {
-    // return $request->purchase();
-})->middleware('auth:api');
+Route::model('purchase', PurchaseOrder::class);
