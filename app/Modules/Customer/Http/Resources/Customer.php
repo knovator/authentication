@@ -20,14 +20,15 @@ class Customer extends JsonResource
      */
     public function toArray($request) {
         return [
-            'id'           => $this->id,
-            'name'         => $this->name,
-            'design_no'    => $this->design_no,
-            'quality_name' => $this->quality_name,
-            'type'         => $this->type,
-            'fiddles'      => $this->fiddles,
-            'is_active'    => $this->is_active,
-            'is_approved'  => $this->is_approved
+            'id'         => $this->id,
+            'first_name' => $this->first_name,
+            'last_name'  => $this->last_name,
+            'email'      => $this->email,
+            'phone'      => $this->phone,
+            'is_active'  => $this->is_active,
+            'gst_no'     => $this->gst_no,
+            'address'    => $this->city_name,
+            'state'      => $this->whenLoaded('state')
         ];
     }
 }
