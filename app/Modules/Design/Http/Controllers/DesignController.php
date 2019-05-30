@@ -207,7 +207,6 @@ class DesignController extends Controller
             $relations = [
                 'salesOrders'
             ];
-
             return $this->destroyModelObject($relations, $design, 'Design');
 
         } catch (Exception $exception) {
@@ -232,7 +231,6 @@ class DesignController extends Controller
         ]);
 
 
-
         return $this->sendResponse($this->makeResource($design),
             __('messages.retrieved', ['module' => 'Design']),
             HTTPCode::OK);
@@ -245,6 +243,25 @@ class DesignController extends Controller
      */
     private function makeResource($design) {
         return new DesignResource($design);
+    }
+
+
+    /**
+     * @return JsonResponse
+     */
+    public function index() {
+        try {
+            $designs = $this->designRepository->getDesignList();
+
+            return $this->sendResponse($designs,
+                __('messages.retrieved', ['module' => 'Designs']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
     }
 
 }

@@ -30,4 +30,20 @@ class DesignRepository extends BaseRepository
     }
 
 
+    /**
+     * @return mixed
+     * @throws RepositoryException
+     * @throws \Exception
+     */
+    public function getDesignList() {
+        $this->applyCriteria();
+        $designs = datatables()->of($this->model->with([
+            'detail',
+            'mainImage.file:id,uri'
+        ])->select('designs.*'))->make(true);
+        $this->resetModel();
+
+        return $designs;
+    }
+
 }

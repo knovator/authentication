@@ -69,6 +69,14 @@ class Design extends Model
         return $this->hasMany(DesignImage::class, 'design_id', 'id');
     }
 
+
+    /**
+     * @return mixed
+     */
+    public function mainImage() {
+        return $this->hasOne(DesignImage::class, 'design_id', 'id')->where('type', '=', 'MAIN');
+    }
+
     /**
      * @return mixed
      */
