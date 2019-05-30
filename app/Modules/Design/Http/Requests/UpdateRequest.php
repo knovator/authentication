@@ -31,6 +31,7 @@ class UpdateRequest extends FormRequest
     public function rules() {
         return [
             // design details
+            'name'                      => 'required|string|max:60',
             'quality_name'              => 'required|string|max:60',
             'type'                      => 'required|string|max:60',
             'fiddles'                   => 'required|integer',
