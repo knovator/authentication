@@ -33,15 +33,19 @@ class ThreadColorRepository extends BaseRepository
 
 
     /**
-     * @param $weftId
+     * @param $statusId
      * @return Model
      * @throws RepositoryException
      */
-    public function getColorsList($weftId) {
+    public function getColorsList($statusId) {
 
         $this->applyCriteria();
-        $threadColors = $this->model->whereHas('thread', function ($thread) use ($weftId) {
-            $thread->whereIsActive(true)->whereTypeId($weftId);
+        $threadColors = $this->model->whereHas('thread', function ($thread) use ($statusId) {
+            $thread->whereIsActive(true);
+            if (!is_null($statusId)) {
+                $thread->whereTypeId($statusId);
+            }
+
         })->with(['thread:id,name,denier,price', 'color:id,name,code'])->get();
         $this->resetModel();
 

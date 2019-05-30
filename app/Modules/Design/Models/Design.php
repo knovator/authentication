@@ -3,7 +3,7 @@
 namespace App\Modules\Design\Models;
 
 
-use App\Modules\SalesOrder\Models\SalesOrder;
+use App\Modules\Sales\Models\SalesOrder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Knovators\Support\Traits\HasModelEvent;

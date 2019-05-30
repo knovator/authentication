@@ -4,7 +4,7 @@ namespace App\Modules\Thread\Models;
 
 
 use App\Modules\Recipe\Models\Recipe;
-use App\Modules\SalesOrder\Models\SalesOrderQuantity;
+use App\Modules\Sales\Models\SalesOrderQuantity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Knovators\Masters\Models\Master;

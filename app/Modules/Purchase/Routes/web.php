@@ -11,8 +11,8 @@
 |
 */
 
-Route::group(['prefix' => 'salesorder'], function () {
+Route::group(['prefix' => 'purchase'], function () {
     Route::get('/', function () {
-        dd('This is the SalesOrder module index page. Build something great!');
+        dd('This is the Purchase module index page. Build something great!');
     });
 });

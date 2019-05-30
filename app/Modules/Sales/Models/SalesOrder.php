@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\SalesOrder\Models;
+namespace App\Modules\Sales\Models;
 
 
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +9,7 @@ use Knovators\Support\Traits\HasModelEvent;
 
 /**
  * Class SalesOrder
- * @package App\Modules\SalesOrder\Models
+ * @package App\Modules\Sales\Models
  */
 class SalesOrder extends Model
 {
