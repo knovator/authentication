@@ -3,8 +3,10 @@
 namespace App\Modules\Purchase\Http\Controllers;
 
 use App\Constants\GenerateNumber;
+use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
 use App\Modules\Purchase\Http\Requests\CreateRequest;
+use App\Modules\Purchase\Models\PurchaseOrder;
 use App\Modules\Purchase\Repositories\PurchaseOrderRepository;
 use App\Support\UniqueIdGenerator;
 use DB;
@@ -47,15 +49,14 @@ class PurchaseController extends Controller
      */
     public function store(CreateRequest $request) {
         $input = $request->all();
-        dd($input);
         try {
             DB::beginTransaction();
             $input['order_no'] = $this->generateUniqueId(GenerateNumber::PURCHASE);
-
+            $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::PO_PENDING)->id;
             $purchaseOrder = $this->purchaseOrderRepository->create($input);
+            /** @var PurchaseOrder $purchaseOrder */
             $purchaseOrder->threads()->createMany($input['threads_purchase_details']);
             DB::commit();
-
             return $this->sendResponse($purchaseOrder,
                 __('messages.created', ['module' => 'Purchase']),
                 HTTPCode::CREATED);

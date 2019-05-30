@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class PurchaseOrderThread extends Model
 {
 
+    public $timestamps = false;
+
     use SoftDeletes;
 
     protected $table = 'purchase_order_threads';
