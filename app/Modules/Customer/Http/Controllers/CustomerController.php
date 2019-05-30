@@ -46,7 +46,7 @@ class CustomerController extends Controller
         try {
             $customer = $this->customerRepository->create($input);
 
-            return $this->sendResponse($this->makeResource($customer),
+            return $this->sendResponse($this->makeResource($customer->load('state')),
                 __('messages.created', ['module' => 'Customer']),
                 HTTPCode::CREATED);
         } catch (Exception $exception) {
@@ -70,7 +70,7 @@ class CustomerController extends Controller
             $customer->update($input);
             $customer->fresh();
 
-            return $this->sendResponse($this->makeResource($customer),
+            return $this->sendResponse($this->makeResource($customer->load('state')),
                 __('messages.updated', ['module' => 'Customer']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -91,7 +91,7 @@ class CustomerController extends Controller
         $customer->update($request->all());
         $customer->fresh();
 
-        return $this->sendResponse($this->makeResource($customer),
+        return $this->sendResponse($this->makeResource($customer->load('state')),
             __('messages.updated', ['module' => 'Customer']),
             HTTPCode::OK);
     }
@@ -122,8 +122,8 @@ class CustomerController extends Controller
      * @return JsonResponse
      */
     public function show(Customer $customer) {
-        $customer->load('state');
-        return $this->sendResponse($this->makeResource($customer),
+
+        return $this->sendResponse($this->makeResource($customer->load('state')),
             __('messages.retrieved', ['module' => 'Customer']),
             HTTPCode::OK);
     }
