@@ -59,7 +59,7 @@ class Customer extends Model
      * @return mixed
      */
     public function state() {
-        return $this->hasMany(State::class, 'state_id', 'id');
+        return $this->belongsTo(State::class, 'state_id', 'id');
     }
 
 

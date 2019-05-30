@@ -122,7 +122,6 @@ class CustomerController extends Controller
      * @return JsonResponse
      */
     public function show(Customer $customer) {
-
         return $this->sendResponse($this->makeResource($customer->load('state')),
             __('messages.retrieved', ['module' => 'Customer']),
             HTTPCode::OK);

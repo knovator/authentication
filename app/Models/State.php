@@ -17,4 +17,10 @@ class State extends Model
 
     protected $fillable = ['name', 'code', 'gst_code', 'is_active'];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
+
 }
