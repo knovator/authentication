@@ -11,7 +11,7 @@ deploy_staging:
     - chmod 600 ~/.ssh/$ID_RSA_NAME
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
   script:
-    - ssh -i "~/.ssh/$ID_RSA_NAME" "$STAGE_USER_NAME"@"$STAGE_SERVER_HOST" "cd $STAGE_PATH && git checkout development && git pull origin development && composer install && php artisan migrate && php artisan module:optimize && php artisan store:routes && php artisan queue:restart && exit"
+    - ssh -i "~/.ssh/$ID_RSA_NAME" "$STAGE_USER_NAME"@"$STAGE_SERVER_HOST" "cd $STAGE_PATH && git checkout development && git pull origin development && composer install && php artisan migrate && php artisan module:optimize && php artisan store:routes && php artisan db:seed && php artisan queue:restart && exit"
   only:
     - development
 
