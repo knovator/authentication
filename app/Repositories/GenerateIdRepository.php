@@ -12,8 +12,6 @@ use Knovators\Support\Traits\BaseRepository;
  */
 class GenerateIdRepository extends BaseRepository
 {
-
-
     /**
      * Configure the Model
      *

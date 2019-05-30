@@ -55,7 +55,7 @@ class DesignController extends Controller
             $this->storeDesignDetails($design, $input);
             DB::commit();
 
-            return $this->sendResponse($design,
+            return $this->sendResponse($this->makeResource($design->load('detail')),
                 __('messages.created', ['module' => 'Design']),
                 HTTPCode::CREATED);
         } catch (Exception $exception) {
@@ -97,8 +97,8 @@ class DesignController extends Controller
             $design->update($input);
             $this->storeDesignDetails($design, $input);
             DB::commit();
-
-            return $this->sendResponse($design->fresh(),
+            $design->fresh();
+            return $this->sendResponse($this->makeResource($design->load('detail')),
                 __('messages.updated', ['module' => 'Design']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -171,7 +171,7 @@ class DesignController extends Controller
         $design->update($request->all());
         $design->fresh();
 
-        return $this->sendResponse($design,
+        return $this->sendResponse($this->makeResource($design->load('detail')),
             __('messages.updated', ['module' => 'Design']),
             HTTPCode::OK);
     }
@@ -192,7 +192,7 @@ class DesignController extends Controller
         $design->update($input);
         $design->fresh();
 
-        return $this->sendResponse($design,
+        return $this->sendResponse($this->makeResource($design->load('detail')),
             __('messages.updated', ['module' => 'Design']),
             HTTPCode::OK);
     }
@@ -207,6 +207,7 @@ class DesignController extends Controller
             $relations = [
                 'salesOrders'
             ];
+
             return $this->destroyModelObject($relations, $design, 'Design');
 
         } catch (Exception $exception) {
