@@ -1341,11 +1341,11 @@
         },
         {
             "name": "knovators/authentication",
-            "version": "v1.1",
+            "version": "v1.2",
             "source": {
                 "type": "git",
                 "url": "git@git.knovator.in:knovators/authentication.git",
-                "reference": "51ced9daecfd67a1f51cbaaf8cc33bcf11a140d2"
+                "reference": "c7fae85c1bbac2129c8c9e171f21c2b034e66ff6"
             },
             "require": {
                 "laravel/passport": "^7.2",
@@ -1358,7 +1358,7 @@
                 }
             },
             "description": "This is authentication module description",
-            "time": "2019-05-22T09:40:12+00:00"
+            "time": "2019-05-30T07:56:50+00:00"
         },
         {
             "name": "knovators/httplogger",
