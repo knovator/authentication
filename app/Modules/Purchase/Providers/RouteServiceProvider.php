@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Salesorder\Providers;
+namespace App\Modules\Purchase\Providers;
 
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Route;
@@ -14,7 +14,7 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @var string
      */
-    protected $namespace = 'App\Modules\Salesorder\Http\Controllers';
+    protected $namespace = 'App\Modules\Purchase\Http\Controllers';
 
     /**
      * Define your route model bindings, pattern filters, etc.
@@ -55,7 +55,7 @@ class RouteServiceProvider extends ServiceProvider
             'middleware' => 'web',
             'namespace'  => $this->namespace,
         ], function ($router) {
-            require module_path('salesorder', 'Routes/web.php', 'app');
+            require module_path('purchase', 'Routes/web.php', 'app');
         });
     }
 
@@ -73,7 +73,7 @@ class RouteServiceProvider extends ServiceProvider
             'namespace'  => $this->namespace,
             'prefix'     => 'api',
         ], function ($router) {
-            require module_path('salesorder', 'Routes/api.php', 'app');
+            require module_path('purchase', 'Routes/api.php', 'app');
         });
     }
 }

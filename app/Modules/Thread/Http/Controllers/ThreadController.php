@@ -211,7 +211,10 @@ class ThreadController extends Controller
      */
     public function threadColorsList(ThreadColorRequest $request) {
         try {
-            $statusId = $this->masterRepository->findByCode($request->get('code'))->id;
+            $statusId = null;
+            if ($request->has('code')) {
+                $statusId = $this->masterRepository->findByCode($request->get('code'))->id;
+            }
             $threadsColors = $this->threadColorRepository->getColorsList($statusId);
 
             return $this->sendResponse($threadsColors,
