@@ -33,9 +33,9 @@ class ChangeProfileRequest extends FormRequest
             'first_name' => 'required|string|max:60',
             'last_name'  => 'required|string|max:60',
             'email'      => 'required|string|unique:users,email,' .
-                $this->users->id . ',id,deleted_at,NULL',
+                $this->user->id . ',id,deleted_at,NULL',
             'phone'      => 'required|numeric|digits:10|unique:users,phone,' .
-                $this->users->id . ',id,deleted_at,NULL',
+                $this->user->id . ',id,deleted_at,NULL',
             'image_id'   => 'nullable|exists:files,id',
         ];
     }

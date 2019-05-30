@@ -9,7 +9,7 @@ use Knovators\Support\Traits\HasModelEvent;
 
 /**
  * Class SalesOrder
- * @package App\Modules\SalesOrder\Models
+ * @package App\Modules\Sales\Models
  */
 class SalesOrder extends Model
 {
