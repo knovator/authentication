@@ -23,16 +23,16 @@ class CommonService
         switch ($classLabel) {
 
             case 'user':
-                return self::getClassByName('models.' . $classLabel, User::class);
+                return self::getClassByName('models.user', User::class);
 
             case 'role':
-                return self::getClassByName('models.' . $classLabel, Role::class);
+                return self::getClassByName('models.role', Role::class);
 
             case 'permission':
-                return self::getClassByName('models.' . $classLabel, Permission::class);
+                return self::getClassByName('models.permission', Permission::class);
 
             case 'user_resource':
-                return self::getClassByName('resources.' . $classLabel, UserResource::class);
+                return self::getClassByName('resources.user' . $classLabel, UserResource::class);
 
             default:
                 return null;
