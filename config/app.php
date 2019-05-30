@@ -184,6 +184,7 @@ return [
         Knovators\Authentication\AuthServiceProvider::class,
         Knovators\Media\MediaServiceProvider::class,
         Knovators\Masters\MasterServiceProvider::class,
+        DougSisk\CountryState\CountryStateServiceProvider::class,
 
 
     ],

@@ -13,6 +13,7 @@
         "barryvdh/laravel-cors": "^0.11.3",
         "caffeinated/modules": "5.1.*",
         "doctrine/dbal": "^2.9",
+        "dougsisk/laravel-country-state": "^2.1",
         "fideloper/proxy": "^4.0",
         "knovators/authentication": "1.*",
         "knovators/httplogger": "1.0.*",

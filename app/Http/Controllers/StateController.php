@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Repositories\StateRepository;
+use DougSisk\CountryState\CountryState;
 use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Knovators\Support\Helpers\HTTPCode;
 use Log;
 
@@ -38,6 +38,8 @@ class StateController extends Controller
             return $this->sendResponse($states,
                 __('messages.retrieved', ['module' => 'States']),
                 HTTPCode::OK);
+
+
         } catch (Exception $exception) {
             Log::error($exception);
 
