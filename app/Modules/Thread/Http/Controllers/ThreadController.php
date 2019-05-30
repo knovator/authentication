@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\PartiallyUpdateRequest;
 use App\Modules\Thread\Constants\ThreadType;
 use App\Modules\Thread\Http\Requests\CreateRequest;
+use App\Modules\Thread\Http\Requests\ThreadColorRequest;
 use App\Modules\Thread\Http\Requests\UpdateRequest;
 use App\Modules\Thread\Http\Resources\Thread as ThreadResource;
 use App\Modules\Thread\Models\Thread;
@@ -15,6 +16,7 @@ use App\Modules\Thread\Repositories\ThreadRepository;
 use DB;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Knovators\Masters\Repository\MasterRepository;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
@@ -204,12 +206,13 @@ class ThreadController extends Controller
     }
 
     /**
+     * @param Request $request
      * @return JsonResponse
      */
-    public function threadColorsList() {
+    public function threadColorsList(ThreadColorRequest $request) {
         try {
-            $weftId = $this->masterRepository->findByCode(ThreadType::WEFT)->id;
-            $threadsColors = $this->threadColorRepository->getColorsList($weftId);
+            $statusId = $this->masterRepository->findByCode($request->get('code'))->id;
+            $threadsColors = $this->threadColorRepository->getColorsList($statusId);
 
             return $this->sendResponse($threadsColors,
                 __('messages.retrieved', ['module' => 'Threads colors']),
