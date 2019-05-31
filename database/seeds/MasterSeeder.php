@@ -84,21 +84,51 @@ class MasterSeeder extends Seeder
                 'code'        => 'COLOR',
                 'is_active'   => true,
                 'sub_masters' => [
+
+                ]
+            ],
+            2 => [
+                'name'        => 'Purchase Order Status',
+                'code'        => 'PURCHASE_STATUS',
+                'is_active'   => true,
+                'sub_masters' => [
                     0 => [
-                        'name'      => 'Red',
-                        'code'      => '#FF0000',
+                        'name'      => 'Pending',
+                        'code'      => 'PO_PENDING',
                         'is_active' => true,
                     ],
                     1 => [
-                        'name'      => 'Blue',
-                        'code'      => '#0000FF',
+                        'name'      => 'Delivered',
+                        'code'      => 'PO_DELIVERED',
                         'is_active' => true,
                     ],
                     2 => [
-                        'name'      => 'Yellow',
-                        'code'      => '#FFFF00',
+                        'name'      => 'Canceled',
+                        'code'      => 'PO_CANCELED',
                         'is_active' => true,
-                    ]
+                    ],
+                ]
+            ],
+            3 => [
+                'name'        => 'Sales Order Status',
+                'code'        => 'SALES_STATUS',
+                'is_active'   => true,
+                'sub_masters' => [
+                    0 => [
+                        'name'      => 'Pending',
+                        'code'      => 'SO_PENDING',
+                        'is_active' => true,
+                    ],
+                    1 => [
+                        'name'      => 'Manufacturing',
+                        'code'      => 'SO_MANUFACTURING',
+                        'is_active' => true,
+                    ],
+                    2 => [
+                        'name'      => 'Delivered',
+                        'code'      => 'SO_DELIVERED',
+                        'is_active' => true,
+                    ],
                 ]
             ]
         ];

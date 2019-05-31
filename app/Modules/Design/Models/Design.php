@@ -98,4 +98,14 @@ class Design extends Model
         return $this->hasOne(DesignDetail::class, 'design_id', 'id');
     }
 
+
+    /**
+     * @return mixed
+     */
+    public function recipes() {
+        return $this->hasManyThrough(BeamRecipe::class, DesignBeam::class, 'design_id',
+            'design_beam_id', 'id');
+    }
+
+
 }
