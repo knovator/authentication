@@ -14,12 +14,10 @@ use App\Support\UniqueIdGenerator;
 use DB;
 use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Knovators\Masters\Repository\MasterRepository;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;
-use Prettus\Repository\Exceptions\RepositoryException;
 use Str;
 
 /**
@@ -233,7 +231,6 @@ class PurchaseController extends Controller
      */
     private function updatePOCANCELEDStatus(PurchaseOrder $purchaseOrder, $input) {
         $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::PO_CANCELED)->id;
-
         return $this->updateStatus($purchaseOrder, $input);
 
     }
