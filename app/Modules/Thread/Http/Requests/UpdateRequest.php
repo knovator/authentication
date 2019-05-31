@@ -30,13 +30,14 @@ class UpdateRequest extends FormRequest
      */
     public function rules() {
         return [
-            'name'        => 'required|string|max:60',
-            'denier'      => 'required|integer',
-            'type_id'     => 'nullable|exists:masters,id',
-            'price'       => 'required|integer',
-            'is_active'   => 'required|boolean',
-            'color_ids'   => 'required|array',
-            'color_ids.*' => 'required|exists:masters,id',
+            'name'         => 'required|string|max:60',
+            'company_name' => 'required|string|max:60',
+            'denier'       => 'required|integer',
+            'type_id'      => 'nullable|exists:masters,id',
+            'price'        => 'required|integer',
+            'is_active'    => 'required|boolean',
+            'color_ids'    => 'required|array',
+            'color_ids.*'  => 'required|exists:masters,id',
         ];
     }
 

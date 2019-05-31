@@ -63,7 +63,7 @@ class PurchaseController extends Controller
             $purchaseOrder->threads()->createMany($input['threads']);
             DB::commit();
 
-            return $this->sendResponse($purchaseOrder,
+            return $this->sendResponse($this->makeResource($purchaseOrder),
                 __('messages.created', ['module' => 'Purchase']),
                 HTTPCode::CREATED);
         } catch (Exception $exception) {
@@ -96,8 +96,9 @@ class PurchaseController extends Controller
             $purchaseOrder->update($input);
             $this->storeThreadDetails($purchaseOrder, $input);
             DB::commit();
+            $purchaseOrder->fresh();
 
-            return $this->sendResponse($purchaseOrder,
+            return $this->sendResponse($this->makeResource($purchaseOrder->load('threads')),
                 __('messages.updated', ['module' => 'Purchase']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -179,7 +180,7 @@ class PurchaseController extends Controller
         try {
             $purchaseOrder->update($input);
 
-            return $this->sendResponse($purchaseOrder->fresh(),
+            return $this->sendResponse($this->makeResource($purchaseOrder->fresh()),
                 __('messages.updated', ['module' => 'Status']),
                 HTTPCode::OK);
         } catch (Exception $exception) {

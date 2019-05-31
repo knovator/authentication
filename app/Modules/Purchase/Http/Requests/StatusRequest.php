@@ -66,4 +66,19 @@ class StatusRequest extends FormRequest
             'purchase_order_id' => 'required|exists:purchase_orders,id,status_id,' . $currentStatusId
         ];
     }
+
+
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array
+     */
+    public function messages() {
+
+        return [
+            'purchase_order_id.exists' => 'Please select valid status.'
+        ];
+    }
+
+
 }
