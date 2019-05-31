@@ -2,6 +2,7 @@
 
 namespace App\Modules\Purchase\Models;
 
+use App\Modules\Stock\Models\Stock;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -28,6 +29,8 @@ class PurchaseOrderThread extends Model
     protected $hidden = [
         'deleted_at',
     ];
+
+
 
 
 }

@@ -2,6 +2,7 @@
 
 namespace App\Modules\Purchase\Models;
 
+use App\Modules\Stock\Models\Stock;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Knovators\Masters\Models\Master;
@@ -49,6 +50,14 @@ class PurchaseOrder extends Model
      */
     public function status() {
         return $this->belongsTo(Master::class, 'status_id', 'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function orderStocks() {
+        return $this->morphMany(Stock::class, 'order');
     }
 
 }

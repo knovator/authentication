@@ -145,7 +145,7 @@ class PurchaseController extends Controller
         try {
             $purchaseOrder = $this->purchaseOrderRepository->find($request->get('purchase_order_id'));
 
-            return $this->{$method}($purchaseOrder, $request);
+            return $this->{$method}($purchaseOrder, $request->all());
         } catch (Exception $exception) {
             Log::error('Unable to find status method: ' . $status);
 
@@ -153,18 +153,19 @@ class PurchaseController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
 
-
     }
 
 
     /**
-     * @param $purchaseOrder
-     * @param $request
+     * @param PurchaseOrder $purchaseOrder
+     * @param               $input
      * @return JsonResponse
      * @throws Exception
      */
-    private function updatePOPENDINGStatus(PurchaseOrder $purchaseOrder, Request $request) {
-        return $this->updateStatus($purchaseOrder, $request->all());
+    private function updatePOPENDINGStatus(PurchaseOrder $purchaseOrder, $input) {
+        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::PO_PENDING)->id;
+
+        return $this->updateStatus($purchaseOrder, $input);
 
     }
 
@@ -179,7 +180,7 @@ class PurchaseController extends Controller
         try {
             $purchaseOrder->update($input);
 
-            return $this->sendResponse($purchaseOrder,
+            return $this->sendResponse($purchaseOrder->fresh(),
                 __('messages.updated', ['module' => 'Status']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -190,30 +191,50 @@ class PurchaseController extends Controller
     }
 
     /**
-     * @param $purchaseOrder
-     * @param $request
+     * @param PurchaseOrder $purchaseOrder
+     * @param               $input
      * @return JsonResponse
      * @throws Exception
      */
-    private function updatePODELIVEREDStatus(PurchaseOrder $purchaseOrder, Request $request) {
+    private function updatePODELIVEREDStatus(PurchaseOrder $purchaseOrder, $input) {
+        $purchaseOrder->load('threads');
+        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::PO_DELIVERED)->id;
+        $stockItems = [];
+        foreach ($purchaseOrder->threads as $key => $purchasedThread) {
+            $stockItems[$key] = [
+                'product_id'   => $purchasedThread->thread_color_id,
+                'product_type' => 'thread_color',
+                'kg_qty'       => $purchasedThread->kg_qty,
+                'status_id'    => $input['status_id'],
+            ];
+        }
+        try {
+            DB::beginTransaction();
+            $purchaseOrder->orderStocks()->createMany($stockItems);
+            $response = $this->updateStatus($purchaseOrder, $input);
+            DB::commit();
 
+            return $response;
+        } catch (Exception $exception) {
+            DB::rollBack();
+            Log::error($exception);
 
-
-
-
-
-        return $this->updateStatus($purchaseOrder, $request->all());
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
 
     }
 
     /**
-     * @param $purchaseOrder
-     * @param $request
+     * @param PurchaseOrder $purchaseOrder
+     * @param               $input
      * @return JsonResponse
      * @throws Exception
      */
-    private function updatePOCANCELEDStatus(PurchaseOrder $purchaseOrder, Request $request) {
-        return $this->updateStatus($purchaseOrder, $request->all());
+    private function updatePOCANCELEDStatus(PurchaseOrder $purchaseOrder, $input) {
+        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::PO_CANCELED)->id;
+
+        return $this->updateStatus($purchaseOrder, $input);
 
     }
 
