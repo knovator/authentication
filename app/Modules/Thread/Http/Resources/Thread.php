@@ -23,6 +23,7 @@ class Thread extends JsonResource
         return [
             'id'           => $this->id,
             'name'         => $this->name,
+            'company_name' => $this->company_name,
             'denier'       => $this->denier,
             'price'        => $this->price,
             'is_active'    => $this->is_active,
