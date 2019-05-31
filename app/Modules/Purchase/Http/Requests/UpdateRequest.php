@@ -29,8 +29,16 @@ class UpdateRequest extends FormRequest
      * @return array
      */
     public function rules() {
-        return [
 
+//        return false;
+
+        return [
+            'order_date'                => 'required|date_format:Y-m-d',
+            'customer_id'               => 'required|exists:customers,id',
+            'threads'                   => 'required|array',
+            'threads.*.id'              => 'sometimes|required|integer',
+            'threads.*.thread_color_id' => 'required|integer',
+            'threads.*.kg_qty'          => 'required|integer',
         ];
     }
 

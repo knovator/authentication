@@ -8,8 +8,8 @@ Route::group([
 ],
     function () {
         Route::resource('purchases', 'PurchaseController');
-        Route::put('purchases/partiallyUpdate/{purchase}', 'PurchaseController@partiallyUpdate')
-             ->name('purchase.partially-update');
+        Route::put('purchases/order/change-status', 'PurchaseController@changeStatus')
+             ->name('purchase.change-status');
     });
 
 Route::model('purchase', PurchaseOrder::class);

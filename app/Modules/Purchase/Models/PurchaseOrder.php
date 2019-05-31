@@ -4,6 +4,7 @@ namespace App\Modules\Purchase\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Knovators\Masters\Models\Master;
 use Knovators\Support\Traits\HasModelEvent;
 
 /**
@@ -40,6 +41,14 @@ class PurchaseOrder extends Model
      */
     public function threads() {
         return $this->hasMany(PurchaseOrderThread::class, 'purchase_order_id', 'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function status() {
+        return $this->belongsTo(Master::class, 'status_id', 'id');
     }
 
 }

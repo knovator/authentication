@@ -30,11 +30,11 @@ class CreateRequest extends FormRequest
      */
     public function rules() {
         return [
-            'order_date'                                 => 'required|date_format:Y-m-d',
-            'customer_id'                                => 'required|exists:customers,id',
-            'threads_purchase_details'                   => 'required|array',
-            'threads_purchase_details.*.thread_color_id' => 'required|integer',
-            'threads_purchase_details.*.kg_qty'          => 'required|integer',
+            'order_date'                => 'required|date_format:Y-m-d',
+            'customer_id'               => 'required|exists:customers,id',
+            'threads'                   => 'required|array',
+            'threads.*.thread_color_id' => 'required|integer',
+            'threads.*.kg_qty'          => 'required|integer',
         ];
     }
 

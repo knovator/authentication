@@ -16,6 +16,7 @@ class Master
     const PURCHASE_STATUS = 'PURCHASE_STATUS'; // parent
     const PO_PENDING = 'PO_PENDING';
     const PO_DELIVERED = 'PO_DELIVERED';
+    const PO_CANCELED = 'PO_CANCELED';
 
     // Sales Order Statuses
     const SALES_STATUS = 'SALES_STATUS'; // parent

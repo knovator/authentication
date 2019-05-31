@@ -102,6 +102,11 @@ class MasterSeeder extends Seeder
                         'code'      => 'PO_DELIVERED',
                         'is_active' => true,
                     ],
+                    2 => [
+                        'name'      => 'Canceled',
+                        'code'      => 'PO_CANCELED',
+                        'is_active' => true,
+                    ],
                 ]
             ],
             3 => [
