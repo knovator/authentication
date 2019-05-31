@@ -30,8 +30,6 @@ class UpdateRequest extends FormRequest
      */
     public function rules() {
 
-//        return false;
-
         return [
             'order_date'                => 'required|date_format:Y-m-d',
             'customer_id'               => 'required|exists:customers,id',

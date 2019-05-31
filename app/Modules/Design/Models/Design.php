@@ -21,7 +21,6 @@ class Design extends Model
 
     protected $fillable = [
         'design_no',
-        'name',
         'quality_name',
         'type',
         'fiddles',
