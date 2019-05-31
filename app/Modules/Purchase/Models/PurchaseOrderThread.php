@@ -3,6 +3,7 @@
 namespace App\Modules\Purchase\Models;
 
 use App\Modules\Stock\Models\Stock;
+use App\Modules\Thread\Models\ThreadColor;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -31,6 +32,12 @@ class PurchaseOrderThread extends Model
     ];
 
 
+    /**
+     * @return mixed
+     */
+    public function threadColor() {
+        return $this->belongsTo(ThreadColor::class, 'thread_color_id', 'id');
+    }
 
 
 }

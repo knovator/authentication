@@ -10,6 +10,7 @@ use App\Modules\Purchase\Http\Requests\StatusRequest;
 use App\Modules\Purchase\Http\Requests\UpdateRequest;
 use App\Modules\Purchase\Models\PurchaseOrder;
 use App\Modules\Purchase\Repositories\PurchaseOrderRepository;
+use App\Modules\Purchase\Http\Resources\PurchaseOrder as PurchaseOrderResource;
 use App\Support\UniqueIdGenerator;
 use DB;
 use Exception;
@@ -231,8 +232,34 @@ class PurchaseController extends Controller
      */
     private function updatePOCANCELEDStatus(PurchaseOrder $purchaseOrder, $input) {
         $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::PO_CANCELED)->id;
-        return $this->updateStatus($purchaseOrder, $input);
 
+        return $this->updateStatus($purchaseOrder, $input);
+    }
+
+    /**
+     * @param PurchaseOrder $purchaseOrder
+     * @return JsonResponse
+     */
+    public function show(PurchaseOrder $purchaseOrder) {
+        $purchaseOrder->load([
+            'threads.threadColor.thread',
+            'threads.threadColor.color',
+            'customer',
+            'status'
+        ]);
+
+        return $this->sendResponse($this->makeResource($purchaseOrder),
+            __('messages.retrieved', ['module' => 'Purchase Order']),
+            HTTPCode::OK);
+    }
+
+
+    /**
+     * @param $purchaseOrder
+     * @return PurchaseOrderResource
+     */
+    private function makeResource($purchaseOrder) {
+        return new PurchaseOrderResource($purchaseOrder);
     }
 
 

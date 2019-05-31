@@ -2,6 +2,7 @@
 
 namespace App\Modules\Purchase\Models;
 
+use App\Modules\Customer\Models\Customer;
 use App\Modules\Stock\Models\Stock;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -44,6 +45,12 @@ class PurchaseOrder extends Model
         return $this->hasMany(PurchaseOrderThread::class, 'purchase_order_id', 'id');
     }
 
+    /**
+     * @return mixed
+     */
+    public function customer() {
+        return $this->belongsTo(Customer::class, 'customer_id', 'id');
+    }
 
     /**
      * @return mixed
