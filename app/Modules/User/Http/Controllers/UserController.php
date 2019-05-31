@@ -69,7 +69,7 @@ class UserController extends Controller
             $user = $this->userRepository->createOrUpdateTrashed('email', $input['email'],
                 $input);
             /** @var User $user */
-            $user->roles()->attach($input['role_ids']);
+            $user->roles()->sync($input['role_ids']);
             $user->load(['image', 'roles']);
             DB::commit();
 
