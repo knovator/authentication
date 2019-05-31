@@ -38,12 +38,24 @@ class PurchaseOrder extends Model
         'updated_at'
     ];
 
+
+    public static function boot() {
+        parent::boot();
+        self::creatingEvent();
+        static::deleting(function (PurchaseOrder $model) {
+            $model->threads()->delete();
+        });
+        self::deletedEvent();
+    }
+
+
     /**
      * @return mixed
      */
     public function threads() {
         return $this->hasMany(PurchaseOrderThread::class, 'purchase_order_id', 'id');
     }
+
 
     /**
      * @return mixed
@@ -58,7 +70,6 @@ class PurchaseOrder extends Model
     public function status() {
         return $this->belongsTo(Master::class, 'status_id', 'id');
     }
-
 
     /**
      * @return mixed

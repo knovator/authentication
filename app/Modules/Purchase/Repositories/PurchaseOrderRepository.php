@@ -37,13 +37,15 @@ class PurchaseOrderRepository extends BaseRepository
      */
     public function getPurchaseOrderList() {
         $this->applyCriteria();
-        $designs = datatables()->of($this->model->with([
-            'detail',
-            'mainImage.file:id,uri'
-        ])->select('designs.*'))->make(true);
+        $orders = datatables()->of($this->model->with([
+            'threads.threadColor.thread',
+            'threads.threadColor.color:id,name,code',
+            'customer.state:id,name,code,gst_code',
+            'status:id,name,code'
+        ])->select('purchase_orders.*'))->make(true);
         $this->resetModel();
 
-        return $designs;
+        return $orders;
     }
 
 }

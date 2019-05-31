@@ -263,6 +263,48 @@ class PurchaseController extends Controller
     }
 
 
+    /**
+     * @return JsonResponse
+     */
+    public function index() {
+        try {
+            $orders = $this->purchaseOrderRepository->getPurchaseOrderList();
+
+            return $this->sendResponse($orders,
+                __('messages.retrieved', ['module' => 'Orders']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+    }
+
+
+    /**
+     * @param PurchaseOrder $purchaseOrder
+     * @return JsonResponse
+     */
+    public function destroy(PurchaseOrder $purchaseOrder) {
+        try {
+            $purchaseOrder->load('status');
+            if ($purchaseOrder->status->code === MasterConstant::PO_DELIVERED) {
+                return $this->sendResponse(null,
+                    __('messages.can_not_delete_purchase_order'),
+                    HTTPCode::UNPROCESSABLE_ENTITY);
+            }
+
+            return $this->destroyModelObject([], $purchaseOrder, 'Purchase Order');
+
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
+
 }
 
 
