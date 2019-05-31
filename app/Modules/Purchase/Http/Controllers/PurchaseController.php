@@ -281,7 +281,6 @@ class PurchaseController extends Controller
         }
     }
 
-
     /**
      * @param PurchaseOrder $purchaseOrder
      * @return JsonResponse

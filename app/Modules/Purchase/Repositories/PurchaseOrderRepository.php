@@ -38,6 +38,7 @@ class PurchaseOrderRepository extends BaseRepository
     public function getPurchaseOrderList() {
         $this->applyCriteria();
         $orders = datatables()->of($this->model->with([
+            'threadQty',
             'threads.threadColor.thread',
             'threads.threadColor.color:id,name,code',
             'customer.state:id,name,code,gst_code',

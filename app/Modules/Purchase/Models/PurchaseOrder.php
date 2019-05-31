@@ -60,6 +60,16 @@ class PurchaseOrder extends Model
     /**
      * @return mixed
      */
+    public function threadQty() {
+        return $this->hasOne(PurchaseOrderThread::class, 'purchase_order_id', 'id')
+                    ->groupBy('purchase_order_id')
+                    ->selectRaw('sum(kg_qty) as total,purchase_order_id');
+    }
+
+
+    /**
+     * @return mixed
+     */
     public function customer() {
         return $this->belongsTo(Customer::class, 'customer_id', 'id');
     }
