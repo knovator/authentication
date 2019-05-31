@@ -7,21 +7,22 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * Class SalesOrderQuantity
+ * Class SalesOrderRecipe
  * @package App\Modules\Sales\Models
  */
-class SalesOrderQuantity extends Model
+class SalesOrderRecipe extends Model
 {
 
     use SoftDeletes;
 
-    protected $table = 'sales_orders_quantities';
+    protected $table = 'sales_orders_recipes';
 
     protected $fillable = [
-        'fiddle_no',
-        'sales_order_recipe_id',
-        'thread_color_id',
-        'qty',
+        'sales_order_id',
+        'pcs',
+        'meters',
+        'total_meters',
+        'recipe_id',
     ];
 
 }

@@ -14,7 +14,7 @@ use Knovators\Support\Traits\HasModelEvent;
 class SalesOrder extends Model
 {
 
-    use SoftDeletes,HasModelEvent;
+    use SoftDeletes, HasModelEvent;
 
     protected $table = 'sales_orders';
 
@@ -29,6 +29,13 @@ class SalesOrder extends Model
         'status_id',
         'created_by',
         'deleted_by',
+    ];
+
+    protected $hidden = [
+        'created_by',
+        'deleted_by',
+        'updated_at',
+        'deleted_at',
     ];
 
 }
