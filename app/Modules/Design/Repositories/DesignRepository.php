@@ -37,10 +37,10 @@ class DesignRepository extends BaseRepository
      */
     public function getDesignList() {
         $this->applyCriteria();
-        $designs = datatables()->of($this->model->with([
+        $designs = datatables()->of($this->model->select('designs.*')->with([
             'detail',
             'mainImage.file:id,uri'
-        ])->select('designs.*'))->make(true);
+        ])->withCount('recipes'))->make(true);
         $this->resetModel();
 
         return $designs;
