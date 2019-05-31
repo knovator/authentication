@@ -22,6 +22,7 @@ class Thread extends Model
 
     protected $fillable = [
         'name',
+        'company_name',
         'denier',
         'type_id',
         'price',
