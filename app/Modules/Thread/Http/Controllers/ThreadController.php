@@ -84,12 +84,19 @@ class ThreadController extends Controller
      */
     public function destroy(Thread $thread) {
         try {
-            // thread relations
-            $relations = [
-                'recipes'
-            ];
+            $thread->load('threadColors.recipes');
+            foreach ($thread->threadColors as $threadColor) {
+                if ($threadColor->recipes->isNotEmpty()) {
+                    return $this->sendResponse(null,
+                        __('messages.associated', [
+                            'module'  => 'Thread',
+                            'related' => 'recipes'
+                        ]),
+                        HTTPCode::UNPROCESSABLE_ENTITY);
+                }
+            }
 
-            return $this->destroyModelObject($relations, $thread, 'Thread');
+            return $this->destroyModelObject([], $thread, 'Thread');
 
         } catch (Exception $exception) {
             Log::error($exception);
