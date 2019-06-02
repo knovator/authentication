@@ -39,6 +39,15 @@ class Thread extends Model
         'deleted_by'
     ];
 
+    public static function boot() {
+        parent::boot();
+        self::creatingEvent();
+        static::deleting(function (Thread $model) {
+            $model->threadColors()->delete();
+        });
+        self::deletedEvent();
+    }
+
     /**
      * @return mixed
      */
