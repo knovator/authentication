@@ -23,5 +23,4 @@ class SalesOrderQuantity extends Model
         'thread_color_id',
         'qty',
     ];
-
 }
