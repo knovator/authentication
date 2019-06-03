@@ -45,6 +45,10 @@ class MachineController extends Controller
         $input = $request->all();
         try {
             $machine = $this->machineRepository->create($input);
+            $machine->load([
+                'threadColor.thread',
+                'threadColor.color'
+            ]);
 
             return $this->sendResponse($this->makeResource($machine),
                 __('messages.created', ['module' => 'Machine']),
@@ -96,7 +100,10 @@ class MachineController extends Controller
             $machine->update($input);
             $machine->fresh();
 
-            return $this->sendResponse($this->makeResource($machine),
+            return $this->sendResponse($this->makeResource($machine->load([
+                'threadColor.thread',
+                'threadColor.color'
+            ])),
                 __('messages.updated', ['module' => 'Machine']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -117,7 +124,10 @@ class MachineController extends Controller
         $machine->update($request->all());
         $machine->fresh();
 
-        return $this->sendResponse($this->makeResource($machine),
+        return $this->sendResponse($this->makeResource($machine->load([
+            'threadColor.thread',
+            'threadColor.color'
+        ])),
             __('messages.updated', ['module' => 'Machine']),
             HTTPCode::OK);
     }
