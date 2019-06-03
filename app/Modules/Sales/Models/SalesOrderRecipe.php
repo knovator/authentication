@@ -4,6 +4,7 @@ namespace App\Modules\Sales\Models;
 
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -24,5 +25,12 @@ class SalesOrderRecipe extends Model
         'total_meters',
         'recipe_id',
     ];
+
+    /**
+     * @return HasMany
+     */
+    public function partialOrders() {
+        return $this->hasMany(RecipePartialOrder::class, 'sales_order_recipe_id', '');
+    }
 
 }
