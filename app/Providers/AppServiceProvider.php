@@ -22,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
 
 
         Relation::morphMap([
-            'order'        => PurchaseOrder::class,
+            'purchase'        => PurchaseOrder::class,
             'thread_color' => ThreadColor::class
         ]);
     }
