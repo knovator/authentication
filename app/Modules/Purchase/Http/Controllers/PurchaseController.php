@@ -61,6 +61,7 @@ class PurchaseController extends Controller
             $purchaseOrder = $this->purchaseOrderRepository->create($input);
             /** @var PurchaseOrder $purchaseOrder */
             $purchaseOrder->threads()->createMany($input['threads']);
+            $this->storeStockOrders($purchaseOrder, $input);
             DB::commit();
 
             return $this->sendResponse($this->makeResource($purchaseOrder),
@@ -164,7 +165,7 @@ class PurchaseController extends Controller
      */
     private function updatePOPENDINGStatus(PurchaseOrder $purchaseOrder, $input) {
         $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::PO_PENDING)->id;
-
+        $this->storeStockOrders($purchaseOrder, $input);
         return $this->updateStatus($purchaseOrder, $input);
 
     }
@@ -197,20 +198,11 @@ class PurchaseController extends Controller
      * @throws Exception
      */
     private function updatePODELIVEREDStatus(PurchaseOrder $purchaseOrder, $input) {
-        $purchaseOrder->load('threads');
         $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::PO_DELIVERED)->id;
-        $stockItems = [];
-        foreach ($purchaseOrder->threads as $key => $purchasedThread) {
-            $stockItems[$key] = [
-                'product_id'   => $purchasedThread->thread_color_id,
-                'product_type' => 'thread_color',
-                'kg_qty'       => $purchasedThread->kg_qty,
-                'status_id'    => $input['status_id'],
-            ];
-        }
         try {
             DB::beginTransaction();
-            $purchaseOrder->orderStocks()->createMany($stockItems);
+            $purchaseOrder->orderStocks()->delete();
+            $this->storeStockOrders($purchaseOrder, $input);
             $response = $this->updateStatus($purchaseOrder, $input);
             DB::commit();
 
@@ -225,6 +217,25 @@ class PurchaseController extends Controller
 
     }
 
+
+    /**
+     * @param $purchaseOrder
+     * @param $input
+     */
+    private function storeStockOrders(PurchaseOrder $purchaseOrder, $input) {
+        $stockItems = [];
+        $purchaseOrder->load('threads');
+        foreach ($purchaseOrder->threads as $key => $purchasedThread) {
+            $stockItems[$key] = [
+                'product_id'   => $purchasedThread->thread_color_id,
+                'product_type' => 'thread_color',
+                'kg_qty'       => $purchasedThread->kg_qty,
+                'status_id'    => $input['status_id'],
+            ];
+        }
+        $purchaseOrder->orderStocks()->createMany($stockItems);
+    }
+
     /**
      * @param PurchaseOrder $purchaseOrder
      * @param               $input
@@ -232,6 +243,7 @@ class PurchaseController extends Controller
      * @throws Exception
      */
     private function updatePOCANCELEDStatus(PurchaseOrder $purchaseOrder, $input) {
+        $purchaseOrder->orderStocks()->delete();
         $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::PO_CANCELED)->id;
 
         return $this->updateStatus($purchaseOrder, $input);
