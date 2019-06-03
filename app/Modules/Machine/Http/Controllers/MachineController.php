@@ -68,6 +68,23 @@ class MachineController extends Controller
 
 
     /**
+     * @param Machine $machine
+     * @return JsonResponse
+     */
+    public function show(Machine $machine) {
+
+        $machine->load([
+            'threadColor.thread',
+            'threadColor.color'
+        ]);
+
+
+        return $this->sendResponse($this->makeResource($machine),
+            __('messages.retrieved', ['module' => 'Machine']),
+            HTTPCode::OK);
+    }
+
+    /**
      * @param Machine       $machine
      * @param UpdateRequest $request
      * @return JsonResponse

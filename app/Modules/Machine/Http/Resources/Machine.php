@@ -2,6 +2,7 @@
 
 namespace App\Modules\Machine\Http\Resources;
 
+use App\Modules\Thread\Http\Resources\ThreadColor;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -20,12 +21,12 @@ class Machine extends JsonResource
      */
     public function toArray($request) {
         return [
-            'id'              => $this->id,
-            'name'            => $this->name,
-            'reed'            => $this->reed,
-            'thread_color_id' => $this->thread_color_id,
-            'panno'           => $this->panno,
-            'is_active'       => $this->is_active,
+            'id'          => $this->id,
+            'name'        => $this->name,
+            'reed'        => $this->reed,
+            'threadColor' => new ThreadColor($this->whenLoaded('threadColor')),
+            'panno'       => $this->panno,
+            'is_active'   => $this->is_active,
         ];
     }
 }
