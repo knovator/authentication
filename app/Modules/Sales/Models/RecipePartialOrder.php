@@ -21,6 +21,7 @@ class RecipePartialOrder extends Model
         'sales_order_recipe_id',
         'total_meters',
         'machine_id',
+        'status_id',
     ];
 
 }
