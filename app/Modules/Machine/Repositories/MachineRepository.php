@@ -36,8 +36,14 @@ class MachineRepository extends BaseRepository
      * @throws \Exception
      */
     public function getMachineList() {
+        $this->applyCriteria();
+        $machines = datatables()->of($this->model->select('machines.*')->with([
+            'threadColor.thread',
+            'threadColor.color:id,name,code'
+        ]))->make(true);
+        $this->resetModel();
 
-
+        return $machines;
 
     }
 

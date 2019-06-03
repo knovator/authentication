@@ -3,6 +3,7 @@
 namespace App\Modules\Machine\Models;
 
 
+use App\Modules\Thread\Models\ThreadColor;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Knovators\Support\Traits\HasModelEvent;
@@ -35,4 +36,11 @@ class Machine extends Model
         'created_at',
         'updated_at'
     ];
+
+    /**
+     * @return mixed
+     */
+    public function threadColor() {
+        return $this->belongsTo(ThreadColor::class, 'thread_color_id', 'id');
+    }
 }

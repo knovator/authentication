@@ -108,14 +108,13 @@ class MachineController extends Controller
 
     /**
      * @param Machine $machine
+     * @param         $arr
      * @return JsonResponse
      */
-    public function destroy(Machine $machine) {
+    public function destroy(Machine $machine, $arr) {
         try {
             // Machine associated relations
-            $relations = [
-
-            ];
+            $relations = $arr;
 
             return $this->destroyModelObject($relations, $machine, 'Machine');
 
@@ -124,6 +123,24 @@ class MachineController extends Controller
 
             return $this->sendResponse(null, __('messages.something_wrong'),
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
+
+    /**
+     * @return JsonResponse
+     */
+    public function index() {
+        try {
+            $machines = $this->machineRepository->getMachineList();
+
+            return $this->sendResponse($machines,
+                __('messages.retrieved', ['module' => 'Machines']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
         }
     }
 
