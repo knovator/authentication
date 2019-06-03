@@ -108,13 +108,14 @@ class MachineController extends Controller
 
     /**
      * @param Machine $machine
-     * @param         $arr
      * @return JsonResponse
      */
-    public function destroy(Machine $machine, $arr) {
+    public function destroy(Machine $machine) {
         try {
             // Machine associated relations
-            $relations = $arr;
+            $relations = [
+
+            ];
 
             return $this->destroyModelObject($relations, $machine, 'Machine');
 
