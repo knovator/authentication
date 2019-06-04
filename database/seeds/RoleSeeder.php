@@ -30,6 +30,16 @@ class RoleSeeder extends Seeder
                 'name'   => 'Accountant',
                 'code'   => 'ACCOUNTANT',
                 'weight' => 3
+            ],
+            3 => [
+                'name'   => 'Manager',
+                'code'   => 'MANAGER',
+                'weight' => 4
+            ],
+            4 => [
+                'name'   => 'Programmer',
+                'code'   => 'PROGRAMMER',
+                'weight' => 5
             ]
         ];
 
