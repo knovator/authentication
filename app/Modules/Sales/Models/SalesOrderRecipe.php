@@ -18,6 +18,8 @@ class SalesOrderRecipe extends Model
 
     protected $table = 'sales_orders_recipes';
 
+    public $timestamps = false;
+
     protected $fillable = [
         'sales_order_id',
         'pcs',

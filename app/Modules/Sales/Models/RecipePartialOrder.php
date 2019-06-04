@@ -17,8 +17,12 @@ class RecipePartialOrder extends Model
 
     protected $table = 'recipes_partial_orders';
 
+    public $timestamps = false;
+
     protected $fillable = [
         'sales_order_recipe_id',
+        'pcs',
+        'meters',
         'total_meters',
         'machine_id',
         'status_id',

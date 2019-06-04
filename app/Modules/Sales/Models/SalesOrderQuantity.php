@@ -21,6 +21,6 @@ class SalesOrderQuantity extends Model
         'fiddle_no',
         'sales_order_recipe_id',
         'thread_color_id',
-        'qty',
+        'kg_qty',
     ];
 }

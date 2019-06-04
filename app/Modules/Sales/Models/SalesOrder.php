@@ -2,6 +2,7 @@
 
 namespace App\Modules\Sales\Models;
 
+use App\Modules\Stock\Models\Stock;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Knovators\Support\Traits\HasModelEvent;
@@ -36,5 +37,21 @@ class SalesOrder extends Model
         'updated_at',
         'deleted_at',
     ];
+
+
+    /**
+     * @return mixed
+     */
+    public function orderRecipes() {
+        return $this->hasMany(SalesOrderRecipe::class, 'sales_order_id',
+            'id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function orderStocks() {
+        return $this->morphMany(Stock::class, 'order');
+    }
 
 }
