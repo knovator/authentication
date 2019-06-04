@@ -21,7 +21,7 @@ class SalesOrder extends Model
         'order_no',
         'order_date',
         'delivery_date',
-        'bill_no',
+        'cost_per_meter',
         'design_id',
         'design_beam_id',
         'customer_id',
