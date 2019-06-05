@@ -6,7 +6,6 @@ use App\Constants\GenerateNumber;
 use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
 use App\Modules\Design\Repositories\DesignDetailRepository;
-use App\Modules\Design\Repositories\DesignRepository;
 use App\Modules\Sales\Http\Requests\CreateRequest;
 use App\Modules\Sales\Models\RecipePartialOrder;
 use App\Modules\Sales\Models\SalesOrder;
@@ -67,7 +66,7 @@ class SalesController extends Controller
             $input['status_id'] = $this->getMasterByCode(MasterConstant::SO_PENDING);
             $salesOrder = $this->salesOrderRepository->create($input);
             $designDetail = $this->designDetailRepository->findBy('design_id',
-                $input['design_id'], ['panno', 'additional_panno']);
+                $input['design_id'], ['panno', 'additional_panno', 'reed']);
             $salesOrder->load('designBeam.threadColor.thread');
             $this->storeSalesOrderRecipes($salesOrder, $input, $designDetail);
             DB::commit();

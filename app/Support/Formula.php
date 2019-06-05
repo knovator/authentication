@@ -50,7 +50,7 @@ class Formula
                 return $this->convertRoundValue($value);
             case ThreadType::WARP:
 
-                $value = ($threadDetail['denier'] * ($items['designDetail']->panno) *
+                $value = ($threadDetail['denier'] * ($items['designDetail']->panno + $items['designDetail']->reed) *
                         $items['total_meters']) / (9000 * 1000);
 
                 return $this->convertRoundValue($value);
