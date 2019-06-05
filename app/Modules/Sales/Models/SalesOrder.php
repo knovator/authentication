@@ -53,7 +53,7 @@ class SalesOrder extends Model
      * @return mixed
      */
     public function designBeam() {
-        return $this->hasMany(DesignBeam::class, 'design_beam_id',
+        return $this->belongsTo(DesignBeam::class, 'design_beam_id',
             'id');
     }
 

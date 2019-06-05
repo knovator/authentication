@@ -68,12 +68,7 @@ class SalesController extends Controller
             $salesOrder = $this->salesOrderRepository->create($input);
             $designDetail = $this->designDetailRepository->findBy('design_id',
                 $input['design_id'], ['panno', 'additional_panno']);
-
             $salesOrder->load('designBeam.threadColor.thread');
-
-
-
-
             $this->storeSalesOrderRecipes($salesOrder, $input, $designDetail);
             DB::commit();
 
@@ -95,7 +90,6 @@ class SalesController extends Controller
      * @param            $designDetail
      */
     private function storeSalesOrderRecipes(SalesOrder $salesOrder, $input, $designDetail) {
-
         foreach ($input['order_recipes'] as $items) {
             $orderRecipe = $salesOrder->orderRecipes()->create($items);
             $items['status_id'] = $input['status_id'];
@@ -121,28 +115,35 @@ class SalesController extends Controller
     ) {
         $formula = Formula::getInstance();
         $data = [];
+        // storing weft stock
         foreach ($items['quantity_details'] as $key => $quantityDetails) {
 
             $data[$key] = [
-                'sales_order_recipe_id' => $orderRecipe->id,
-                'partial_order_id'      => $partialOrder->id,
-                'fiddle_no'             => $quantityDetails['fiddle_no'],
-                'thread_color_id'       => $quantityDetails['thread_color_id'],
-                'product_id'            => $quantityDetails['thread_color_id'],
-                'product_type'          => 'thread_color',
-                'kg_qty'                => $formula->getTotalKgQty(ThreadType::WEFT,
+                'partial_order_id' => $partialOrder->id,
+                'fiddle_no'        => $quantityDetails['fiddle_no'],
+                'thread_color_id'  => $quantityDetails['thread_color_id'],
+                'product_id'       => $quantityDetails['thread_color_id'],
+                'product_type'     => 'thread_color',
+                'kg_qty'           => $formula->getTotalKgQty(ThreadType::WEFT,
                     $quantityDetails, $items),
-                'status_id'             => $items['status_id'],
+                'status_id'        => $items['status_id'],
             ];
         }
 
+        $orderRecipe->items()->createMany($data);
+
+        $threadDetail['denier'] = $salesOrder->designBeam->threadColor->thread->denier;
+        // storing warp stock
         array_push($data, [
-            'product_id'   => $quantityDetails['thread_color_id'],
-            'product_type' => 'thread_color',
-            'status_id'    => $items['status_id'],
+            'product_id'       => $salesOrder->designBeam->thread_color_id,
+            'product_type'     => 'thread_color',
+            'status_id'        => $items['status_id'],
+            'partial_order_id' => $partialOrder->id,
+            'kg_qty'           => $formula->getTotalKgQty(ThreadType::WARP,
+                $threadDetail, $items),
         ]);
 
-        $orderRecipe->items()->createMany($data);
+
         $salesOrder->orderStocks()->createMany($data);
     }
 
