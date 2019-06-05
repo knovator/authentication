@@ -68,6 +68,12 @@ class SalesController extends Controller
             $salesOrder = $this->salesOrderRepository->create($input);
             $designDetail = $this->designDetailRepository->findBy('design_id',
                 $input['design_id'], ['panno', 'additional_panno']);
+
+            $salesOrder->load('designBeam.threadColor.thread');
+
+
+
+
             $this->storeSalesOrderRecipes($salesOrder, $input, $designDetail);
             DB::commit();
 
@@ -102,11 +108,10 @@ class SalesController extends Controller
     }
 
     /**
-     * @param SalesOrder $salesOrder
-     * @param            $orderRecipe
-     * @param            $partialOrder
-     * @param            $items
-     * @param            $designDetail
+     * @param SalesOrder         $salesOrder
+     * @param SalesOrderRecipe   $orderRecipe
+     * @param RecipePartialOrder $partialOrder
+     * @param                    $items
      */
     private function storeRecipeOrderQuantities(
         SalesOrder $salesOrder,
@@ -132,7 +137,9 @@ class SalesController extends Controller
         }
 
         array_push($data, [
-            'status_id' => $items['status_id'],
+            'product_id'   => $quantityDetails['thread_color_id'],
+            'product_type' => 'thread_color',
+            'status_id'    => $items['status_id'],
         ]);
 
         $orderRecipe->items()->createMany($data);

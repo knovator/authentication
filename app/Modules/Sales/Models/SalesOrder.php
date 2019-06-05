@@ -2,6 +2,7 @@
 
 namespace App\Modules\Sales\Models;
 
+use App\Modules\Design\Models\DesignBeam;
 use App\Modules\Stock\Models\Stock;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -44,6 +45,15 @@ class SalesOrder extends Model
      */
     public function orderRecipes() {
         return $this->hasMany(SalesOrderRecipe::class, 'sales_order_id',
+            'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function designBeam() {
+        return $this->hasMany(DesignBeam::class, 'design_beam_id',
             'id');
     }
 
