@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Design\Repositories\DesignDetailRepository;
 use App\Modules\Design\Repositories\DesignRepository;
 use App\Modules\Sales\Http\Requests\CreateRequest;
+use App\Modules\Sales\Models\RecipePartialOrder;
 use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Sales\Models\SalesOrderRecipe;
 use App\Modules\Sales\Repositories\SalesOrderRepository;
@@ -94,8 +95,9 @@ class SalesController extends Controller
             $items['status_id'] = $input['status_id'];
             /** @var SalesOrderRecipe $orderRecipe */
             $partialOrder = $orderRecipe->partialOrders()->create($items);
-            $this->storeRecipeOrderQuantities($salesOrder, $orderRecipe, $partialOrder, $items,
-                $designDetail);
+            /** @var RecipePartialOrder $partialOrder */
+            $items['designDetail'] = $designDetail;
+            $this->storeRecipeOrderQuantities($salesOrder, $orderRecipe, $partialOrder, $items);
         }
     }
 
@@ -108,32 +110,33 @@ class SalesController extends Controller
      */
     private function storeRecipeOrderQuantities(
         SalesOrder $salesOrder,
-        $orderRecipe,
-        $partialOrder,
-        $items,
-        $designDetail
+        SalesOrderRecipe $orderRecipe,
+        RecipePartialOrder $partialOrder,
+        $items
     ) {
         $formula = Formula::getInstance();
         $data = [];
         foreach ($items['quantity_details'] as $key => $quantityDetails) {
-
-            $qty = $formula->getTotalKgQty(ThreadType::WEFT, $quantityDetails, $items,
-                $designDetail);
-
-            dd($qty);
 
             $data[$key] = [
                 'sales_order_recipe_id' => $orderRecipe->id,
                 'partial_order_id'      => $partialOrder->id,
                 'fiddle_no'             => $quantityDetails['fiddle_no'],
                 'thread_color_id'       => $quantityDetails['thread_color_id'],
-                'kg_qty'                => '',
+                'product_id'            => $quantityDetails['thread_color_id'],
+                'product_type'          => 'thread_color',
+                'kg_qty'                => $formula->getTotalKgQty(ThreadType::WEFT,
+                    $quantityDetails, $items),
                 'status_id'             => $items['status_id'],
             ];
         }
 
-        $salesOrder->orderStocks()->createMany($data);
+        array_push($data, [
+            'status_id' => $items['status_id'],
+        ]);
 
+        $orderRecipe->items()->createMany($data);
+        $salesOrder->orderStocks()->createMany($data);
     }
 
 

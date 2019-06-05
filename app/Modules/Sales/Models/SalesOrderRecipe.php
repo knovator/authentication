@@ -35,4 +35,12 @@ class SalesOrderRecipe extends Model
         return $this->hasMany(RecipePartialOrder::class, 'sales_order_recipe_id', '');
     }
 
+
+    /**
+     * @return HasMany
+     */
+    public function items() {
+        return $this->hasMany(SalesOrderQuantity::class, 'sales_order_recipe_id', '');
+    }
+
 }

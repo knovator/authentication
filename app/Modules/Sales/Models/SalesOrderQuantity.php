@@ -15,6 +15,8 @@ class SalesOrderQuantity extends Model
 
     use SoftDeletes;
 
+    public $timestamps = false;
+
     protected $table = 'sales_orders_quantities';
 
     protected $fillable = [
