@@ -2,13 +2,16 @@
 
 namespace App;
 
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use \Knovators\Authentication\Models\User as Authenticatable;
+use Knovators\Media\Models\Media;
 
+/**
+ * Class User
+ * @package App
+ */
 class User extends Authenticatable
 {
-    use Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -16,24 +19,44 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'first_name',
+        'last_name',
+        'slug',
+        'is_active',
+        'email',
+        'email_verification_key',
+        'email_verified',
+        'password',
+        'phone',
+        'created_by',
+        'deleted_by',
+        'deleted_at',
+        'image_id'
     ];
-
     /**
      * The attributes that should be hidden for arrays.
      *
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password',
+        'remember_token',
+        'deleted_at',
+        'created_by',
+        'updated_by',
+        'deleted_by'
     ];
 
     /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
+     * @return BelongsTo
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
+    public function image() {
+        return $this->belongsTo(Media::class, 'image_id', 'id')->select([
+            'id',
+            'name',
+            'type',
+            'mime_type',
+            'uri'
+        ]);
+    }
 }

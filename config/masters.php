@@ -1,9 +1,11 @@
 <?php
 
+use App\Models\Master;
+
 return [
 
 
-    'model' => Knovators\Masters\Models\Master::class,
+    'model' => Master::class,
 
     'resource' => Knovators\Masters\Http\Resources\Master::class,
 
@@ -14,7 +16,7 @@ return [
             'prefix' => 'api/v1/admin',
 
             'middleware' => env('MASTER_MIDDLEWARE') ? explode(',',
-                env('MASTER_MIDDLEWARE')) : ['api'],
+                env('MASTER_MIDDLEWARE')) : ['api', 'auth_active'],
         ],
 
         'client_attributes' => [
@@ -28,6 +30,9 @@ return [
     ],
 
 
-    'delete_relations' => []
+    'delete_relations' => [
+        'threadColors',
+        'childMasters'
+    ]
 
 ];

@@ -13,6 +13,7 @@
         "barryvdh/laravel-cors": "^0.11.3",
         "caffeinated/modules": "5.1.*",
         "doctrine/dbal": "^2.9",
+        "dougsisk/laravel-country-state": "^2.1",
         "fideloper/proxy": "^4.0",
         "knovators/authentication": "1.*",
         "knovators/httplogger": "1.0.*",
@@ -48,23 +49,23 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "http://git.knovator.in/knovators/logger.git"
+            "url": "git@git.knovator.in:knovators/logger.git"
         },
         {
             "type": "vcs",
-            "url": "http://git.knovator.in/knovators/authentication.git"
+            "url": "git@git.knovator.in:knovators/authentication.git"
         },
         {
             "type": "vcs",
-            "url": "http://git.knovator.in/knovators/media.git"
+            "url": "git@git.knovator.in:knovators/media.git"
         },
         {
             "type": "vcs",
-            "url": "http://git.knovator.in/knovators/support.git"
+            "url": "git@git.knovator.in:knovators/support.git"
         },
         {
             "type": "vcs",
-            "url": "http://git.knovator.in/knovators/master.git"
+            "url": "git@git.knovator.in:knovators/master.git"
         }
     ],
     "autoload": {
