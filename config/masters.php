@@ -32,7 +32,7 @@ return [
 
     'delete_relations' => [
         'threadColors',
-        'threadColors'
+        'childMasters'
     ]
 
 ];
