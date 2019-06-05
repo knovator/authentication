@@ -98,6 +98,7 @@ class DesignController extends Controller
             $this->storeDesignDetails($design, $input);
             DB::commit();
             $design->fresh();
+
             return $this->sendResponse($this->makeResource($design->load('detail')),
                 __('messages.updated', ['module' => 'Design']),
                 HTTPCode::OK);

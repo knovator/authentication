@@ -143,7 +143,6 @@ class SalesController extends Controller
                 $threadDetail, $items),
         ]);
 
-
         $salesOrder->orderStocks()->createMany($data);
     }
 
@@ -156,15 +155,5 @@ class SalesController extends Controller
         return $this->masterRepository->findByCode($code)->id;
     }
 
-
-    /**
-     * @param SalesOrder $salesOrder
-     * //     * @return SalesOrderResource
-     */
-//    private function makeResource($salesOrder) {
-//        return new SalesOrderResource($salesOrder);
-//    }
-//
-//
 
 }
