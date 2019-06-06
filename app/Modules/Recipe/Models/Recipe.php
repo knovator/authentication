@@ -41,7 +41,7 @@ class Recipe extends Model
      */
     public function fiddles() {
         return $this->belongsToMany(ThreadColor::class, 'recipes_fiddles', 'recipe_id',
-            'thread_color_id');
+            'thread_color_id')->withPivot('fiddle_no')->orderBy('recipes_fiddles.fiddle_no');
     }
 
 
