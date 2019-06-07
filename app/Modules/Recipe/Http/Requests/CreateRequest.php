@@ -30,11 +30,12 @@ class CreateRequest extends FormRequest
      */
     public function rules() {
         return [
-            'name'               => 'required|string|max:60',
-            'total_fiddles'      => 'required|integer',
-            'is_active'          => 'required|boolean',
-            'thread_color_ids'   => 'required|array',
-            'thread_color_ids.*' => 'required|exists:threads_colors,id',
+            'name'                               => 'required|string|max:60',
+            'total_fiddles'                      => 'required|integer',
+            'is_active'                          => 'required|boolean',
+            'thread_color_ids'                   => 'required|array',
+            'thread_color_ids.*.thread_color_id' => 'required|integer',
+            'thread_color_ids.*.fiddle_no'       => 'required|integer',
 
         ];
     }

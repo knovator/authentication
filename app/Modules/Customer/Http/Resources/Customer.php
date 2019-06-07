@@ -27,7 +27,8 @@ class Customer extends JsonResource
             'phone'      => $this->phone,
             'is_active'  => $this->is_active,
             'gst_no'     => $this->gst_no,
-            'address'    => $this->city_name,
+            'address'    => $this->address,
+            'city_name'  => $this->city_name,
             'state'      => $this->whenLoaded('state')
         ];
     }
