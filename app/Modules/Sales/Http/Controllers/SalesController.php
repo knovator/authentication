@@ -147,7 +147,6 @@ class SalesController extends Controller
         $input,
         $designDetail
     ) {
-
         foreach ($input['order_recipes'] as $items) {
 
             $recipeId = isset($items['id']) ? $items['id'] : null;
@@ -165,7 +164,6 @@ class SalesController extends Controller
         if (isset($input['removed_order_recipes_id']) && !empty($input['removed_order_recipes_id'])) {
             $this->destroyOrderRecipes($input['removed_order_recipes_id']);
         }
-
     }
 
 
