@@ -151,7 +151,8 @@ class SalesController extends Controller
 
             $orderRecipeId = isset($items['id']) ? $items['id'] : null;
 
-            $orderRecipe = $salesOrder->orderRecipes()->updateOrCreate(['id' => $orderRecipeId], $items);
+            $orderRecipe = $salesOrder->orderRecipes()
+                                      ->updateOrCreate(['id' => $orderRecipeId], $items);
 
             $items['status_id'] = $salesOrder->id;
             /** @var SalesOrderRecipe $orderRecipe */
