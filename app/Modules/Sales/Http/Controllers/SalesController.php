@@ -12,6 +12,7 @@ use App\Modules\Sales\Models\RecipePartialOrder;
 use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Sales\Models\SalesOrderRecipe;
 use App\Modules\Sales\Repositories\RecipePartialRepository;
+use App\Modules\Sales\Repositories\SalesRecipeQuantityRepository;
 use App\Modules\Sales\Repositories\SalesRecipeRepository;
 use App\Modules\Sales\Repositories\SalesOrderRepository;
 use App\Modules\Stock\Repositories\StockRepository;
@@ -43,8 +44,6 @@ class SalesController extends Controller
 
     protected $designDetailRepository;
 
-    protected $salesRecipeRepository;
-
     protected $recipePartialOrderRepo;
 
 
@@ -53,20 +52,17 @@ class SalesController extends Controller
      * @param SalesOrderRepository    $salesOrderRepository
      * @param MasterRepository        $masterRepository
      * @param DesignDetailRepository  $designDetailRepository
-     * @param SalesRecipeRepository   $salesRecipeRepository
      * @param RecipePartialRepository $recipePartialOrderRepository
      */
     public function __construct(
         SalesOrderRepository $salesOrderRepository,
         MasterRepository $masterRepository,
         DesignDetailRepository $designDetailRepository,
-        SalesRecipeRepository $salesRecipeRepository,
         RecipePartialRepository $recipePartialOrderRepository
     ) {
         $this->salesOrderRepository = $salesOrderRepository;
         $this->masterRepository = $masterRepository;
         $this->designDetailRepository = $designDetailRepository;
-        $this->salesRecipeRepository = $salesRecipeRepository;
         $this->recipePartialOrderRepo = $recipePartialOrderRepository;
     }
 
@@ -124,7 +120,7 @@ class SalesController extends Controller
             DB::beginTransaction();
             $salesOrder->update($input);
             $salesOrder->fresh();
-            $this->createOrUpdateSalesDetails($salesOrder, $input, true);
+            $this->createOrUpdateSalesDetails($salesOrder, $input);
             DB::commit();
 
             return $this->sendResponse($salesOrder,
@@ -166,7 +162,6 @@ class SalesController extends Controller
             $this->storeRecipeOrderQuantities($salesOrder, $orderRecipe, $partialOrder, $items);
         }
 
-
         if (isset($input['removed_order_recipes_id']) && !empty($input['removed_order_recipes_id'])) {
             $this->destroyOrderRecipes($input['removed_order_recipes_id']);
         }
@@ -180,14 +175,19 @@ class SalesController extends Controller
      */
     private function destroyOrderRecipes($orderRecipeIds) {
 
+        (new SalesRecipeQuantityRepository(new Container()))->deleteWhere(['sales_order_recipe_id' => $orderRecipeIds]);
+
         $partialOrderIds = $this->recipePartialOrderRepo->makeModel()
                                                         ->whereIn('sales_order_recipe_id',
                                                             $orderRecipeIds)
                                                         ->pluck()->toArray();
 
-
-
         (new StockRepository(new Container()))->deleteWhere(['partial_order_id' => $partialOrderIds]);
+
+        $this->recipePartialOrderRepo->deleteWhere(['id' => $partialOrderIds]);
+
+        (new SalesRecipeRepository(new Container()))->deleteWhere(['id' => $orderRecipeIds]);
+
     }
 
     /**
