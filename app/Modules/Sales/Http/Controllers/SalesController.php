@@ -149,11 +149,11 @@ class SalesController extends Controller
     ) {
         foreach ($input['order_recipes'] as $items) {
 
-            $recipeId = isset($items['id']) ? $items['id'] : null;
+            $orderRecipeId = isset($items['id']) ? $items['id'] : null;
 
-            $orderRecipe = $salesOrder->orderRecipes()->updateOrCreate(['id' => $recipeId], $items);
+            $orderRecipe = $salesOrder->orderRecipes()->updateOrCreate(['id' => $orderRecipeId], $items);
 
-            $items['status_id'] = $input['status_id'];
+            $items['status_id'] = $salesOrder->id;
             /** @var SalesOrderRecipe $orderRecipe */
             $partialOrder = $orderRecipe->partialOrders()->updateOrCreate([], $items);
             /** @var RecipePartialOrder $partialOrder */

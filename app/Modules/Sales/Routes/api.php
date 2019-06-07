@@ -12,4 +12,4 @@ Route::group([
              ->name('sales.change-status');
     });
 
-Route::model('sales', SalesOrder::class);
+Route::model('sale', SalesOrder::class);
