@@ -37,6 +37,7 @@ class UpdateRequest extends FormRequest
             'design_id'                                          => 'required|exists:designs,id',
             'design_beam_id'                                     => 'required|exists:design_beams,id',
             'order_recipes'                                      => 'required|array',
+            'order_recipes.*.id'                                 => 'sometimes|required|integer',
             'order_recipes.*.recipe_id'                          => 'required|integer',
             'order_recipes.*.pcs'                                => 'required|integer',
             'order_recipes.*.meters'                             => 'required|integer',
@@ -46,7 +47,7 @@ class UpdateRequest extends FormRequest
             'order_recipes.*.quantity_details.*.fiddle_no'       => 'required|integer',
             'order_recipes.*.quantity_details.*.denier'          => 'required|integer',
             'order_recipes.*.quantity_details.*.pick'            => 'required|integer',
-            'removed_order_recipes_id'                           => 'required|array',
+            'removed_order_recipes_id'                           => 'array',
         ];
     }
 

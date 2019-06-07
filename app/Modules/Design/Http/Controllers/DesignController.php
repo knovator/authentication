@@ -143,10 +143,7 @@ class DesignController extends Controller
      */
     private function storeDesignBeams(Design $design, $input) {
         foreach ($input['design_beams'] as $beam) {
-            $beamId = null;
-            if (isset($beam['id'])) {
-                $beamId = $beam['id'];
-            }
+            $beamId = isset($beam['id']) ? $beam['id'] : null;
             $designBeam = $design->beams()
                                  ->updateOrCreate(['id' => $beamId], [
                                      'thread_color_id' =>

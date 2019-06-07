@@ -39,7 +39,7 @@ class SalesOrderRecipe extends Model
     /**
      * @return HasMany
      */
-    public function items() {
+    public function quantities() {
         return $this->hasMany(SalesOrderQuantity::class, 'sales_order_recipe_id', '');
     }
 

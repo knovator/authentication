@@ -11,16 +11,21 @@ use App\Modules\Sales\Http\Requests\UpdateRequest;
 use App\Modules\Sales\Models\RecipePartialOrder;
 use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Sales\Models\SalesOrderRecipe;
+use App\Modules\Sales\Repositories\RecipePartialRepository;
+use App\Modules\Sales\Repositories\SalesRecipeRepository;
 use App\Modules\Sales\Repositories\SalesOrderRepository;
+use App\Modules\Stock\Repositories\StockRepository;
 use App\Modules\Thread\Constants\ThreadType;
 use App\Support\Formula;
 use App\Support\UniqueIdGenerator;
 use DB;
 use Exception;
+use Illuminate\Container\Container;
 use Knovators\Masters\Repository\MasterRepository;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;
+use Prettus\Repository\Exceptions\RepositoryException;
 use function Zend\Diactoros\normalizeUploadedFiles;
 
 /**
@@ -38,20 +43,31 @@ class SalesController extends Controller
 
     protected $designDetailRepository;
 
+    protected $salesRecipeRepository;
+
+    protected $recipePartialOrderRepo;
+
+
     /**
      * SalesController constructor.
-     * @param SalesOrderRepository   $salesOrderRepository
-     * @param MasterRepository       $masterRepository
-     * @param DesignDetailRepository $designDetailRepository
+     * @param SalesOrderRepository    $salesOrderRepository
+     * @param MasterRepository        $masterRepository
+     * @param DesignDetailRepository  $designDetailRepository
+     * @param SalesRecipeRepository   $salesRecipeRepository
+     * @param RecipePartialRepository $recipePartialOrderRepository
      */
     public function __construct(
         SalesOrderRepository $salesOrderRepository,
         MasterRepository $masterRepository,
-        DesignDetailRepository $designDetailRepository
+        DesignDetailRepository $designDetailRepository,
+        SalesRecipeRepository $salesRecipeRepository,
+        RecipePartialRepository $recipePartialOrderRepository
     ) {
         $this->salesOrderRepository = $salesOrderRepository;
         $this->masterRepository = $masterRepository;
         $this->designDetailRepository = $designDetailRepository;
+        $this->salesRecipeRepository = $salesRecipeRepository;
+        $this->recipePartialOrderRepo = $recipePartialOrderRepository;
     }
 
 
@@ -67,10 +83,7 @@ class SalesController extends Controller
             $input['order_no'] = $this->generateUniqueId(GenerateNumber::SALES);
             $input['status_id'] = $this->getMasterByCode(MasterConstant::SO_PENDING);
             $salesOrder = $this->salesOrderRepository->create($input);
-            $designDetail = $this->designDetailRepository->findBy('design_id',
-                $input['design_id'], ['panno', 'additional_panno', 'reed']);
-            $salesOrder->load('designBeam.threadColor.thread');
-            $this->storeSalesOrderRecipes($salesOrder, $input, $designDetail);
+            $this->createOrUpdateSalesDetails($salesOrder, $input);
             DB::commit();
 
             return $this->sendResponse($salesOrder,
@@ -87,27 +100,34 @@ class SalesController extends Controller
 
 
     /**
+     * @param SalesOrder $salesOrder
+     * @param            $input
+     * @throws RepositoryException
+     */
+    private function createOrUpdateSalesDetails(SalesOrder $salesOrder, $input) {
+        $designDetail = $this->designDetailRepository->findBy('design_id',
+            $input['design_id'], ['panno', 'additional_panno', 'reed']);
+        $salesOrder->load('designBeam.threadColor.thread');
+        $this->storeSalesOrderRecipes($salesOrder, $input, $designDetail);
+    }
+
+
+    /**
      * @param SalesOrder    $salesOrder
      * @param UpdateRequest $request
      * @return mixed
+     * @throws Exception
      */
     public function update(SalesOrder $salesOrder, UpdateRequest $request) {
         $input = $request->all();
         try {
             DB::beginTransaction();
             $salesOrder->update($input);
-
-
-
-
-
-
-
-
-            DB::commit();
             $salesOrder->fresh();
+            $this->createOrUpdateSalesDetails($salesOrder, $input, true);
+            DB::commit();
 
-            return $this->sendResponse(null,
+            return $this->sendResponse($salesOrder,
                 __('messages.updated', ['module' => 'Sales']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -124,19 +144,50 @@ class SalesController extends Controller
      * @param SalesOrder $salesOrder
      * @param            $input
      * @param            $designDetail
+     * @throws RepositoryException
      */
-    private function storeSalesOrderRecipes(SalesOrder $salesOrder, $input, $designDetail) {
+    private function storeSalesOrderRecipes(
+        SalesOrder $salesOrder,
+        $input,
+        $designDetail
+    ) {
+
         foreach ($input['order_recipes'] as $items) {
 
-            $orderRecipe = $salesOrder->orderRecipes()->create($items);
+            $recipeId = isset($items['id']) ? $items['id'] : null;
+
+            $orderRecipe = $salesOrder->orderRecipes()->updateOrCreate(['id' => $recipeId], $items);
 
             $items['status_id'] = $input['status_id'];
             /** @var SalesOrderRecipe $orderRecipe */
-            $partialOrder = $orderRecipe->partialOrders()->create($items);
+            $partialOrder = $orderRecipe->partialOrders()->updateOrCreate([], $items);
             /** @var RecipePartialOrder $partialOrder */
             $items['designDetail'] = $designDetail;
             $this->storeRecipeOrderQuantities($salesOrder, $orderRecipe, $partialOrder, $items);
         }
+
+
+        if (isset($input['removed_order_recipes_id']) && !empty($input['removed_order_recipes_id'])) {
+            $this->destroyOrderRecipes($input['removed_order_recipes_id']);
+        }
+
+    }
+
+
+    /**
+     * @param $orderRecipeIds
+     * @throws RepositoryException
+     */
+    private function destroyOrderRecipes($orderRecipeIds) {
+
+        $partialOrderIds = $this->recipePartialOrderRepo->makeModel()
+                                                        ->whereIn('sales_order_recipe_id',
+                                                            $orderRecipeIds)
+                                                        ->pluck()->toArray();
+
+
+
+        (new StockRepository(new Container()))->deleteWhere(['partial_order_id' => $partialOrderIds]);
     }
 
     /**
@@ -168,7 +219,7 @@ class SalesController extends Controller
             ];
         }
 
-        $orderRecipe->items()->createMany($data);
+        $orderRecipe->quantities()->createMany($data);
 
         $threadDetail['denier'] = $salesOrder->designBeam->threadColor->thread->denier;
         // storing warp stock
