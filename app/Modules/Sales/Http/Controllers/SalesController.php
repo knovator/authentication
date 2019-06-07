@@ -7,6 +7,7 @@ use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
 use App\Modules\Design\Repositories\DesignDetailRepository;
 use App\Modules\Sales\Http\Requests\CreateRequest;
+use App\Modules\Sales\Http\Requests\UpdateRequest;
 use App\Modules\Sales\Models\RecipePartialOrder;
 use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Sales\Models\SalesOrderRecipe;
@@ -20,6 +21,7 @@ use Knovators\Masters\Repository\MasterRepository;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;
+use function Zend\Diactoros\normalizeUploadedFiles;
 
 /**
  * Class SalesController
@@ -83,6 +85,41 @@ class SalesController extends Controller
         }
     }
 
+
+    /**
+     * @param SalesOrder    $salesOrder
+     * @param UpdateRequest $request
+     * @return mixed
+     */
+    public function update(SalesOrder $salesOrder, UpdateRequest $request) {
+        $input = $request->all();
+        try {
+            DB::beginTransaction();
+            $salesOrder->update($input);
+
+
+
+
+
+
+
+
+            DB::commit();
+            $salesOrder->fresh();
+
+            return $this->sendResponse(null,
+                __('messages.updated', ['module' => 'Sales']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            DB::rollBack();
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
+
+
     /**
      * @param SalesOrder $salesOrder
      * @param            $input
@@ -90,7 +127,9 @@ class SalesController extends Controller
      */
     private function storeSalesOrderRecipes(SalesOrder $salesOrder, $input, $designDetail) {
         foreach ($input['order_recipes'] as $items) {
+
             $orderRecipe = $salesOrder->orderRecipes()->create($items);
+
             $items['status_id'] = $input['status_id'];
             /** @var SalesOrderRecipe $orderRecipe */
             $partialOrder = $orderRecipe->partialOrders()->create($items);
