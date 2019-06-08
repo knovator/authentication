@@ -2,7 +2,11 @@
 
 namespace App\Modules\Sales\Models;
 
-
+use App\Models\Master;
+use App\Modules\Customer\Models\Customer;
+use App\Modules\Design\Models\Design;
+use App\Modules\Design\Models\DesignBeam;
+use App\Modules\Stock\Models\Stock;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Knovators\Support\Traits\HasModelEvent;
@@ -14,7 +18,7 @@ use Knovators\Support\Traits\HasModelEvent;
 class SalesOrder extends Model
 {
 
-    use SoftDeletes,HasModelEvent;
+    use SoftDeletes, HasModelEvent;
 
     protected $table = 'sales_orders';
 
@@ -22,7 +26,7 @@ class SalesOrder extends Model
         'order_no',
         'order_date',
         'delivery_date',
-        'bill_no',
+        'cost_per_meter',
         'design_id',
         'design_beam_id',
         'customer_id',
@@ -30,5 +34,77 @@ class SalesOrder extends Model
         'created_by',
         'deleted_by',
     ];
+
+    protected $hidden = [
+        'created_by',
+        'deleted_by',
+        'updated_at',
+        'deleted_at',
+    ];
+
+    public static function boot() {
+        parent::boot();
+        self::creatingEvent();
+        static::deleting(function (SalesOrder $salesOrder) {
+            $salesOrder->orderRecipes->each(function (SalesOrderRecipe $orderRecipe) {
+                $orderRecipe->partialOrders()->delete();
+            });
+            $salesOrder->orderRecipes()->delete();
+            $salesOrder->orderStocks()->delete();
+        });
+        self::deletedEvent();
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function orderRecipes() {
+        return $this->hasMany(SalesOrderRecipe::class, 'sales_order_id',
+            'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function status() {
+        return $this->belongsTo(Master::class, 'status_id',
+            'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function design() {
+        return $this->belongsTo(Design::class, 'design_id',
+            'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function customer() {
+        return $this->belongsTo(Customer::class, 'customer_id',
+            'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function designBeam() {
+        return $this->belongsTo(DesignBeam::class, 'design_beam_id',
+            'id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function orderStocks() {
+        return $this->morphMany(Stock::class, 'order');
+    }
 
 }

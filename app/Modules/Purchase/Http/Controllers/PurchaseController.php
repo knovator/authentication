@@ -166,6 +166,7 @@ class PurchaseController extends Controller
     private function updatePOPENDINGStatus(PurchaseOrder $purchaseOrder, $input) {
         $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::PO_PENDING)->id;
         $this->storeStockOrders($purchaseOrder, $input);
+
         return $this->updateStatus($purchaseOrder, $input);
 
     }

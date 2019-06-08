@@ -98,6 +98,7 @@ class DesignController extends Controller
             $this->storeDesignDetails($design, $input);
             DB::commit();
             $design->fresh();
+
             return $this->sendResponse($this->makeResource($design->load('detail')),
                 __('messages.updated', ['module' => 'Design']),
                 HTTPCode::OK);
@@ -142,10 +143,7 @@ class DesignController extends Controller
      */
     private function storeDesignBeams(Design $design, $input) {
         foreach ($input['design_beams'] as $beam) {
-            $beamId = null;
-            if (isset($beam['id'])) {
-                $beamId = $beam['id'];
-            }
+            $beamId = isset($beam['id']) ? $beam['id'] : null;
             $designBeam = $design->beams()
                                  ->updateOrCreate(['id' => $beamId], [
                                      'thread_color_id' =>
@@ -226,6 +224,8 @@ class DesignController extends Controller
         $design->load([
             'detail',
             'fiddlePicks',
+            'beams.threadColor.thread',
+            'beams.threadColor.color',
             'beams.recipes.fiddles.thread',
             'beams.recipes.fiddles.color',
             'images.file',

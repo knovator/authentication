@@ -46,6 +46,10 @@ class UniqueIdSeeder extends Seeder
                 'code'   => 'PURCHASE',
                 'prefix' => 'PO'
             ],
+            2 => [
+                'code'   => 'SALES',
+                'prefix' => 'SO'
+            ],
         ];
     }
 }
