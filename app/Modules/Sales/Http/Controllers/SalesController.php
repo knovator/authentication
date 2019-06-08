@@ -331,8 +331,4 @@ class SalesController extends Controller
 
     }
 
-
-
-
-
 }
