@@ -4,7 +4,9 @@ namespace App\Modules\Sales\Http\Requests;
 
 use App\Constants\Master as MasterConstant;
 use App\Support\FetchMaster;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Knovators\Support\Traits\APIResponse;
 
 /**
@@ -32,7 +34,6 @@ class StatusRequest extends FormRequest
      */
     public function rules() {
 
-
         switch ($this->code) {
 
             case MasterConstant::SO_PENDING:
@@ -45,8 +46,13 @@ class StatusRequest extends FormRequest
 
                 return $this->customValidation($currentStatusId);
 
-            case MasterConstant::SO_DELIVERED:
+            case MasterConstant::SO_MANUFACTURING:
                 $currentStatusId = $this->retrieveMasterId(MasterConstant::SO_PENDING);
+
+                return $this->customValidation($currentStatusId);
+
+            case MasterConstant::SO_DELIVERED:
+                $currentStatusId = $this->retrieveMasterId(MasterConstant::SO_MANUFACTURING);
 
                 return $this->customValidation($currentStatusId);
 
@@ -58,16 +64,19 @@ class StatusRequest extends FormRequest
     }
 
 
-
-
-
     /**
      * @param $currentStatusId
      * @return array
      */
     private function customValidation($currentStatusId) {
+        $currentStatusIds = is_array($currentStatusId) ? $currentStatusId : [$currentStatusId];
+
         return [
-            'sales_order_id' => 'required|exists:sales_orders,id,status_id,' . $currentStatusId
+            'required',
+            Rule::exists('sales_orders', 'id')->where(function ($query) use ($currentStatusIds) {
+                /** @var Builder $query */
+                $query->whereIn('status_id', $currentStatusIds);
+            }),
         ];
     }
 
