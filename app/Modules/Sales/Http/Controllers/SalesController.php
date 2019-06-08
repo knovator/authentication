@@ -151,24 +151,19 @@ class SalesController extends Controller
         $update
     ) {
         foreach ($input['order_recipes'] as $items) {
-
             $orderRecipeId = isset($items['id']) ? $items['id'] : null;
-
             $orderRecipe = $salesOrder->orderRecipes()
                                       ->updateOrCreate(['id' => $orderRecipeId], $items);
-
             $items['status_id'] = $salesOrder->status_id;
             /** @var SalesOrderRecipe $orderRecipe */
             $partialOrder = $orderRecipe->partialOrders()->updateOrCreate([], $items);
             /** @var RecipePartialOrder $partialOrder */
             $items['designDetail'] = $designDetail;
-
             if ($update) {
                 // remove old quantities and stock results
                 $orderRecipe->quantities()->delete();
                 $salesOrder->orderStocks()->delete();
             }
-
             $this->storeRecipeOrderQuantities($salesOrder, $orderRecipe, $partialOrder, $items);
         }
 

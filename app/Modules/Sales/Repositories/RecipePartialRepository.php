@@ -46,8 +46,7 @@ class RecipePartialRepository extends BaseRepository
      */
     public function findIdByRecipeIds($orderRecipeIds) {
         return $this->model->whereIn('sales_order_recipe_id',
-            $orderRecipeIds)
-                           ->pluck()->toArray();
+            $orderRecipeIds)->pluck('id')->toArray();
     }
 
 
