@@ -120,9 +120,11 @@ class SalesController extends Controller
         $input = $request->all();
         try {
             DB::beginTransaction();
+            DB::enableQueryLog();
             $salesOrder->update($input);
             $salesOrder->fresh();
             $this->createOrUpdateSalesDetails($salesOrder, $input, true);
+            dd(DB::getQueryLog());
             DB::commit();
 
             return $this->sendResponse($salesOrder,
@@ -159,12 +161,12 @@ class SalesController extends Controller
             $partialOrder = $orderRecipe->partialOrders()->updateOrCreate([], $items);
             /** @var RecipePartialOrder $partialOrder */
             $items['designDetail'] = $designDetail;
+
             if ($update) {
-                // remove old quantities and stock results
-                $orderRecipe->quantities()->delete();
+                // remove old stock results
                 $salesOrder->orderStocks()->delete();
             }
-            $this->storeRecipeOrderQuantities($salesOrder, $orderRecipe, $partialOrder, $items);
+            $this->storeRecipeOrderQuantities($salesOrder, $partialOrder, $items);
         }
 
         if ($update && isset($input['removed_order_recipes_id']) && !empty($input['removed_order_recipes_id'])) {
@@ -177,8 +179,6 @@ class SalesController extends Controller
      * @param $orderRecipeIds
      */
     private function destroyOrderRecipes($orderRecipeIds) {
-        // remove sales recipes quantity
-        (new SalesRecipeQuantityRepository(new Container()))->removeByOrderRecipesId($orderRecipeIds);
         // get recipes default partial order
         $partialOrderIds = $this->recipePartialOrderRepo->findIdByRecipeIds($orderRecipeIds);
         // remove sales partial order stocks
@@ -192,18 +192,14 @@ class SalesController extends Controller
 
     /**
      * @param SalesOrder         $salesOrder
-     * @param SalesOrderRecipe   $orderRecipe
      * @param RecipePartialOrder $partialOrder
      * @param                    $items
      */
     private function storeRecipeOrderQuantities(
         SalesOrder $salesOrder,
-        SalesOrderRecipe $orderRecipe,
         RecipePartialOrder $partialOrder,
         $items
     ) {
-
-
         $formula = Formula::getInstance();
         $data = [];
         // storing weft stock
@@ -211,24 +207,21 @@ class SalesController extends Controller
 
             $data[$key] = [
                 'partial_order_id' => $partialOrder->id,
-                'fiddle_no'        => $quantityDetails['fiddle_no'],
-                'thread_color_id'  => $quantityDetails['thread_color_id'],
                 'product_id'       => $quantityDetails['thread_color_id'],
                 'product_type'     => 'thread_color',
+                'status_id'        => $items['status_id'],
                 'kg_qty'           => $formula->getTotalKgQty(ThreadType::WEFT,
                     $quantityDetails, $items),
-                'status_id'        => $items['status_id'],
             ];
         }
-        $orderRecipe->quantities()->createMany($data);
 
         $threadDetail['denier'] = $salesOrder->designBeam->threadColor->thread->denier;
         // storing warp stock
         array_push($data, [
+            'partial_order_id' => $partialOrder->id,
             'product_id'       => $salesOrder->designBeam->thread_color_id,
             'product_type'     => 'thread_color',
             'status_id'        => $items['status_id'],
-            'partial_order_id' => $partialOrder->id,
             'kg_qty'           => $formula->getTotalKgQty(ThreadType::WARP,
                 $threadDetail, $items),
         ]);
