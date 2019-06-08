@@ -3,6 +3,7 @@
 namespace App\Modules\Sales\Models;
 
 use App\Models\Master;
+use App\Modules\Design\Models\Design;
 use App\Modules\Design\Models\DesignBeam;
 use App\Modules\Stock\Models\Stock;
 use Illuminate\Database\Eloquent\Model;
@@ -68,6 +69,15 @@ class SalesOrder extends Model
      */
     public function status() {
         return $this->belongsTo(Master::class, 'status_id',
+            'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function design() {
+        return $this->belongsTo(Design::class, 'design_id',
             'id');
     }
 

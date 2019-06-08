@@ -3,6 +3,7 @@
 namespace App\Modules\Design\Http\Resources;
 
 use App\Modules\Recipe\Http\Resources\Recipe;
+use App\Modules\Thread\Http\Resources\ThreadColor;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -21,8 +22,9 @@ class DesignBeam extends JsonResource
      */
     public function toArray($request) {
         return [
-            'id'      => $this->id,
-            'recipes' => Recipe::collection($this->whenLoaded('recipes'))
+            'id'          => $this->id,
+            'threadColor' => new ThreadColor($this->whenLoaded('threadColor')),
+            'recipes'     => Recipe::collection($this->whenLoaded('recipes'))
         ];
     }
 }

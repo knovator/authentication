@@ -8,13 +8,13 @@ use App\Http\Controllers\Controller;
 use App\Modules\Design\Repositories\DesignDetailRepository;
 use App\Modules\Sales\Http\Requests\CreateRequest;
 use App\Modules\Sales\Http\Requests\UpdateRequest;
+use App\Modules\Sales\Http\Resources\SalesOrder as SalesOrderResource;
 use App\Modules\Sales\Models\RecipePartialOrder;
 use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Sales\Models\SalesOrderRecipe;
 use App\Modules\Sales\Repositories\RecipePartialRepository;
-use App\Modules\Sales\Repositories\SalesRecipeQuantityRepository;
-use App\Modules\Sales\Repositories\SalesRecipeRepository;
 use App\Modules\Sales\Repositories\SalesOrderRepository;
+use App\Modules\Sales\Repositories\SalesRecipeRepository;
 use App\Modules\Stock\Repositories\StockRepository;
 use App\Modules\Thread\Constants\ThreadType;
 use App\Support\Formula;
@@ -22,14 +22,12 @@ use App\Support\UniqueIdGenerator;
 use DB;
 use Exception;
 use Illuminate\Container\Container;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Knovators\Masters\Repository\MasterRepository;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;
 use Prettus\Repository\Exceptions\RepositoryException;
-use function Zend\Diactoros\normalizeUploadedFiles;
 
 /**
  * Class SalesController
@@ -84,7 +82,7 @@ class SalesController extends Controller
             $this->createOrUpdateSalesDetails($salesOrder, $input, false);
             DB::commit();
 
-            return $this->sendResponse($salesOrder,
+            return $this->sendResponse($this->makeResource($salesOrder),
                 __('messages.created', ['module' => 'Sales Order']),
                 HTTPCode::CREATED);
         } catch (Exception $exception) {
@@ -126,7 +124,7 @@ class SalesController extends Controller
             $this->createOrUpdateSalesDetails($salesOrder, $input, true);
             DB::commit();
 
-            return $this->sendResponse($salesOrder,
+            return $this->sendResponse($this->makeResource($salesOrder),
                 __('messages.updated', ['module' => 'Sales']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -250,7 +248,7 @@ class SalesController extends Controller
                 return $this->destroyModelObject([], $salesOrder, 'Sales Order');
             }
 
-            return $this->sendResponse(null,
+            return $this->sendResponse($this->makeResource($salesOrder),
                 __('messages.not_delete_sales_order', ['status' => $salesOrder->status->name]),
                 HTTPCode::UNPROCESSABLE_ENTITY);
 
@@ -269,7 +267,12 @@ class SalesController extends Controller
      */
     public function show(SalesOrder $salesOrder) {
         $salesOrder->load([
-
+            'status',
+            'design',
+            'designBeam.threadColor.thread',
+            'designBeam.threadColor.color',
+            'orderRecipes.recipe.fiddles.thread',
+            'orderRecipes.recipe.fiddles.color'
         ]);
 
         return $this->sendResponse($this->makeResource($salesOrder),

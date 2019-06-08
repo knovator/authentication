@@ -3,6 +3,7 @@
 namespace App\Modules\Sales\Models;
 
 
+use App\Modules\Recipe\Models\Recipe;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -33,6 +34,14 @@ class SalesOrderRecipe extends Model
      */
     public function partialOrders() {
         return $this->hasMany(RecipePartialOrder::class, 'sales_order_recipe_id', 'id');
+    }
+
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function recipe() {
+        return $this->belongsTo(Recipe::class, 'recipe_id', 'id');
     }
 
 
