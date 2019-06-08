@@ -283,8 +283,6 @@ class SalesController extends Controller
     }
 
 
-
-
     /**
      * @param $purchaseOrder
      * @return SalesOrderResource
