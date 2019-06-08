@@ -21,11 +21,12 @@ class SalesOrderRecipe extends JsonResource
      */
     public function toArray($request) {
         return [
-            'id'           => $this->id,
-            'pcs'          => $this->pcs,
-            'meters'       => $this->meters,
-            'total_meters' => $this->total_meters,
-            'recipe'       => new RecipeResource($this->whenLoaded('recipe')),
+            'id'            => $this->id,
+            'pcs'           => $this->pcs,
+            'meters'        => $this->meters,
+            'total_meters'  => $this->total_meters,
+            'recipe'        => new RecipeResource($this->whenLoaded('recipe')),
+            'partialOrders' => RecipePartialOrder::collection($this->whenLoaded('partialOrders')),
 
         ];
     }

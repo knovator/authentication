@@ -271,6 +271,7 @@ class SalesController extends Controller
             'design',
             'designBeam.threadColor.thread',
             'designBeam.threadColor.color',
+            'orderRecipes',
             'orderRecipes.recipe.fiddles.thread',
             'orderRecipes.recipe.fiddles.color'
         ]);
