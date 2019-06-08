@@ -263,4 +263,27 @@ class SalesController extends Controller
     }
 
 
+    /**
+     * @param SalesOrder $salesOrder
+     * @return JsonResponse
+     */
+    public function show(SalesOrder $salesOrder) {
+        $salesOrder->load([
+
+        ]);
+
+        return $this->sendResponse($this->makeResource($salesOrder),
+            __('messages.retrieved', ['module' => 'Sales Order']),
+            HTTPCode::OK);
+    }
+
+    /**
+     * @param $purchaseOrder
+     * @return SalesOrderResource
+     */
+    private function makeResource($purchaseOrder) {
+        return new SalesOrderResource($purchaseOrder);
+    }
+
+
 }
