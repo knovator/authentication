@@ -3,6 +3,7 @@
 namespace App\Modules\Sales\Models;
 
 use App\Models\Master;
+use App\Modules\Customer\Models\Customer;
 use App\Modules\Design\Models\Design;
 use App\Modules\Design\Models\DesignBeam;
 use App\Modules\Stock\Models\Stock;
@@ -78,6 +79,15 @@ class SalesOrder extends Model
      */
     public function design() {
         return $this->belongsTo(Design::class, 'design_id',
+            'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function customer() {
+        return $this->belongsTo(Customer::class, 'customer_id',
             'id');
     }
 

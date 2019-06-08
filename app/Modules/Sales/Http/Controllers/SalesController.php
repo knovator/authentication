@@ -267,6 +267,7 @@ class SalesController extends Controller
      */
     public function show(SalesOrder $salesOrder) {
         $salesOrder->load([
+            'customer',
             'status',
             'design',
             'designBeam.threadColor.thread',
@@ -280,6 +281,9 @@ class SalesController extends Controller
             __('messages.retrieved', ['module' => 'Sales Order']),
             HTTPCode::OK);
     }
+
+
+
 
     /**
      * @param $purchaseOrder
