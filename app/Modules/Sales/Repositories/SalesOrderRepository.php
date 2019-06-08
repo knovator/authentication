@@ -29,4 +29,20 @@ class SalesOrderRepository extends BaseRepository
         return SalesOrder::class;
     }
 
+    /**
+     * @return mixed
+     * @throws RepositoryException
+     * @throws \Exception
+     */
+    public function getSalesOrderList() {
+        $this->applyCriteria();
+        $orders = datatables()->of($this->model->with([
+            'customer.state:id,name,code,gst_code',
+            'status:id,name,code'
+        ])->select('sales_orders.*'))->make(true);
+        $this->resetModel();
+
+        return $orders;
+    }
+
 }

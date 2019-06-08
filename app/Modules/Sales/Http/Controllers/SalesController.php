@@ -7,6 +7,7 @@ use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
 use App\Modules\Design\Repositories\DesignDetailRepository;
 use App\Modules\Sales\Http\Requests\CreateRequest;
+use App\Modules\Sales\Http\Requests\StatusRequest;
 use App\Modules\Sales\Http\Requests\UpdateRequest;
 use App\Modules\Sales\Http\Resources\SalesOrder as SalesOrderResource;
 use App\Modules\Sales\Models\RecipePartialOrder;
@@ -28,6 +29,7 @@ use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;
 use Prettus\Repository\Exceptions\RepositoryException;
+use Str;
 
 /**
  * Class SalesController
@@ -284,12 +286,49 @@ class SalesController extends Controller
 
 
     /**
-     * @param $purchaseOrder
-     * @return SalesOrderResource
+     * @return JsonResponse
      */
-    private function makeResource($purchaseOrder) {
-        return new SalesOrderResource($purchaseOrder);
+    public function index() {
+        try {
+            $orders = $this->salesOrderRepository->getSalesOrderList();
+
+            return $this->sendResponse($orders,
+                __('messages.retrieved', ['module' => 'Sales Orders']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
     }
 
+    /**
+     * @param $salesOrder
+     * @return SalesOrderResource
+     */
+    private function makeResource($salesOrder) {
+        return new SalesOrderResource($salesOrder);
+    }
+
+    /**
+     * @param StatusRequest $request
+     * @return JsonResponse
+     */
+    public function changeStatus(StatusRequest $request) {
+        $status = $request->get('code');
+        $method = 'update' . Str::studly($status) . 'Status';
+        try {
+            $salesOrder = $this->salesOrderRepository->find($request->get('sales_order_id'));
+
+            return $this->{$method}($salesOrder, $request->all());
+        } catch (Exception $exception) {
+            Log::error('Unable to find status method: ' . $status);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+
+    }
 
 }

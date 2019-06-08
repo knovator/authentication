@@ -224,6 +224,8 @@ class DesignController extends Controller
         $design->load([
             'detail',
             'fiddlePicks',
+            'beams.threadColor.thread',
+            'beams.threadColor.color',
             'beams.recipes.fiddles.thread',
             'beams.recipes.fiddles.color',
             'images.file',
