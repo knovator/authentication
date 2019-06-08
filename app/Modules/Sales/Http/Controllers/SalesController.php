@@ -120,11 +120,9 @@ class SalesController extends Controller
         $input = $request->all();
         try {
             DB::beginTransaction();
-            DB::enableQueryLog();
             $salesOrder->update($input);
             $salesOrder->fresh();
             $this->createOrUpdateSalesDetails($salesOrder, $input, true);
-            dd(DB::getQueryLog());
             DB::commit();
 
             return $this->sendResponse($salesOrder,
