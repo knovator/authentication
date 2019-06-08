@@ -2,6 +2,7 @@
 
 namespace App\Modules\Sales\Models;
 
+use App\Models\Master;
 use App\Modules\Design\Models\DesignBeam;
 use App\Modules\Stock\Models\Stock;
 use Illuminate\Database\Eloquent\Model;
@@ -39,12 +40,34 @@ class SalesOrder extends Model
         'deleted_at',
     ];
 
+    public static function boot() {
+        parent::boot();
+        self::creatingEvent();
+        static::deleting(function (SalesOrder $salesOrder) {
+            $salesOrder->orderRecipes->each(function (SalesOrderRecipe $orderRecipe) {
+                $orderRecipe->partialOrders()->delete();
+            });
+            $salesOrder->orderRecipes()->delete();
+            $salesOrder->orderStocks()->delete();
+        });
+        self::deletedEvent();
+    }
+
 
     /**
      * @return mixed
      */
     public function orderRecipes() {
         return $this->hasMany(SalesOrderRecipe::class, 'sales_order_id',
+            'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function status() {
+        return $this->belongsTo(Master::class, 'status_id',
             'id');
     }
 

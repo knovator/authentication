@@ -125,10 +125,15 @@ class MasterSeeder extends Seeder
                         'is_active' => true,
                     ],
                     2 => [
+                        'name'      => 'Canceled',
+                        'code'      => 'SO_CANCELED',
+                        'is_active' => true,
+                    ],
+                    3 => [
                         'name'      => 'Delivered',
                         'code'      => 'SO_DELIVERED',
                         'is_active' => true,
-                    ],
+                    ]
                 ]
             ]
         ];

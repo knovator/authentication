@@ -23,6 +23,7 @@ use DB;
 use Exception;
 use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Knovators\Masters\Repository\MasterRepository;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
@@ -234,6 +235,31 @@ class SalesController extends Controller
      */
     private function getMasterByCode($code) {
         return $this->masterRepository->findByCode($code)->id;
+    }
+
+
+    /**
+     * @param SalesOrder $salesOrder
+     * @return JsonResponse
+     */
+    public function destroy(SalesOrder $salesOrder) {
+        try {
+            $salesOrder->load('status');
+            if (($salesOrder->status->code === MasterConstant::SO_PENDING) ||
+                $salesOrder->status->code === MasterConstant::SO_CANCELED) {
+                return $this->destroyModelObject([], $salesOrder, 'Sales Order');
+            }
+
+            return $this->sendResponse(null,
+                __('messages.not_delete_sales_order', ['status' => $salesOrder->status->name]),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
     }
 
 
