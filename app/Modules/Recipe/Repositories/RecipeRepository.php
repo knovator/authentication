@@ -40,10 +40,10 @@ class RecipeRepository extends BaseRepository
      */
     public function getRecipeList() {
         $this->applyCriteria();
-        $recipes = datatables()->of($this->model/*->with([
+        $recipes = datatables()->of($this->model->with([
             'fiddles.thread:id,name,denier,price',
             'fiddles.color:id,name,code'
-        ])*/ ->withCount('designBeams as associated_count'))->make(true);
+        ])->withCount('designBeams as associated_count'))->make(true);
         $this->resetModel();
 
         return $recipes;
