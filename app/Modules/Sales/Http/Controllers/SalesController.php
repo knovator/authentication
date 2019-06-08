@@ -331,4 +331,47 @@ class SalesController extends Controller
 
     }
 
+
+    /**
+     * @param SalesOrder    $salesOrder
+     * @param               $input
+     * @return JsonResponse
+     * @throws Exception
+     */
+    private function updateSOPENDINGStatus(SalesOrder $salesOrder, $input) {
+        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::PO_PENDING)->id;
+
+        $salesOrder->orderStocks()->update(['status_id' => $input['status_id']]);
+
+
+        // update partial order statuses
+
+
+
+        return $this->updateStatus($salesOrder, $input);
+
+    }
+
+
+    /**
+     * @param SalesOrder $salesOrder
+     * @param            $input
+     * @return JsonResponse
+     * @throws Exception
+     */
+    private function updateStatus(SalesOrder $salesOrder, $input) {
+        try {
+            $salesOrder->update($input);
+
+            return $this->sendResponse($this->makeResource($salesOrder->fresh()),
+                __('messages.updated', ['module' => 'Status']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            throw $exception;
+        }
+    }
+
+
 }

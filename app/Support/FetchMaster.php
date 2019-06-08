@@ -32,7 +32,4 @@ trait FetchMaster
     }
 
 
-
-
-
 }
