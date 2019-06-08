@@ -29,4 +29,26 @@ class RecipePartialRepository extends BaseRepository
         return RecipePartialOrder::class;
     }
 
+
+    /**
+     * @param $partialOrderIds
+     * @return mixed
+     */
+    public function removeById($partialOrderIds) {
+        return $this->model->whereIn('id',
+            $partialOrderIds)->delete();
+    }
+
+
+    /**
+     * @param $orderRecipeIds
+     * @return mixed
+     */
+    public function findIdByRecipeIds($orderRecipeIds) {
+        return $this->model->whereIn('sales_order_recipe_id',
+            $orderRecipeIds)
+                           ->pluck()->toArray();
+    }
+
+
 }

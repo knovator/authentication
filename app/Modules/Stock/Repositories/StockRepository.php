@@ -29,4 +29,13 @@ class StockRepository extends BaseRepository
         return Stock::class;
     }
 
+    /**
+     * @param $partialOrderIds
+     * @return mixed
+     */
+    public function removeByPartialOrderId($partialOrderIds) {
+        return $this->model->whereIn('partial_order_id',
+            $partialOrderIds)->delete();
+    }
+
 }

@@ -32,7 +32,7 @@ class SalesOrderRecipe extends Model
      * @return HasMany
      */
     public function partialOrders() {
-        return $this->hasMany(RecipePartialOrder::class, 'sales_order_recipe_id', '');
+        return $this->hasMany(RecipePartialOrder::class, 'sales_order_recipe_id', 'id');
     }
 
 
@@ -40,7 +40,7 @@ class SalesOrderRecipe extends Model
      * @return HasMany
      */
     public function quantities() {
-        return $this->hasMany(SalesOrderQuantity::class, 'sales_order_recipe_id', '');
+        return $this->hasMany(SalesOrderQuantity::class, 'sales_order_recipe_id', 'id');
     }
 
 }

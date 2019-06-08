@@ -22,6 +22,7 @@ use App\Support\UniqueIdGenerator;
 use DB;
 use Exception;
 use Illuminate\Container\Container;
+use Illuminate\Database\Eloquent\Builder;
 use Knovators\Masters\Repository\MasterRepository;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
@@ -79,7 +80,7 @@ class SalesController extends Controller
             $input['order_no'] = $this->generateUniqueId(GenerateNumber::SALES);
             $input['status_id'] = $this->getMasterByCode(MasterConstant::SO_PENDING);
             $salesOrder = $this->salesOrderRepository->create($input);
-            $this->createOrUpdateSalesDetails($salesOrder, $input);
+            $this->createOrUpdateSalesDetails($salesOrder, $input, false);
             DB::commit();
 
             return $this->sendResponse($salesOrder,
@@ -98,13 +99,14 @@ class SalesController extends Controller
     /**
      * @param SalesOrder $salesOrder
      * @param            $input
+     * @param            $update
      * @throws RepositoryException
      */
-    private function createOrUpdateSalesDetails(SalesOrder $salesOrder, $input) {
+    private function createOrUpdateSalesDetails(SalesOrder $salesOrder, $input, $update) {
         $designDetail = $this->designDetailRepository->findBy('design_id',
             $input['design_id'], ['panno', 'additional_panno', 'reed']);
         $salesOrder->load('designBeam.threadColor.thread');
-        $this->storeSalesOrderRecipes($salesOrder, $input, $designDetail);
+        $this->storeSalesOrderRecipes($salesOrder, $input, $designDetail, $update);
     }
 
 
@@ -120,7 +122,7 @@ class SalesController extends Controller
             DB::beginTransaction();
             $salesOrder->update($input);
             $salesOrder->fresh();
-            $this->createOrUpdateSalesDetails($salesOrder, $input);
+            $this->createOrUpdateSalesDetails($salesOrder, $input, true);
             DB::commit();
 
             return $this->sendResponse($salesOrder,
@@ -140,12 +142,13 @@ class SalesController extends Controller
      * @param SalesOrder $salesOrder
      * @param            $input
      * @param            $designDetail
-     * @throws RepositoryException
+     * @param            $update
      */
     private function storeSalesOrderRecipes(
         SalesOrder $salesOrder,
         $input,
-        $designDetail
+        $designDetail,
+        $update
     ) {
         foreach ($input['order_recipes'] as $items) {
 
@@ -154,15 +157,22 @@ class SalesController extends Controller
             $orderRecipe = $salesOrder->orderRecipes()
                                       ->updateOrCreate(['id' => $orderRecipeId], $items);
 
-            $items['status_id'] = $salesOrder->id;
+            $items['status_id'] = $salesOrder->status_id;
             /** @var SalesOrderRecipe $orderRecipe */
             $partialOrder = $orderRecipe->partialOrders()->updateOrCreate([], $items);
             /** @var RecipePartialOrder $partialOrder */
             $items['designDetail'] = $designDetail;
+
+            if ($update) {
+                // remove old quantities and stock results
+                $orderRecipe->quantities()->delete();
+                $salesOrder->orderStocks()->delete();
+            }
+
             $this->storeRecipeOrderQuantities($salesOrder, $orderRecipe, $partialOrder, $items);
         }
 
-        if (isset($input['removed_order_recipes_id']) && !empty($input['removed_order_recipes_id'])) {
+        if ($update && isset($input['removed_order_recipes_id']) && !empty($input['removed_order_recipes_id'])) {
             $this->destroyOrderRecipes($input['removed_order_recipes_id']);
         }
     }
@@ -170,22 +180,18 @@ class SalesController extends Controller
 
     /**
      * @param $orderRecipeIds
-     * @throws RepositoryException
      */
     private function destroyOrderRecipes($orderRecipeIds) {
-
-        (new SalesRecipeQuantityRepository(new Container()))->deleteWhere(['sales_order_recipe_id' => $orderRecipeIds]);
-
-        $partialOrderIds = $this->recipePartialOrderRepo->makeModel()
-                                                        ->whereIn('sales_order_recipe_id',
-                                                            $orderRecipeIds)
-                                                        ->pluck()->toArray();
-
-        (new StockRepository(new Container()))->deleteWhere(['partial_order_id' => $partialOrderIds]);
-
-        $this->recipePartialOrderRepo->deleteWhere(['id' => $partialOrderIds]);
-
-        (new SalesRecipeRepository(new Container()))->deleteWhere(['id' => $orderRecipeIds]);
+        // remove sales recipes quantity
+        (new SalesRecipeQuantityRepository(new Container()))->removeByOrderRecipesId($orderRecipeIds);
+        // get recipes default partial order
+        $partialOrderIds = $this->recipePartialOrderRepo->findIdByRecipeIds($orderRecipeIds);
+        // remove sales partial order stocks
+        (new StockRepository(new Container()))->removeByPartialOrderId($partialOrderIds);
+        // remove sales recipe default partial order
+        $this->recipePartialOrderRepo->removeById($partialOrderIds);
+        // remove sales partial orders
+        (new SalesRecipeRepository(new Container()))->removeById($orderRecipeIds);
 
     }
 
@@ -201,6 +207,8 @@ class SalesController extends Controller
         RecipePartialOrder $partialOrder,
         $items
     ) {
+
+
         $formula = Formula::getInstance();
         $data = [];
         // storing weft stock
@@ -217,7 +225,6 @@ class SalesController extends Controller
                 'status_id'        => $items['status_id'],
             ];
         }
-
         $orderRecipe->quantities()->createMany($data);
 
         $threadDetail['denier'] = $salesOrder->designBeam->threadColor->thread->denier;

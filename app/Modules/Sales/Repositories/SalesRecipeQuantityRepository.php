@@ -29,4 +29,14 @@ class SalesRecipeQuantityRepository extends BaseRepository
         return SalesOrderQuantity::class;
     }
 
+
+    /**
+     * @param $orderRecipeIds
+     * @return mixed
+     */
+    public function removeByOrderRecipesId($orderRecipeIds) {
+        return $this->model->whereIn('sales_order_recipe_id',
+            $orderRecipeIds)->delete();
+    }
+
 }
