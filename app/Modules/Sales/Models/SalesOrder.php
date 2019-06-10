@@ -8,6 +8,7 @@ use App\Modules\Design\Models\Design;
 use App\Modules\Design\Models\DesignBeam;
 use App\Modules\Stock\Models\Stock;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Knovators\Support\Traits\HasModelEvent;
 
@@ -108,7 +109,7 @@ class SalesOrder extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
+     * @return HasManyThrough
      */
     public function partialOrders() {
         return $this->hasManyThrough(RecipePartialOrder::class, SalesOrderRecipe::class,

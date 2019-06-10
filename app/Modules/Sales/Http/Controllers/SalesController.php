@@ -366,14 +366,13 @@ class SalesController extends Controller
         });
 
         if ($salesOrder->partialOrders->isNotEmpty()) {
-            return $this->sendResponse(null, __('messages.something_wrong'),
+            return $this->sendResponse(null, __('messages.complete_order'),
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
 
         return $this->updateStatus($salesOrder, $input);
 
     }
-
 
     /**
      * @param SalesOrder    $salesOrder
