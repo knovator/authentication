@@ -107,8 +107,12 @@ class SalesOrder extends Model
         return $this->morphMany(Stock::class, 'order');
     }
 
-
-
-
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
+     */
+    public function partialOrders() {
+        return $this->hasManyThrough(RecipePartialOrder::class, SalesOrderRecipe::class,
+            'sales_order_id', 'sales_order_recipe_id', 'id', 'id');
+    }
 
 }

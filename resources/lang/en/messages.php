@@ -25,6 +25,7 @@ return [
     // Sales order Messages
     'not_delete_sales_order'        => 'This Order is in :status state, so you can not delete it.',
 
+
     // password messages
     'current_password_wrong'        => 'Current password is incorrect.',
     'password_changed'              => 'Password changed successfully.',
