@@ -69,14 +69,9 @@ class StatusRequest extends FormRequest
      * @return array
      */
     private function customValidation($currentStatusId) {
-        $currentStatusIds = is_array($currentStatusId) ? $currentStatusId : [$currentStatusId];
 
         return [
-            'required',
-            Rule::exists('sales_orders', 'id')->where(function ($query) use ($currentStatusIds) {
-                /** @var Builder $query */
-                $query->whereIn('status_id', $currentStatusIds);
-            }),
+            'sales_order_id' => 'required|exists:sales_orders,id,status_id,' . $currentStatusId
         ];
     }
 
