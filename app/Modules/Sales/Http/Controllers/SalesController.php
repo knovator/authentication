@@ -23,6 +23,7 @@ use App\Support\UniqueIdGenerator;
 use DB;
 use Exception;
 use Illuminate\Container\Container;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Knovators\Masters\Repository\MasterRepository;
 use Knovators\Support\Helpers\HTTPCode;
@@ -330,5 +331,85 @@ class SalesController extends Controller
         }
 
     }
+
+
+    /**
+     * @param SalesOrder    $salesOrder
+     * @param               $input
+     * @return JsonResponse
+     * @throws Exception
+     */
+    private function updateSOPENDINGStatus(SalesOrder $salesOrder, $input) {
+
+        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::SO_PENDING)->id;
+
+        $salesOrder->orderStocks()->update(['status_id' => $input['status_id']]);
+
+        $salesOrder->partialOrders()->update(['status_id' => $input['status_id']]);
+
+        return $this->updateStatus($salesOrder, $input);
+
+    }
+
+    /**
+     * @param SalesOrder    $salesOrder
+     * @param               $input
+     * @return JsonResponse
+     * @throws Exception
+     */
+    private function updateSODELIVEREDStatus(SalesOrder $salesOrder, $input) {
+        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::SO_DELIVERED)->id;
+
+        $salesOrder->load('partialOrders', function ($partialOrder) use ($input) {
+            /** @var Builder $partialOrder */
+            $partialOrder->where('status_id', '<>', $input['status_id']);
+        });
+
+        if ($salesOrder->partialOrders->isNotEmpty()) {
+            return $this->sendResponse(null, __('messages.complete_order'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+
+        return $this->updateStatus($salesOrder, $input);
+
+    }
+
+    /**
+     * @param SalesOrder    $salesOrder
+     * @param               $input
+     * @return JsonResponse
+     * @throws Exception
+     */
+    private function updateSOCANCELEDStatus(SalesOrder $salesOrder, $input) {
+        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::SO_CANCELED)->id;
+
+        $salesOrder->partialOrders()->update(['status_id' => $input['status_id']]);
+
+        $salesOrder->orderStocks()->update(['status_id' => $input['status_id']]);
+
+        return $this->updateStatus($salesOrder, $input);
+
+    }
+
+    /**
+     * @param SalesOrder $salesOrder
+     * @param            $input
+     * @return JsonResponse
+     * @throws Exception
+     */
+    private function updateStatus(SalesOrder $salesOrder, $input) {
+        try {
+            $salesOrder->update($input);
+
+            return $this->sendResponse($this->makeResource($salesOrder->fresh()),
+                __('messages.updated', ['module' => 'Status']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            throw $exception;
+        }
+    }
+
 
 }

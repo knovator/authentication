@@ -8,6 +8,7 @@ use App\Modules\Design\Models\Design;
 use App\Modules\Design\Models\DesignBeam;
 use App\Modules\Stock\Models\Stock;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Knovators\Support\Traits\HasModelEvent;
 
@@ -105,6 +106,14 @@ class SalesOrder extends Model
      */
     public function orderStocks() {
         return $this->morphMany(Stock::class, 'order');
+    }
+
+    /**
+     * @return HasManyThrough
+     */
+    public function partialOrders() {
+        return $this->hasManyThrough(RecipePartialOrder::class, SalesOrderRecipe::class,
+            'sales_order_id', 'sales_order_recipe_id', 'id', 'id');
     }
 
 }
