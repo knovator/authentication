@@ -34,16 +34,23 @@ class RecipeRepository extends BaseRepository
 
 
     /**
+     * @param $input
      * @return mixed
      * @throws RepositoryException
-     * @throws \Exception
      */
-    public function getRecipeList() {
+    public function getRecipeList($input) {
         $this->applyCriteria();
-        $recipes = datatables()->of($this->model->with([
+
+        $recipes = $this->model->with([
             'fiddles.thread:id,name,denier,price',
             'fiddles.color:id,name,code'
-        ])->withCount('designBeams as associated_count'))->make(true);
+        ])->withCount('designBeams as associated_count');
+
+        if (isset($input['not_ids']) && (!empty($input['not_ids']))) {
+            $recipes = $recipes->whereNotIn('id', $input['not_ids']);
+        }
+
+        $recipes = datatables()->of($recipes)->make(true);
         $this->resetModel();
 
         return $recipes;
