@@ -63,6 +63,12 @@ class PurchaseController extends Controller
             $purchaseOrder->threads()->createMany($input['threads']);
             $this->storeStockOrders($purchaseOrder, $input);
             DB::commit();
+            $purchaseOrder->load([
+                'threads.threadColor.thread',
+                'threads.threadColor.color',
+                'customer',
+                'status'
+            ]);
 
             return $this->sendResponse($this->makeResource($purchaseOrder),
                 __('messages.created', ['module' => 'Purchase']),
@@ -98,8 +104,13 @@ class PurchaseController extends Controller
             $this->storeThreadDetails($purchaseOrder, $input);
             DB::commit();
             $purchaseOrder->fresh();
-
-            return $this->sendResponse($this->makeResource($purchaseOrder->load('threads')),
+            $purchaseOrder->load([
+                'threads.threadColor.thread',
+                'threads.threadColor.color',
+                'customer',
+                'status'
+            ]);
+            return $this->sendResponse($this->makeResource($purchaseOrder),
                 __('messages.updated', ['module' => 'Purchase']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -166,6 +177,7 @@ class PurchaseController extends Controller
     private function updatePOPENDINGStatus(PurchaseOrder $purchaseOrder, $input) {
         $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::PO_PENDING)->id;
         $this->storeStockOrders($purchaseOrder, $input);
+
         return $this->updateStatus($purchaseOrder, $input);
 
     }
@@ -180,8 +192,15 @@ class PurchaseController extends Controller
     private function updateStatus(PurchaseOrder $purchaseOrder, $input) {
         try {
             $purchaseOrder->update($input);
+            $purchaseOrder->fresh();
+            $purchaseOrder->load([
+                'threads.threadColor.thread',
+                'threads.threadColor.color',
+                'customer',
+                'status'
+            ]);
 
-            return $this->sendResponse($this->makeResource($purchaseOrder->fresh()),
+            return $this->sendResponse($this->makeResource($purchaseOrder),
                 __('messages.updated', ['module' => 'Status']),
                 HTTPCode::OK);
         } catch (Exception $exception) {

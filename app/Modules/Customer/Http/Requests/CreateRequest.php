@@ -32,7 +32,7 @@ class CreateRequest extends FormRequest
         return [
             'first_name' => 'required|string|max:60',
             'last_name'  => 'required|string|max:60',
-            'email'      => 'required|email',
+            'email'      => 'nullable|email',
             'phone'      => 'required|numeric|digits:10',
             'is_active'  => 'required|boolean',
             'gst_no'     => 'required|string',

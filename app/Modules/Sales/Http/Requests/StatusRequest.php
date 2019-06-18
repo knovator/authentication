@@ -1,15 +1,17 @@
 <?php
 
-namespace App\Modules\Purchase\Http\Requests;
+namespace App\Modules\Sales\Http\Requests;
 
-use App\Support\FetchMaster;
-use Illuminate\Foundation\Http\FormRequest;
-use Knovators\Support\Traits\APIResponse;
 use App\Constants\Master as MasterConstant;
+use App\Support\FetchMaster;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Knovators\Support\Traits\APIResponse;
 
 /**
  * Class StatusRequest
- * @package App\Modules\Purchase\Http\Requests
+ * @package App\Modules\Sales\Http\Requests
  */
 class StatusRequest extends FormRequest
 {
@@ -34,18 +36,23 @@ class StatusRequest extends FormRequest
 
         switch ($this->code) {
 
-            case MasterConstant::PO_PENDING:
-                $currentStatusId = $this->retrieveMasterId(MasterConstant::PO_CANCELED);
+            case MasterConstant::SO_PENDING:
+                $currentStatusId = $this->retrieveMasterId(MasterConstant::SO_CANCELED);
 
                 return $this->customValidation($currentStatusId);
 
-            case MasterConstant::PO_CANCELED:
-                $currentStatusId = $this->retrieveMasterId(MasterConstant::PO_PENDING);
+            case MasterConstant::SO_CANCELED:
+                $currentStatusId = $this->retrieveMasterId(MasterConstant::SO_PENDING);
 
                 return $this->customValidation($currentStatusId);
 
-            case MasterConstant::PO_DELIVERED:
-                $currentStatusId = $this->retrieveMasterId(MasterConstant::PO_PENDING);
+            case MasterConstant::SO_MANUFACTURING:
+                $currentStatusId = $this->retrieveMasterId(MasterConstant::SO_PENDING);
+
+                return $this->customValidation($currentStatusId);
+
+            case MasterConstant::SO_DELIVERED:
+                $currentStatusId = $this->retrieveMasterId(MasterConstant::SO_MANUFACTURING);
 
                 return $this->customValidation($currentStatusId);
 
@@ -62,8 +69,9 @@ class StatusRequest extends FormRequest
      * @return array
      */
     private function customValidation($currentStatusId) {
+
         return [
-            'purchase_order_id' => 'required|exists:purchase_orders,id,status_id,' . $currentStatusId
+            'sales_order_id' => 'required|exists:sales_orders,id,status_id,' . $currentStatusId
         ];
     }
 
@@ -76,7 +84,7 @@ class StatusRequest extends FormRequest
     public function messages() {
 
         return [
-            'purchase_order_id.exists' => 'Please select valid status.'
+            'sales_order_id.exists' => 'Please select valid status.'
         ];
     }
 

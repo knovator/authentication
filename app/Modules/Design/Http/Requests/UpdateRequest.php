@@ -36,11 +36,11 @@ class UpdateRequest extends FormRequest
             'fiddles'                   => 'required|integer',
             'is_active'                 => 'required|boolean',
             'designer_no'               => 'required|string|max:60',
-            'avg_pick'                  => 'required|numeric',
-            'pick_on_loom'              => 'required|numeric',
+            'avg_pick'                  => 'required|integer',
+            'pick_on_loom'              => 'required|integer',
             'panno'                     => 'required|integer',
             'additional_panno'          => 'required|integer',
-            'reed'                      => 'required|string',
+            'reed'                      => 'required|integer',
             // design images
             'images'                    => 'required|array',
             'images.*.file_id'          => 'required|integer',
@@ -48,7 +48,7 @@ class UpdateRequest extends FormRequest
 
             // design fiddle picks
             'fiddle_picks'              => 'required|array',
-            'fiddle_picks.*.pick'       => 'required|numeric',
+            'fiddle_picks.*.pick'       => 'required|integer',
             'fiddle_picks.*.fiddle_no'  => 'required|integer',
 
             // design beams

@@ -166,8 +166,7 @@ class ThreadController extends Controller
         $thread->threadColors->map(function ($threadColor) {
             /** @var ThreadColor $threadColor */
             $threadColor->updatable = true;
-            if (($threadColor->recipes()->exists()) || ($threadColor->salesOrderQuantities()
-                                                                    ->exists())) {
+            if (($threadColor->recipes()->exists())) {
                 $threadColor->updatable = false;
             }
         });

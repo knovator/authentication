@@ -21,6 +21,7 @@ class Stock extends Model
         'order_id',
         'kg_qty',
         'status_id',
+        'partial_order_id'
     ];
 
 }

@@ -1,18 +1,15 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Modules\Sales\Models\SalesOrder;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your module. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
-*/
+Route::group([
+    'prefix'     => 'admin',
+    'middleware' => 'auth_active'
+],
+    function () {
+        Route::resource('sales', 'SalesController');
+        Route::put('sales/order/change-status', 'SalesController@changeStatus')
+             ->name('sales.change-status');
+    });
 
-Route::get('/sales', function (Request $request) {
-    // return $request->sales();
-})->middleware('auth:api');
+Route::model('sale', SalesOrder::class);

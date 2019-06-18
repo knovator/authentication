@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Modules\Purchase\Models\PurchaseOrder;
+use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Thread\Models\ThreadColor;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
@@ -22,7 +23,8 @@ class AppServiceProvider extends ServiceProvider
 
 
         Relation::morphMap([
-            'purchase'        => PurchaseOrder::class,
+            'purchase'     => PurchaseOrder::class,
+            'sales'        => SalesOrder::class,
             'thread_color' => ThreadColor::class
         ]);
     }

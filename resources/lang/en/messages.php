@@ -19,8 +19,12 @@ return [
 
 
     // Purchase order Messages
-    'can_not_edit_purchase_order'   => 'This Order is completed, so you can not update.',
-    'can_not_delete_purchase_order' => 'This Order is completed, so you can not delete.',
+    'can_not_edit_purchase_order'   => 'This Order is completed, so you can not update it.',
+    'can_not_delete_purchase_order' => 'This Order is completed, so you can not delete it.',
+
+    // Sales order Messages
+    'not_delete_sales_order'        => 'This Order is in :status state, so you can not delete it.',
+    'complete_order'                => 'To complete this order, all partial order must be completed.',
 
 
     // password messages
