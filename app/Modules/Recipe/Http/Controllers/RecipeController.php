@@ -12,6 +12,7 @@ use App\Modules\Recipe\Repositories\RecipeRepository;
 use DB;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;
@@ -150,9 +151,10 @@ class RecipeController extends Controller
     /**
      * @return JsonResponse
      */
-    public function index() {
+    public function index(Request $request) {
+        $input = $request->all();
         try {
-            $recipes = $this->recipeRepository->getRecipeList();
+            $recipes = $this->recipeRepository->getRecipeList($input);
 
             return $this->sendResponse($recipes,
                 __('messages.retrieved', ['module' => 'Recipes']),
