@@ -156,17 +156,13 @@ class SalesController extends Controller
             $orderRecipeId = isset($items['id']) ? $items['id'] : null;
             $orderRecipe = $salesOrder->orderRecipes()
                                       ->updateOrCreate(['id' => $orderRecipeId], $items);
-            $items['status_id'] = $salesOrder->status_id;
-            /** @var SalesOrderRecipe $orderRecipe */
-            $partialOrder = $orderRecipe->partialOrders()->updateOrCreate([], $items);
-            /** @var RecipePartialOrder $partialOrder */
             $items['designDetail'] = $designDetail;
-
+            $items['status_id'] = $salesOrder->status_id;
             if ($update) {
                 // remove old stock results
                 $salesOrder->orderStocks()->delete();
             }
-            $this->storeRecipeOrderQuantities($salesOrder, $partialOrder, $items);
+            $this->storeRecipeOrderQuantities($salesOrder, $orderRecipe, $items);
         }
 
         if ($update && isset($input['removed_order_recipes_id']) && !empty($input['removed_order_recipes_id'])) {
@@ -192,12 +188,12 @@ class SalesController extends Controller
 
     /**
      * @param SalesOrder         $salesOrder
-     * @param RecipePartialOrder $partialOrder
+     * @param SalesOrderRecipe   $orderRecipe
      * @param                    $items
      */
     private function storeRecipeOrderQuantities(
         SalesOrder $salesOrder,
-        RecipePartialOrder $partialOrder,
+        SalesOrderRecipe $orderRecipe,
         $items
     ) {
         $formula = Formula::getInstance();
@@ -206,23 +202,22 @@ class SalesController extends Controller
         foreach ($items['quantity_details'] as $key => $quantityDetails) {
 
             $data[$key] = [
-                'partial_order_id' => $partialOrder->id,
-                'product_id'       => $quantityDetails['thread_color_id'],
-                'product_type'     => 'thread_color',
-                'status_id'        => $items['status_id'],
-                'kg_qty'           => $formula->getTotalKgQty(ThreadType::WEFT,
+                'order_recipe_id' => $orderRecipe->id,
+                'product_id'      => $quantityDetails['thread_color_id'],
+                'product_type'    => 'thread_color',
+                'status_id'       => $items['status_id'],
+                'kg_qty'          => $formula->getTotalKgQty(ThreadType::WEFT,
                     $quantityDetails, $items),
             ];
         }
-
         $threadDetail['denier'] = $salesOrder->designBeam->threadColor->thread->denier;
         // storing warp stock
         array_push($data, [
-            'partial_order_id' => $partialOrder->id,
-            'product_id'       => $salesOrder->designBeam->thread_color_id,
-            'product_type'     => 'thread_color',
-            'status_id'        => $items['status_id'],
-            'kg_qty'           => $formula->getTotalKgQty(ThreadType::WARP,
+            'order_recipe_id' => $orderRecipe->id,
+            'product_id'      => $salesOrder->designBeam->thread_color_id,
+            'product_type'    => 'thread_color',
+            'status_id'       => $items['status_id'],
+            'kg_qty'          => $formula->getTotalKgQty(ThreadType::WARP,
                 $threadDetail, $items),
         ]);
 
