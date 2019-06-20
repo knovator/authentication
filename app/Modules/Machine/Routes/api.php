@@ -12,4 +12,13 @@ Route::group([
              ->name('machine.partially-update');
     });
 
+Route::group([
+    'middleware' => 'auth_active'
+],
+    function () {
+        Route::get('active-machines', 'MachineController@activeMachines')
+             ->name('active-machines');
+    });
+
+
 Route::model('machine', Machine::class);

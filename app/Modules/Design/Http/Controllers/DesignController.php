@@ -261,6 +261,28 @@ class DesignController extends Controller
         }
     }
 
+
+    /**
+     * @return JsonResponse
+     */
+    public function activeDesigns() {
+        try {
+            $designs = $this->designRepository->getActiveDesigns();
+
+            return $this->sendResponse($designs,
+                __('messages.retrieved', ['module' => 'Designs']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+    }
+
+
+
+
 }
 
 
