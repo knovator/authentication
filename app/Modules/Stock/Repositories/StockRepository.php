@@ -34,7 +34,7 @@ class StockRepository extends BaseRepository
      * @return mixed
      */
     public function removeByPartialOrderId($partialOrderIds) {
-        return $this->model->whereIn('partial_order_id',
+        return $this->model->whereIn('order_recipe_id',
             $partialOrderIds)->delete();
     }
 

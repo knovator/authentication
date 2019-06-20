@@ -152,16 +152,17 @@ class SalesController extends Controller
         $designDetail,
         $update
     ) {
+        if ($update) {
+            // remove old stock results
+            $salesOrder->orderStocks()->delete();
+        }
+
         foreach ($input['order_recipes'] as $items) {
             $orderRecipeId = isset($items['id']) ? $items['id'] : null;
             $orderRecipe = $salesOrder->orderRecipes()
                                       ->updateOrCreate(['id' => $orderRecipeId], $items);
             $items['designDetail'] = $designDetail;
             $items['status_id'] = $salesOrder->status_id;
-            if ($update) {
-                // remove old stock results
-                $salesOrder->orderStocks()->delete();
-            }
             $this->storeRecipeOrderQuantities($salesOrder, $orderRecipe, $items);
         }
 
@@ -175,12 +176,8 @@ class SalesController extends Controller
      * @param $orderRecipeIds
      */
     private function destroyOrderRecipes($orderRecipeIds) {
-        // get recipes default partial order
-        $partialOrderIds = $this->recipePartialOrderRepo->findIdByRecipeIds($orderRecipeIds);
         // remove sales partial order stocks
-        (new StockRepository(new Container()))->removeByPartialOrderId($partialOrderIds);
-        // remove sales recipe default partial order
-        $this->recipePartialOrderRepo->removeById($partialOrderIds);
+        (new StockRepository(new Container()))->removeByPartialOrderId($orderRecipeIds);
         // remove sales partial orders
         (new SalesRecipeRepository(new Container()))->removeById($orderRecipeIds);
 
