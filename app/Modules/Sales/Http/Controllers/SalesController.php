@@ -25,7 +25,7 @@ use Exception;
 use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
-use Knovators\Masters\Repository\MasterRepository;
+use App\Repositories\MasterRepository;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;
@@ -337,7 +337,20 @@ class SalesController extends Controller
 
         $salesOrder->orderStocks()->update(['status_id' => $input['status_id']]);
 
-        $salesOrder->partialOrders()->update(['status_id' => $input['status_id']]);
+        return $this->updateStatus($salesOrder, $input);
+
+    }
+
+
+    /**
+     * @param SalesOrder    $salesOrder
+     * @param               $input
+     * @return JsonResponse
+     * @throws Exception
+     */
+    private function updateSOMANUFACTURINGStatus(SalesOrder $salesOrder, $input) {
+
+        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::SO_MANUFACTURING)->id;
 
         return $this->updateStatus($salesOrder, $input);
 
@@ -350,13 +363,13 @@ class SalesController extends Controller
      * @throws Exception
      */
     private function updateSODELIVEREDStatus(SalesOrder $salesOrder, $input) {
-        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::SO_DELIVERED)->id;
+        $statusIds = $this->masterRepository->getIdsByCode
+        ([MasterConstant::SO_DELIVERED, MasterConstant::SO_CANCELED]);
 
-        $salesOrder->load('partialOrders', function ($partialOrder) use ($input) {
+        $salesOrder->load('partialOrders', function ($partialOrder) use ($statusIds) {
             /** @var Builder $partialOrder */
-            $partialOrder->where('status_id', '<>', $input['status_id']);
+            $partialOrder->whereNotIn('status_id', $statusIds);
         });
-
         if ($salesOrder->partialOrders->isNotEmpty()) {
             return $this->sendResponse(null, __('messages.complete_order'),
                 HTTPCode::UNPROCESSABLE_ENTITY);
@@ -374,8 +387,6 @@ class SalesController extends Controller
      */
     private function updateSOCANCELEDStatus(SalesOrder $salesOrder, $input) {
         $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::SO_CANCELED)->id;
-
-        $salesOrder->partialOrders()->update(['status_id' => $input['status_id']]);
 
         $salesOrder->orderStocks()->update(['status_id' => $input['status_id']]);
 
