@@ -25,7 +25,7 @@ use Exception;
 use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
-use Knovators\Masters\Repository\MasterRepository;
+use App\Repositories\MasterRepository;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;
@@ -152,21 +152,18 @@ class SalesController extends Controller
         $designDetail,
         $update
     ) {
+        if ($update) {
+            // remove old stock results
+            $salesOrder->orderStocks()->delete();
+        }
+
         foreach ($input['order_recipes'] as $items) {
             $orderRecipeId = isset($items['id']) ? $items['id'] : null;
             $orderRecipe = $salesOrder->orderRecipes()
                                       ->updateOrCreate(['id' => $orderRecipeId], $items);
-            $items['status_id'] = $salesOrder->status_id;
-            /** @var SalesOrderRecipe $orderRecipe */
-            $partialOrder = $orderRecipe->partialOrders()->updateOrCreate([], $items);
-            /** @var RecipePartialOrder $partialOrder */
             $items['designDetail'] = $designDetail;
-
-            if ($update) {
-                // remove old stock results
-                $salesOrder->orderStocks()->delete();
-            }
-            $this->storeRecipeOrderQuantities($salesOrder, $partialOrder, $items);
+            $items['status_id'] = $salesOrder->status_id;
+            $this->storeRecipeOrderQuantities($salesOrder, $orderRecipe, $items);
         }
 
         if ($update && isset($input['removed_order_recipes_id']) && !empty($input['removed_order_recipes_id'])) {
@@ -179,12 +176,8 @@ class SalesController extends Controller
      * @param $orderRecipeIds
      */
     private function destroyOrderRecipes($orderRecipeIds) {
-        // get recipes default partial order
-        $partialOrderIds = $this->recipePartialOrderRepo->findIdByRecipeIds($orderRecipeIds);
         // remove sales partial order stocks
-        (new StockRepository(new Container()))->removeByPartialOrderId($partialOrderIds);
-        // remove sales recipe default partial order
-        $this->recipePartialOrderRepo->removeById($partialOrderIds);
+        (new StockRepository(new Container()))->removeByPartialOrderId($orderRecipeIds);
         // remove sales partial orders
         (new SalesRecipeRepository(new Container()))->removeById($orderRecipeIds);
 
@@ -192,12 +185,12 @@ class SalesController extends Controller
 
     /**
      * @param SalesOrder         $salesOrder
-     * @param RecipePartialOrder $partialOrder
+     * @param SalesOrderRecipe   $orderRecipe
      * @param                    $items
      */
     private function storeRecipeOrderQuantities(
         SalesOrder $salesOrder,
-        RecipePartialOrder $partialOrder,
+        SalesOrderRecipe $orderRecipe,
         $items
     ) {
         $formula = Formula::getInstance();
@@ -206,23 +199,22 @@ class SalesController extends Controller
         foreach ($items['quantity_details'] as $key => $quantityDetails) {
 
             $data[$key] = [
-                'partial_order_id' => $partialOrder->id,
-                'product_id'       => $quantityDetails['thread_color_id'],
-                'product_type'     => 'thread_color',
-                'status_id'        => $items['status_id'],
-                'kg_qty'           => $formula->getTotalKgQty(ThreadType::WEFT,
+                'order_recipe_id' => $orderRecipe->id,
+                'product_id'      => $quantityDetails['thread_color_id'],
+                'product_type'    => 'thread_color',
+                'status_id'       => $items['status_id'],
+                'kg_qty'          => $formula->getTotalKgQty(ThreadType::WEFT,
                     $quantityDetails, $items),
             ];
         }
-
         $threadDetail['denier'] = $salesOrder->designBeam->threadColor->thread->denier;
         // storing warp stock
         array_push($data, [
-            'partial_order_id' => $partialOrder->id,
-            'product_id'       => $salesOrder->designBeam->thread_color_id,
-            'product_type'     => 'thread_color',
-            'status_id'        => $items['status_id'],
-            'kg_qty'           => $formula->getTotalKgQty(ThreadType::WARP,
+            'order_recipe_id' => $orderRecipe->id,
+            'product_id'      => $salesOrder->designBeam->thread_color_id,
+            'product_type'    => 'thread_color',
+            'status_id'       => $items['status_id'],
+            'kg_qty'          => $formula->getTotalKgQty(ThreadType::WARP,
                 $threadDetail, $items),
         ]);
 
@@ -345,7 +337,20 @@ class SalesController extends Controller
 
         $salesOrder->orderStocks()->update(['status_id' => $input['status_id']]);
 
-        $salesOrder->partialOrders()->update(['status_id' => $input['status_id']]);
+        return $this->updateStatus($salesOrder, $input);
+
+    }
+
+
+    /**
+     * @param SalesOrder    $salesOrder
+     * @param               $input
+     * @return JsonResponse
+     * @throws Exception
+     */
+    private function updateSOMANUFACTURINGStatus(SalesOrder $salesOrder, $input) {
+
+        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::SO_MANUFACTURING)->id;
 
         return $this->updateStatus($salesOrder, $input);
 
@@ -358,17 +363,26 @@ class SalesController extends Controller
      * @throws Exception
      */
     private function updateSODELIVEREDStatus(SalesOrder $salesOrder, $input) {
-        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::SO_DELIVERED)->id;
 
-        $salesOrder->load('partialOrders', function ($partialOrder) use ($input) {
-            /** @var Builder $partialOrder */
-            $partialOrder->where('status_id', '<>', $input['status_id']);
-        });
+        $statusIds = $this->masterRepository->getIdsByCode
+        ([MasterConstant::SO_DELIVERED, MasterConstant::SO_CANCELED]);
+
+        $salesOrder->load([
+            'partialOrders' => function ($partialOrder) use ($statusIds) {
+                /** @var Builder $partialOrder */
+                $partialOrder->whereHas('delivery', function ($delivery) use ($statusIds) {
+                    /** @var Builder $delivery */
+                    $delivery->whereNotIn('status_id', $statusIds);
+                });
+            }
+        ]);
 
         if ($salesOrder->partialOrders->isNotEmpty()) {
             return $this->sendResponse(null, __('messages.complete_order'),
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
+
+        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::SO_DELIVERED)->id;
 
         return $this->updateStatus($salesOrder, $input);
 
@@ -382,8 +396,6 @@ class SalesController extends Controller
      */
     private function updateSOCANCELEDStatus(SalesOrder $salesOrder, $input) {
         $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::SO_CANCELED)->id;
-
-        $salesOrder->partialOrders()->update(['status_id' => $input['status_id']]);
 
         $salesOrder->orderStocks()->update(['status_id' => $input['status_id']]);
 

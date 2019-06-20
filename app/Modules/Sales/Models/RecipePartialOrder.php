@@ -27,7 +27,7 @@ class RecipePartialOrder extends Model
         'meters',
         'total_meters',
         'machine_id',
-        'status_id',
+        'delivery_id',
     ];
 
 
@@ -39,6 +39,14 @@ class RecipePartialOrder extends Model
             'id');
     }
 
+
+    /**
+     * @return mixed
+     */
+    public function delivery() {
+        return $this->belongsTo(Delivery::class, 'delivery_id',
+            'id');
+    }
 
 
     /**

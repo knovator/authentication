@@ -3,6 +3,7 @@
 namespace App\Modules\Design\Repositories;
 
 use App\Modules\Design\Models\Design;
+use Knovators\Support\Criteria\IsActiveCriteria;
 use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
 use Prettus\Repository\Exceptions\RepositoryException;
@@ -41,6 +42,22 @@ class DesignRepository extends BaseRepository
             'detail',
             'mainImage.file:id,uri'
         ])->withCount('recipes'))->make(true);
+        $this->resetModel();
+
+        return $designs;
+    }
+
+    /**
+     * @return mixed
+     * @throws RepositoryException
+     * @throws \Exception
+     */
+    public function getActiveDesigns() {
+        $this->pushCriteria(IsActiveCriteria::class);
+        $this->applyCriteria();
+        $designs = $this->model->select('id', 'quality_name', 'design_no')->with([
+            'mainImage.file:id,uri'
+        ])->where('is_approved', true)->get();
         $this->resetModel();
 
         return $designs;
