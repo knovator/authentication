@@ -363,17 +363,26 @@ class SalesController extends Controller
      * @throws Exception
      */
     private function updateSODELIVEREDStatus(SalesOrder $salesOrder, $input) {
+
         $statusIds = $this->masterRepository->getIdsByCode
         ([MasterConstant::SO_DELIVERED, MasterConstant::SO_CANCELED]);
 
-        $salesOrder->load('partialOrders', function ($partialOrder) use ($statusIds) {
-            /** @var Builder $partialOrder */
-            $partialOrder->whereNotIn('status_id', $statusIds);
-        });
+        $salesOrder->load([
+            'partialOrders' => function ($partialOrder) use ($statusIds) {
+                /** @var Builder $partialOrder */
+                $partialOrder->whereHas('delivery', function ($delivery) use ($statusIds) {
+                    /** @var Builder $delivery */
+                    $delivery->whereNotIn('status_id', $statusIds);
+                });
+            }
+        ]);
+
         if ($salesOrder->partialOrders->isNotEmpty()) {
             return $this->sendResponse(null, __('messages.complete_order'),
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
+
+        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::SO_DELIVERED)->id;
 
         return $this->updateStatus($salesOrder, $input);
 

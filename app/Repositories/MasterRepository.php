@@ -19,6 +19,6 @@ class MasterRepository extends BaseRepository
      * @return array
      */
     public function getIdsByCode(array $codes) {
-        return $this->model->whereIn('code', '=', $codes)->pluck('id')->toArray();
+        return $this->model->whereIn('code', $codes)->pluck('id')->toArray();
     }
 }
