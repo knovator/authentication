@@ -48,11 +48,13 @@ class UpdateRequest extends FormRequest
 
             // design fiddle picks
             'fiddle_picks'              => 'required|array',
+            'fiddle_picks.*.id'         => 'sometimes|required|integer',
             'fiddle_picks.*.pick'       => 'required|integer',
             'fiddle_picks.*.fiddle_no'  => 'required|integer',
 
             // design beams
             'design_beams'              => 'required|array',
+            'design_beams.*.id'         => 'sometimes|required|integer',
             'design_beams.*.beam_id'    => 'required|integer',
             'design_beams.*.recipes_id' => 'required|array',
 
