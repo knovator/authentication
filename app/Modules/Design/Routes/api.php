@@ -14,4 +14,12 @@ Route::group([
              ->name('design.partially-approve');
     });
 
+Route::group([
+    'middleware' => 'auth_active'
+],
+    function () {
+        Route::get('active-designs', 'DesignController@activeDesigns')
+             ->name('active-designs');
+    });
+
 Route::model('design', Design::class);

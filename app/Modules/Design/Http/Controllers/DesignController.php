@@ -11,6 +11,7 @@ use App\Modules\Design\Http\Requests\CreateRequest;
 use App\Modules\Design\Http\Requests\UpdateRequest;
 use App\Modules\Design\Models\Design;
 use App\Modules\Design\Models\DesignBeam;
+use App\Modules\Design\Repositories\DesignDetailRepository;
 use App\Modules\Design\Repositories\DesignRepository;
 use App\Support\UniqueIdGenerator;
 use DB;
@@ -31,14 +32,19 @@ class DesignController extends Controller
 
     protected $designRepository;
 
+    protected $designDetailRepository;
+
     /**
      * DesignController constructor.
-     * @param DesignRepository $designRepository
+     * @param DesignRepository       $designRepository
+     * @param DesignDetailRepository $designDetailRepository
      */
     public function __construct(
-        DesignRepository $designRepository
+        DesignRepository $designRepository,
+        DesignDetailRepository $designDetailRepository
     ) {
         $this->designRepository = $designRepository;
+        $this->designDetailRepository = $designDetailRepository;
     }
 
     /**
@@ -50,16 +56,18 @@ class DesignController extends Controller
         $input = $request->all();
         try {
             DB::beginTransaction();
+            DB::enableQueryLog();
             $input['design_no'] = $this->generateUniqueId(GenerateNumber::DESIGN);
             $design = $this->designRepository->create($input);
             $this->storeDesignDetails($design, $input);
+
             DB::commit();
 
             return $this->sendResponse($this->makeResource($design->load('detail')),
                 __('messages.created', ['module' => 'Design']),
                 HTTPCode::CREATED);
         } catch (Exception $exception) {
-            DB::rollBack();
+//            DB::rollBack();
             Log::error($exception);
 
             return $this->sendResponse(null, __('messages.something_wrong'),
@@ -71,9 +79,10 @@ class DesignController extends Controller
     /**
      * @param $design
      * @param $input
+     * @throws \Prettus\Validator\Exceptions\ValidatorException
      */
     private function storeDesignDetails(Design $design, $input) {
-        $design->detail()->updateOrCreate([], $input);
+        $this->designDetailRepository->updateOrCreate(['design_id'=> $design->id], $input);
         $this->storeDesignAttributes($design, $input, 'images', 'images');
         $this->storeDesignAttributes($design, $input, 'fiddle_picks', 'fiddlePicks');
         $this->storeDesignBeams($design, $input);
@@ -260,6 +269,26 @@ class DesignController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
     }
+
+
+    /**
+     * @return JsonResponse
+     */
+    public function activeDesigns() {
+        try {
+            $designs = $this->designRepository->getActiveDesigns();
+
+            return $this->sendResponse($designs,
+                __('messages.retrieved', ['module' => 'Designs']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+    }
+
 
 }
 

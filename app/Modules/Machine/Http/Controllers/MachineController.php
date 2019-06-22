@@ -172,6 +172,24 @@ class MachineController extends Controller
         }
     }
 
+    /**
+     * @return JsonResponse
+     */
+    public function activeMachines() {
+        try {
+            $machines = $this->machineRepository->getActiveMachines();
+
+            return $this->sendResponse($machines,
+                __('messages.retrieved', ['module' => 'Machines']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+    }
+
 }
 
 

@@ -24,7 +24,7 @@ return [
 
     // Sales order Messages
     'not_delete_sales_order'        => 'This Order is in :status state, so you can not delete it.',
-    'complete_order'                => 'To complete this order, all partial order must be completed.',
+    'complete_order'                => 'To complete this order, all partial order must be completed or canceled .',
 
 
     // password messages

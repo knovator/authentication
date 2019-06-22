@@ -3,6 +3,7 @@
 namespace App\Modules\Machine\Repositories;
 
 use App\Modules\Machine\Models\Machine;
+use Knovators\Support\Criteria\IsActiveCriteria;
 use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
 use Prettus\Repository\Exceptions\RepositoryException;
@@ -46,5 +47,21 @@ class MachineRepository extends BaseRepository
         return $machines;
 
     }
+
+
+    /**
+     * @return mixed
+     * @throws RepositoryException
+     * @throws \Exception
+     */
+    public function getActiveMachines() {
+        $this->pushCriteria(IsActiveCriteria::class);
+        $this->applyCriteria();
+        $machines = $this->model->select('id', 'name', 'panno')->get();
+        $this->resetModel();
+
+        return $machines;
+    }
+
 
 }
