@@ -3,9 +3,9 @@
 namespace App\Modules\Sales\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Modules\Sales\Http\Delivery\Requests\CreateRequest;
+use App\Modules\Sales\Http\Requests\Delivery\CreateRequest;
+use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Sales\Repositories\DeliveryRepository;
-use App\Modules\Sales\Repositories\SalesOrderRepository;
 use DB;
 use Exception;
 use Knovators\Support\Helpers\HTTPCode;
@@ -32,16 +32,15 @@ class DeliveryController extends Controller
 
 
     /**
+     * @param SalesOrder    $salesOrder
      * @param CreateRequest $request
      * @return mixed
-     * @throws Exception
      */
-    public function store(CreateRequest $request) {
+    public function store(SalesOrder $salesOrder, CreateRequest $request) {
         $input = $request->all();
         try {
             DB::beginTransaction();
             $this->deliveryRepository->create($input);
-
             DB::commit();
 
             return $this->sendResponse(null,
