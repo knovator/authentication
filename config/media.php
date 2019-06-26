@@ -35,7 +35,7 @@ return [
 
         'mimes' => 'jpeg,jpg,png,gif',
 
-        'max_size' => '2000',
+        'max_size' => '200000',
     ],
 
 ];
