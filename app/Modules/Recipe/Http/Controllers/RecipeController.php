@@ -74,28 +74,31 @@ class RecipeController extends Controller
 
 
     /**
-     * @param $input
+     * @param      $input
+     * @param null $recipeId
      * @return bool
+     * @throws \Prettus\Repository\Exceptions\RepositoryException
      */
-    private function checkUniqueFiddles($input) {
+    private function checkUniqueFiddles($input, $recipeId = false) {
 
         $threadColorIds = array_column($input['thread_color_ids'], 'thread_color_id');
-        $recipes = $this->recipeRepository->with([
+        $recipes = $this->recipeRepository->makeModel()->with([
             'feeders' => function ($feeders) {
                 /** @var Builder $feeders */
                 $feeders->select(['recipe_id', 'thread_color_id'])
                         ->orderBy('fiddle_no', 'ASC');
             }
-        ])->findWhere([
-            'total_fiddles' => $input['total_fiddles']
-        ]);
-        foreach ($recipes as $recipe) {
+        ])->where(['total_fiddles' => $input['total_fiddles']]);
+
+        if ($recipeId) {
+            $recipes = $recipes->whereKeyNot($recipeId);
+        }
+        foreach ($recipes->get() as $recipe) {
             $feeders = array_column($recipe->feeders->toArray(), 'thread_color_id');
             if ($threadColorIds == $feeders) {
                 return true;
             }
         }
-
         return false;
 
     }
@@ -109,7 +112,7 @@ class RecipeController extends Controller
      */
     public function update(Recipe $recipe, UpdateRequest $request) {
         $input = $request->all();
-        if ($this->checkUniqueFiddles($input)) {
+        if ($this->checkUniqueFiddles($input, $recipe->id)) {
             return $this->sendResponse(null, 'Recipe is already added.',
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
