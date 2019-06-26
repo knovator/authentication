@@ -79,9 +79,7 @@ class RecipeController extends Controller
      */
     private function checkUniqueFiddles($input) {
 
-        $threadColorIds = collect($input['thread_color_ids'])->sortBy('fiddle_no')
-                                                             ->keyBy('thread_color_id')->keys()
-                                                             ->toArray();
+        $threadColorIds = array_column($input['thread_color_ids'], 'thread_color_id');
         $recipes = $this->recipeRepository->with([
             'feeders' => function ($feeders) {
                 /** @var Builder $feeders */
@@ -92,7 +90,7 @@ class RecipeController extends Controller
             'total_fiddles' => $input['total_fiddles']
         ]);
         foreach ($recipes as $recipe) {
-            $feeders = $recipe->feeders->keyBy('thread_color_id')->keys()->toArray();
+            $feeders = array_column($recipe->feeders->toArray(), 'thread_color_id');
             if ($threadColorIds == $feeders) {
                 return true;
             }
