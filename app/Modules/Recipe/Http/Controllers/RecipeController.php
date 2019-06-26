@@ -11,6 +11,7 @@ use App\Modules\Recipe\Models\Recipe;
 use App\Modules\Recipe\Repositories\RecipeRepository;
 use DB;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Knovators\Support\Helpers\HTTPCode;
@@ -46,6 +47,10 @@ class RecipeController extends Controller
      */
     public function store(CreateRequest $request) {
         $input = $request->all();
+        if ($this->checkUniqueFiddles($input)) {
+            return $this->sendResponse(null, 'Recipe is already added.',
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
         try {
             DB::beginTransaction();
             $recipe = $this->recipeRepository->create($input);
@@ -65,6 +70,34 @@ class RecipeController extends Controller
             return $this->sendResponse(null, __('messages.something_wrong'),
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
+    }
+
+
+    /**
+     * @param $input
+     * @return bool
+     */
+    private function checkUniqueFiddles($input) {
+
+        $threadColorIds = array_column($input['thread_color_ids'], 'thread_color_id');
+        $recipes = $this->recipeRepository->with([
+            'feeders' => function ($feeders) {
+                /** @var Builder $feeders */
+                $feeders->select(['recipe_id', 'thread_color_id'])
+                        ->orderBy('fiddle_no', 'ASC');
+            }
+        ])->findWhere([
+            'total_fiddles' => $input['total_fiddles']
+        ]);
+        foreach ($recipes as $recipe) {
+            $feeders = array_column($recipe->feeders->toArray(), 'thread_color_id');
+            if ($threadColorIds == $feeders) {
+                return true;
+            }
+        }
+
+        return false;
+
     }
 
 
@@ -129,6 +162,7 @@ class RecipeController extends Controller
             $relations = [
                 'designBeams'
             ];
+
             return $this->destroyModelObject($relations, $recipe, 'Recipe');
 
         } catch (Exception $exception) {

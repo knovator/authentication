@@ -28,6 +28,7 @@ class SalesRecipeRepository extends BaseRepository
     public function model() {
         return SalesOrderRecipe::class;
     }
+
     /**
      * @param $orderRecipeIds
      * @return mixed
@@ -35,6 +36,17 @@ class SalesRecipeRepository extends BaseRepository
     public function removeById($orderRecipeIds) {
         return $this->model->whereIn('id',
             $orderRecipeIds)->delete();
+    }
+
+
+    /**
+     * @param $salesOrderId
+     * @return
+     */
+    public function getOrderRecipeList($salesOrderId) {
+        return $this->model->with('remainingQuantity')->where('sales_order_id', '=', $salesOrderId)
+                           ->get();
+
     }
 
 }

@@ -38,6 +38,16 @@ class SalesOrderRecipe extends Model
 
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function remainingQuantity() {
+        return $this->hasOne(RecipePartialOrder::class, 'sales_order_recipe_id', 'id')
+                    ->selectRaw('sales_order_recipe_id,SUM(total_meters) AS total')
+                    ->groupBy('sales_order_recipe_id');
+    }
+
+
+    /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function recipe() {
