@@ -11,6 +11,7 @@ use App\Modules\Recipe\Models\Recipe;
 use App\Modules\Recipe\Repositories\RecipeRepository;
 use DB;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Knovators\Support\Helpers\HTTPCode;
@@ -46,6 +47,10 @@ class RecipeController extends Controller
      */
     public function store(CreateRequest $request) {
         $input = $request->all();
+        if ($this->checkUniqueFiddles($input)) {
+            return $this->sendResponse(null, 'Recipe is already added.',
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
         try {
             DB::beginTransaction();
             $recipe = $this->recipeRepository->create($input);
@@ -69,6 +74,37 @@ class RecipeController extends Controller
 
 
     /**
+     * @param      $input
+     * @param null $recipeId
+     * @return bool
+     * @throws \Prettus\Repository\Exceptions\RepositoryException
+     */
+    private function checkUniqueFiddles($input, $recipeId = false) {
+
+        $threadColorIds = array_column($input['thread_color_ids'], 'thread_color_id');
+        $recipes = $this->recipeRepository->makeModel()->with([
+            'feeders' => function ($feeders) {
+                /** @var Builder $feeders */
+                $feeders->select(['recipe_id', 'thread_color_id'])
+                        ->orderBy('fiddle_no', 'ASC');
+            }
+        ])->where(['total_fiddles' => $input['total_fiddles']]);
+
+        if ($recipeId) {
+            $recipes = $recipes->whereKeyNot($recipeId);
+        }
+        foreach ($recipes->get() as $recipe) {
+            $feeders = array_column($recipe->feeders->toArray(), 'thread_color_id');
+            if ($threadColorIds == $feeders) {
+                return true;
+            }
+        }
+        return false;
+
+    }
+
+
+    /**
      * @param Recipe        $recipe
      * @param UpdateRequest $request
      * @return JsonResponse
@@ -76,6 +112,10 @@ class RecipeController extends Controller
      */
     public function update(Recipe $recipe, UpdateRequest $request) {
         $input = $request->all();
+        if ($this->checkUniqueFiddles($input, $recipe->id)) {
+            return $this->sendResponse(null, 'Recipe is already added.',
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
         try {
             DB::beginTransaction();
             $recipe->update($input);
@@ -129,6 +169,7 @@ class RecipeController extends Controller
             $relations = [
                 'designBeams'
             ];
+
             return $this->destroyModelObject($relations, $recipe, 'Recipe');
 
         } catch (Exception $exception) {

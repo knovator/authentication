@@ -48,6 +48,14 @@ class Recipe extends Model
     /**
      * @return mixed
      */
+    public function feeders() {
+        return $this->hasMany(RecipeFiddle::class, 'recipe_id', 'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
     public function designBeams() {
         return $this->belongsToMany(DesignBeam::class, 'beams_recipes', 'recipe_id',
             'design_beam_id');
