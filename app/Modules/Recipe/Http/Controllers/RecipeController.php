@@ -11,6 +11,7 @@ use App\Modules\Recipe\Models\Recipe;
 use App\Modules\Recipe\Repositories\RecipeRepository;
 use DB;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Knovators\Support\Helpers\HTTPCode;
@@ -46,6 +47,10 @@ class RecipeController extends Controller
      */
     public function store(CreateRequest $request) {
         $input = $request->all();
+        if ($this->checkUniqueFiddles($input)) {
+            return $this->sendResponse(null, 'Recipe is already added.',
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
         try {
             DB::beginTransaction();
             $recipe = $this->recipeRepository->create($input);
@@ -65,6 +70,36 @@ class RecipeController extends Controller
             return $this->sendResponse(null, __('messages.something_wrong'),
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
+    }
+
+
+    /**
+     * @param $input
+     * @return bool
+     */
+    private function checkUniqueFiddles($input) {
+
+        $threadColorIds = collect($input['thread_color_ids'])->sortBy('fiddle_no')
+                                                             ->keyBy('thread_color_id')->keys()
+                                                             ->toArray();
+        $recipes = $this->recipeRepository->with([
+            'feeders' => function ($feeders) {
+                /** @var Builder $feeders */
+                $feeders->select(['recipe_id', 'thread_color_id'])
+                        ->orderBy('fiddle_no', 'ASC');
+            }
+        ])->findWhere([
+            'total_fiddles' => $input['total_fiddles']
+        ]);
+        foreach ($recipes as $recipe) {
+            $feeders = $recipe->feeders->keyBy('thread_color_id')->keys()->toArray();
+            if ($threadColorIds == $feeders) {
+                return true;
+            }
+        }
+
+        return false;
+
     }
 
 
@@ -129,6 +164,7 @@ class RecipeController extends Controller
             $relations = [
                 'designBeams'
             ];
+
             return $this->destroyModelObject($relations, $recipe, 'Recipe');
 
         } catch (Exception $exception) {
