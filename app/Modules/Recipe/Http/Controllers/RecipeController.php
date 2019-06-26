@@ -109,6 +109,10 @@ class RecipeController extends Controller
      */
     public function update(Recipe $recipe, UpdateRequest $request) {
         $input = $request->all();
+        if ($this->checkUniqueFiddles($input)) {
+            return $this->sendResponse(null, 'Recipe is already added.',
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
         try {
             DB::beginTransaction();
             $recipe->update($input);
