@@ -30,13 +30,13 @@ class CreateRequest extends FormRequest
      */
     public function rules() {
         return [
-            'delivery_date'                => 'required|date_format:Y-m-d',
-            'order_recipes'                => 'required|array',
-            'order_recipes.*.id'           => 'required|integer|exists:sales_orders_recipes,id',
-            'order_recipes.*.machine_id'   => 'required|integer',
-            'order_recipes.*.meters'       => 'required|integer',
-            'order_recipes.*.pcs'          => 'required|integer',
-            'order_recipes.*.total_meters' => 'required|integer',
+            'delivery_date'                  => 'required|date_format:Y-m-d',
+            'orders'                         => 'required|array',
+            'orders.*.sales_order_recipe_id' => 'required|integer|exists:sales_orders_recipes,id',
+            'orders.*.machine_id'            => 'required|integer',
+            'orders.*.meters'                => 'required|integer',
+            'orders.*.pcs'                   => 'required|integer',
+            'orders.*.total_meters'          => 'required|integer',
         ];
     }
 
