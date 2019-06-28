@@ -48,8 +48,8 @@ class CreateRequest extends FormRequest
     public function messages() {
 
         return [
-            'thread_color_ids.required'                   => 'Please fill out all required feeders.',
-            'thread_color_ids.*.thread_color_id.required' => 'Please fill out all required feeders.',
+            'thread_color_ids.required'                   => 'Please fill all the selected feeders.',
+            'thread_color_ids.*.thread_color_id.required' => 'Please fill all the selected feeders.',
         ];
 
     }
