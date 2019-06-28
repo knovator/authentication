@@ -217,6 +217,11 @@ class PurchaseController extends Controller
      * @throws Exception
      */
     private function updatePODELIVEREDStatus(PurchaseOrder $purchaseOrder, $input) {
+
+        if (!isset($input['challan_no'])) {
+            return $this->sendResponse(null, 'Challan Number is must be required',
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
         $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::PO_DELIVERED)->id;
         try {
             DB::beginTransaction();
