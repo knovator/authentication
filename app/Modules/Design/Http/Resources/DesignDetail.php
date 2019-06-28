@@ -21,6 +21,7 @@ class DesignDetail extends JsonResource
     public function toArray($request) {
         return [
             'designer_no'      => $this->designer_no,
+            'creming'          => $this->creming,
             'avg_pick'         => $this->avg_pick,
             'pick_on_loom'     => $this->pick_on_loom,
             'panno'            => $this->panno,
