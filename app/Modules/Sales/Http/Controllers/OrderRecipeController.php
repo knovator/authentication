@@ -3,11 +3,14 @@
 namespace App\Modules\Sales\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Sales\Http\Resources\RecipePartialOrder;
+use App\Modules\Sales\Http\Resources\SalesOrderRecipe as SalesOrderRecipeResource;
 use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Sales\Repositories\DeliveryRepository;
 use App\Modules\Sales\Repositories\SalesRecipeRepository;
 use DB;
 use Exception;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Knovators\Support\Helpers\HTTPCode;
 use Log;
 
@@ -38,15 +41,30 @@ class OrderRecipeController extends Controller
     public function index(SalesOrder $salesOrder) {
         try {
             $orderRecipes = $this->orderRecipeRepository->getOrderRecipeList($salesOrder->id);
-            return $this->sendResponse($orderRecipes,
+            return $this->sendResponse($this->makeResourceCollection($orderRecipes),
                 __('messages.retrieved', ['module' => 'Order recipes']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
-            DB::rollBack();
             Log::error($exception);
 
             return $this->sendResponse(null, __('messages.something_wrong'),
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
+    }
+
+    /**
+     * @param $salesOrder
+     * @return SalesOrderRecipeResource
+     */
+    private function makeResource($salesOrder) {
+        return new SalesOrderRecipeResource($salesOrder);
+    }
+
+    /**
+     * @param $collection
+     * @return AnonymousResourceCollection
+     */
+    private function makeResourceCollection($collection) {
+        return SalesOrderRecipeResource::collection($collection);
     }
 }

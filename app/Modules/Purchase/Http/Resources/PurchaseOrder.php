@@ -25,6 +25,7 @@ class PurchaseOrder extends JsonResource
             'id'         => $this->id,
             'order_no'   => $this->order_no,
             'order_date' => $this->order_date,
+            'challan_no' => $this->challan_no,
             'customer'   => new Customer($this->whenLoaded('customer')),
             'status'     => new Master($this->whenLoaded('status')),
             'threads'    => PurchaseOrderThread::collection($this->whenLoaded('threads')),

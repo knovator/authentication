@@ -30,4 +30,11 @@ class Delivery extends Model
             'id');
     }
 
+    /**
+     * @return mixed
+     */
+    public function partialOrders() {
+        return $this->hasMany(RecipePartialOrder::class, 'delivery_id', 'id');
+    }
+
 }

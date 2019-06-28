@@ -20,14 +20,19 @@ class SalesOrderRecipe extends JsonResource
      * @return array
      */
     public function toArray($request) {
-        return [
+        $orderRecipe = [
             'id'            => $this->id,
             'pcs'           => $this->pcs,
             'meters'        => $this->meters,
             'total_meters'  => $this->total_meters,
             'recipe'        => new RecipeResource($this->whenLoaded('recipe')),
             'partialOrders' => RecipePartialOrder::collection($this->whenLoaded('partialOrders')),
-
         ];
+
+        if ($this->whenLoaded('remainingQuantity')) {
+            $orderRecipe['remaining_meters'] = $this->remaining_meters;
+        }
+
+        return $orderRecipe;
     }
 }

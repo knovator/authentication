@@ -19,6 +19,7 @@ class SalesOrderRecipe extends Model
 
     protected $table = 'sales_orders_recipes';
 
+
     public $timestamps = false;
 
     protected $fillable = [
@@ -42,8 +43,23 @@ class SalesOrderRecipe extends Model
      */
     public function remainingQuantity() {
         return $this->hasOne(RecipePartialOrder::class, 'sales_order_recipe_id', 'id')
-                    ->selectRaw('sales_order_recipe_id,SUM(total_meters) AS total')
+                    ->selectRaw('sales_order_recipe_id,SUM(recipes_partial_orders.total_meters) AS total')
                     ->groupBy('sales_order_recipe_id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRemainingMetersAttribute() {
+
+        if (!$this->relationLoaded('remainingQuantity')) {
+            $this->load('remainingQuantity');
+        }
+        if (!is_null($this->remainingQuantity)) {
+            return $this->total_meters - $this->remainingQuantity->total;
+        }
+
+        return $this->total_meters;
     }
 
 

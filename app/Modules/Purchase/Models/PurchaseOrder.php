@@ -27,6 +27,7 @@ class PurchaseOrder extends Model
         'status_id',
         'created_by',
         'deleted_by',
+        'challan_no'
     ];
 
 
