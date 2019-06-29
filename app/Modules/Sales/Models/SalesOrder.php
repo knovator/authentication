@@ -69,6 +69,14 @@ class SalesOrder extends Model
     /**
      * @return mixed
      */
+    public function delivery() {
+        return $this->hasMany(Delivery::class, 'sales_order_id', 'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
     public function status() {
         return $this->belongsTo(Master::class, 'status_id',
             'id');
