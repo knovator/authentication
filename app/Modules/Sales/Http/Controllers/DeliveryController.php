@@ -141,7 +141,7 @@ class DeliveryController extends Controller
                     // weft partial order per recipe thread color stock
                     $this->createStockQuantity($orderRecipe,
                         $partialOrder->delivery->status_id, $formula, $designDetail,
-                        $partialOrder->total_meters, $designPicks);
+                        $partialOrder->total_meters, $designPicks, $stockQty);
 
                     // warp partial order per recipe thread color stock
                     $stockQty[] = $this->setStockArray($orderRecipe->id, $beam->id,
@@ -158,7 +158,7 @@ class DeliveryController extends Controller
                 // weft remaining meters thread color stock
                 $this->createStockQuantity($orderRecipe,
                     $pendingStatusId, $formula, $designDetail,
-                    $remainingMeters, $designPicks);
+                    $remainingMeters, $designPicks, $stockQty);
 
                 // warp remaining meters thread color stock
                 $stockQty[] = $this->setStockArray($orderRecipe->id, $beam->id,
@@ -182,6 +182,7 @@ class DeliveryController extends Controller
      * @param         $designDetail
      * @param         $totalMeters
      * @param         $designPicks
+     * @param         $stockQty
      */
     private function createStockQuantity(
         $orderRecipe,
@@ -189,7 +190,8 @@ class DeliveryController extends Controller
         Formula $formula,
         $designDetail,
         $totalMeters,
-        $designPicks
+        $designPicks,
+        &$stockQty
     ) {
         foreach ($orderRecipe->recipe->fiddles as $threadColorKey => $threadColor) {
             $threadColor->thread->pick = $designPicks[$threadColorKey]->pick;
