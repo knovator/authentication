@@ -135,8 +135,6 @@ class DeliveryController extends Controller
         $beam = $salesOrder->designBeam->threadColor;
         foreach ($orderRecipes as $orderRecipe) {
 
-            $orderRecipe->recipe->fiddles;
-
             // create partial order stocks
             if ($orderRecipe->partialOrders->isNotEmpty()) {
                 foreach ($orderRecipe->partialOrders as $partialOrder) {
@@ -157,10 +155,17 @@ class DeliveryController extends Controller
             $remainingMeters = ($orderRecipe->total_meters - $orderRecipe->partialOrders->sum('total_meters'));
             // create remaining order stocks
             if ($remainingMeters) {
-                // weft remaining qty thread color stock
+                // weft remaining meters thread color stock
                 $this->createStockQuantity($orderRecipe,
                     $pendingStatusId, $formula, $designDetail,
                     $remainingMeters, $designPicks);
+
+                // warp remaining meters thread color stock
+                $stockQty[] = $this->setStockArray($orderRecipe->id, $beam->id,
+                    $pendingStatusId,
+                    $formula->getTotalKgQty(ThreadType::WARP,
+                        $beam->thread, $designDetail,
+                        $remainingMeters));
 
             }
 
