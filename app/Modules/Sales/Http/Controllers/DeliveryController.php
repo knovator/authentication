@@ -78,7 +78,7 @@ class DeliveryController extends Controller
             $delivery = $salesOrder->delivery()->create($input);
             /** @var Delivery $delivery */
             $delivery->partialOrders()->createMany($input['orders']);
-            $this->storeStockDetails($salesOrder, $input['orders']);
+            $this->storeStockDetails($salesOrder, $input['orders'], $input['status_id']);
 
             DB::commit();
 
@@ -96,11 +96,11 @@ class DeliveryController extends Controller
 
 
     /**
-     * @param $salesOrder
-     * @param $deliveryOrders
-     * @throws \Prettus\Repository\Exceptions\RepositoryException
+     * @param SalesOrder $salesOrder
+     * @param            $deliveryOrders
+     * @param            $pendingStatusId
      */
-    private function storeStockDetails(SalesOrder $salesOrder, $deliveryOrders) {
+    private function storeStockDetails(SalesOrder $salesOrder, $deliveryOrders, $pendingStatusId) {
         $salesRecipeIds = array_unique(array_column($deliveryOrders, 'sales_order_recipe_id'));
         $this->stockRepository->removeByPartialOrderId($salesRecipeIds);
         $orderRecipes = $this->orderRecipeRepository->with([
@@ -116,52 +116,102 @@ class DeliveryController extends Controller
             },
             'designBeam.threadColor.thread'
         ]);
-        $salesOrder->orderStocks()->createMany($this->createStockQuantity($salesOrder,
-            $orderRecipes));
+        $salesOrder->orderStocks()->createMany($this->getStockQuantity($salesOrder,
+            $orderRecipes, $pendingStatusId));
     }
 
 
     /**
      * @param $salesOrder
      * @param $orderRecipes
-     * @param $designDetail
+     * @param $pendingStatusId
      * @return array
      */
-    private function createStockQuantity($salesOrder, $orderRecipes) {
+    private function getStockQuantity($salesOrder, $orderRecipes, $pendingStatusId) {
         $stockQty = [];
         $formula = Formula::getInstance();
         $designDetail = $salesOrder->design->detail;
         $designPicks = $salesOrder->design->fiddlePicks;
+        $beam = $salesOrder->designBeam->threadColor;
         foreach ($orderRecipes as $orderRecipe) {
+
+            $orderRecipe->recipe->fiddles;
+
+            // create partial order stocks
             if ($orderRecipe->partialOrders->isNotEmpty()) {
                 foreach ($orderRecipe->partialOrders as $partialOrder) {
-                    $threadColors = $orderRecipe->recipe->fiddles;
-                    foreach ($threadColors as $threadColorKey => $threadColor) {
-                        $threadColor->thread->pick = $designPicks[$threadColorKey]->pick;
-                        $stockQty[] = [
-                            'order_recipe_id' => $orderRecipe->id,
-                            'product_id'      => $threadColor['id'],
-                            'product_type'    => 'thread_color',
-                            'status_id'       => $partialOrder->delivery->status_id,
-                            'kg_qty'          => $formula->getTotalKgQty(ThreadType::WEFT,
-                                $threadColor->thread, $designDetail,
-                                $partialOrder->total_meters),
-                        ];
-                    }
-                    $beam = $salesOrder->designBeam->threadColor;
-                    $stockQty[] = [
-                        'order_recipe_id' => $orderRecipe->id,
-                        'product_id'      => $beam->id,
-                        'product_type'    => 'thread_color',
-                        'status_id'       => $partialOrder->delivery->status_id,
-                        'kg_qty'          => $formula->getTotalKgQty(ThreadType::WARP,
+                    // weft partial order per recipe thread color stock
+                    $this->createStockQuantity($orderRecipe,
+                        $partialOrder->delivery->status_id, $formula, $designDetail,
+                        $partialOrder->total_meters, $designPicks);
+
+                    // warp partial order per recipe thread color stock
+                    $stockQty[] = $this->setStockArray($orderRecipe->id, $beam->id,
+                        $partialOrder->delivery->status_id,
+                        $formula->getTotalKgQty(ThreadType::WARP,
                             $beam->thread, $designDetail,
-                            $partialOrder->total_meters),
-                    ];
+                            $partialOrder->total_meters));
                 }
             }
+
+            $remainingMeters = ($orderRecipe->total_meters - $orderRecipe->partialOrders->sum('total_meters'));
+            // create remaining order stocks
+            if ($remainingMeters) {
+                // weft remaining qty thread color stock
+                $this->createStockQuantity($orderRecipe,
+                    $pendingStatusId, $formula, $designDetail,
+                    $remainingMeters, $designPicks);
+
+            }
+
         }
+
         return $stockQty;
+    }
+
+
+    /**
+     * @param         $orderRecipe
+     * @param         $statusId
+     * @param Formula $formula
+     * @param         $designDetail
+     * @param         $totalMeters
+     * @param         $designPicks
+     */
+    private function createStockQuantity(
+        $orderRecipe,
+        $statusId,
+        Formula $formula,
+        $designDetail,
+        $totalMeters,
+        $designPicks
+    ) {
+        foreach ($orderRecipe->recipe->fiddles as $threadColorKey => $threadColor) {
+            $threadColor->thread->pick = $designPicks[$threadColorKey]->pick;
+            $stockQty[] = $this->setStockArray($orderRecipe->id, $threadColor['id'],
+                $statusId,
+                $formula->getTotalKgQty(ThreadType::WEFT,
+                    $threadColor->thread, $designDetail,
+                    $totalMeters));
+        }
+    }
+
+
+    /**
+     * @param $orderRecipeId
+     * @param $threadColorId
+     * @param $statusId
+     * @param $kgQty
+     * @return array
+     */
+    private function setStockArray($orderRecipeId, $threadColorId, $statusId, $kgQty) {
+        return [
+            'order_recipe_id' => $orderRecipeId,
+            'product_id'      => $threadColorId,
+            'product_type'    => 'thread_color',
+            'status_id'       => $statusId,
+            'kg_qty'          => $kgQty,
+        ];
     }
 
 
