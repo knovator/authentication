@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Design\Repositories\DesignDetailRepository;
 use App\Modules\Sales\Http\Requests\Delivery\CreateRequest;
 use App\Modules\Sales\Models\Delivery;
+use App\Modules\Sales\Models\RecipePartialOrder;
 use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Sales\Repositories\DeliveryRepository;
 use App\Modules\Sales\Repositories\SalesRecipeRepository;
@@ -141,14 +142,14 @@ class DeliveryController extends Controller
                     // weft partial order per recipe thread color stock
                     $this->createStockQuantity($orderRecipe,
                         $partialOrder->delivery->status_id, $formula, $designDetail,
-                        $partialOrder->total_meters, $designPicks, $stockQty);
+                        $partialOrder->total_meters, $designPicks, $stockQty, $partialOrder);
 
                     // warp partial order per recipe thread color stock
                     $stockQty[] = $this->setStockArray($orderRecipe->id, $beam->id,
                         $partialOrder->delivery->status_id,
                         $formula->getTotalKgQty(ThreadType::WARP,
                             $beam->thread, $designDetail,
-                            $partialOrder->total_meters));
+                            $partialOrder->total_meters), $partialOrder);
                 }
             }
 
@@ -183,6 +184,7 @@ class DeliveryController extends Controller
      * @param         $totalMeters
      * @param         $designPicks
      * @param         $stockQty
+     * @param bool    $partialOrder
      */
     private function createStockQuantity(
         $orderRecipe,
@@ -191,7 +193,8 @@ class DeliveryController extends Controller
         $designDetail,
         $totalMeters,
         $designPicks,
-        &$stockQty
+        &$stockQty,
+        $partialOrder = false
     ) {
         foreach ($orderRecipe->recipe->fiddles as $threadColorKey => $threadColor) {
             $threadColor->thread->pick = $designPicks[$threadColorKey]->pick;
@@ -199,26 +202,40 @@ class DeliveryController extends Controller
                 $statusId,
                 $formula->getTotalKgQty(ThreadType::WEFT,
                     $threadColor->thread, $designDetail,
-                    $totalMeters));
+                    $totalMeters), $partialOrder);
         }
     }
 
 
     /**
-     * @param $orderRecipeId
-     * @param $threadColorId
-     * @param $statusId
-     * @param $kgQty
+     * @param      $orderRecipeId
+     * @param      $threadColorId
+     * @param      $statusId
+     * @param      $kgQty
+     * @param bool $partialOrder
      * @return array
      */
-    private function setStockArray($orderRecipeId, $threadColorId, $statusId, $kgQty) {
-        return [
+    private function setStockArray(
+        $orderRecipeId,
+        $threadColorId,
+        $statusId,
+        $kgQty,
+        $partialOrder = false
+    ) {
+        $stock = [
             'order_recipe_id' => $orderRecipeId,
             'product_id'      => $threadColorId,
             'product_type'    => 'thread_color',
             'status_id'       => $statusId,
             'kg_qty'          => $kgQty,
         ];
+
+        if ($partialOrder) {
+            /** @var RecipePartialOrder $partialOrder */
+            $stock['partial_order_id'] = $partialOrder->id;
+        }
+
+        return $stock;
     }
 
 
