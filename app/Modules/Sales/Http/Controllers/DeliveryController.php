@@ -6,6 +6,7 @@ use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
 use App\Modules\Design\Repositories\DesignDetailRepository;
 use App\Modules\Sales\Http\Requests\Delivery\CreateRequest;
+use App\Modules\Sales\Http\Requests\Delivery\UpdateRequest;
 use App\Modules\Sales\Models\Delivery;
 use App\Modules\Sales\Models\RecipePartialOrder;
 use App\Modules\Sales\Models\SalesOrder;
@@ -79,8 +80,7 @@ class DeliveryController extends Controller
             $delivery = $salesOrder->delivery()->create($input);
             /** @var Delivery $delivery */
             $delivery->partialOrders()->createMany($input['orders']);
-            $this->storeStockDetails($salesOrder, $input['orders'], $input['status_id']);
-
+            $this->storeStockDetails($salesOrder, $input['status_id']);
             DB::commit();
 
             return $this->sendResponse($delivery,
@@ -97,19 +97,70 @@ class DeliveryController extends Controller
 
 
     /**
+     * @param SalesOrder    $salesOrder
+     * @param Delivery      $delivery
+     * @param UpdateRequest $request
+     * @return mixed
+     * @throws Exception
+     */
+    public function update(SalesOrder $salesOrder, Delivery $delivery, UpdateRequest $request) {
+        $input = $request->all();
+        if ($this->checkQuantityNotExists($salesOrder, $input['orders'], $delivery->id)) {
+            return $this->sendResponse(null, __('messages.quantity_not_exists'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+        try {
+            DB::beginTransaction();
+            $delivery->update($input);
+            $this->partialOrderUpdateOrCreate($delivery, $input);
+            $this->storeStockDetails($salesOrder,
+                $this->masterRepository->findByCode(MasterConstant::SO_PENDING)->id);
+            DB::commit();
+
+            return $this->sendResponse($delivery,
+                __('messages.updated', ['module' => 'Sales']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            DB::rollBack();
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
+
+
+    /**
+     * @param Delivery $delivery
+     * @param array    $input
+     */
+    private function partialOrderUpdateOrCreate(Delivery $delivery, $input) {
+        $partialOrders = [];
+        foreach ($input['orders'] as $order) {
+            if (isset($order['id'])) {
+                $delivery->partialOrders()->whereId($order['id'])->update($order);
+            } else {
+                $partialOrders[] = $order;
+            }
+        }
+        if (!empty($partialOrders)) {
+            $delivery->partialOrders()->createMany($partialOrders);
+        }
+        if (isset($input['removed_partial_orders'])) {
+            $delivery->partialOrders()->whereIn('id', $input['removed_partial_orders'])->delete();
+        }
+    }
+
+
+    /**
      * @param SalesOrder $salesOrder
-     * @param            $deliveryOrders
      * @param            $pendingStatusId
      */
-    private function storeStockDetails(SalesOrder $salesOrder, $deliveryOrders, $pendingStatusId) {
-        $salesRecipeIds = array_unique(array_column($deliveryOrders, 'sales_order_recipe_id'));
-        $this->stockRepository->removeByPartialOrderId($salesRecipeIds);
-        $orderRecipes = $this->orderRecipeRepository->with([
-            'partialOrders.delivery',
-            'recipe.fiddles.thread'
-        ])->findWhereIn('id', $salesRecipeIds);
-
+    private function storeStockDetails(SalesOrder $salesOrder, $pendingStatusId) {
+        $salesOrder->orderStocks()->delete();
         $salesOrder->load([
+            'orderRecipes.partialOrders.delivery',
+            'orderRecipes.recipe.fiddles.thread',
             'design.detail',
             'design.fiddlePicks' => function ($fiddlePicks) {
                 /** @var Builder $fiddlePicks */
@@ -118,23 +169,22 @@ class DeliveryController extends Controller
             'designBeam.threadColor.thread'
         ]);
         $salesOrder->orderStocks()->createMany($this->getStockQuantity($salesOrder,
-            $orderRecipes, $pendingStatusId));
+            $pendingStatusId));
     }
 
 
     /**
      * @param $salesOrder
-     * @param $orderRecipes
      * @param $pendingStatusId
      * @return array
      */
-    private function getStockQuantity($salesOrder, $orderRecipes, $pendingStatusId) {
+    private function getStockQuantity($salesOrder, $pendingStatusId) {
         $stockQty = [];
         $formula = Formula::getInstance();
         $designDetail = $salesOrder->design->detail;
         $designPicks = $salesOrder->design->fiddlePicks;
         $beam = $salesOrder->designBeam->threadColor;
-        foreach ($orderRecipes as $orderRecipe) {
+        foreach ($salesOrder->orderRecipes as $orderRecipe) {
 
             // create partial order stocks
             if ($orderRecipe->partialOrders->isNotEmpty()) {
@@ -240,13 +290,15 @@ class DeliveryController extends Controller
 
 
     /**
-     * @param $salesOrder
-     * @param $orders
+     * @param      $salesOrder
+     * @param      $orders
+     * @param null $deliveryId
      * @return bool
      */
-    private function checkQuantityNotExists($salesOrder, $orders) {
+    private function checkQuantityNotExists($salesOrder, $orders, $deliveryId = null) {
         $orders = collect($orders)->groupBy('sales_order_recipe_id');
-        $orderRecipes = $this->orderRecipeRepository->getOrderRecipeList($salesOrder->id);
+        $orderRecipes = $this->orderRecipeRepository->getOrderRecipeList($salesOrder->id,
+            $deliveryId);
         foreach ($orders as $key => $order) {
             $totalMeters = $order->sum('total_meters');
             $orderRecipe = $orderRecipes->find($key);
