@@ -163,28 +163,25 @@ return [
         Illuminate\View\ViewServiceProvider::class,
 
         /*
-         * Package Service Providers...
-         */
-
-        /*
          * Application Service Providers...
          */
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
-        App\Providers\RouteServiceProvider::class,
         Prettus\Repository\Providers\RepositoryServiceProvider::class,
         Yajra\DataTables\DataTablesServiceProvider::class,
         Barryvdh\Cors\ServiceProvider::class,
-
 
         // Knovator packages
         Knovators\HttpLogger\HttpLoggerServiceProvider::class,
         Knovators\Authentication\AuthServiceProvider::class,
         Knovators\Media\MediaServiceProvider::class,
         Knovators\Masters\MasterServiceProvider::class,
+
+
         DougSisk\CountryState\CountryStateServiceProvider::class,
+        App\Providers\RouteServiceProvider::class,
 
 
     ],
