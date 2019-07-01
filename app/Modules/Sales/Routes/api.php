@@ -1,6 +1,7 @@
 <?php
 
 use App\Modules\Sales\Models\SalesOrder;
+use App\Modules\Sales\Models\Delivery;
 
 Route::group([
     'prefix'     => 'admin',
@@ -13,10 +14,13 @@ Route::group([
         // ordered recipes list
         Route::get('sales/{sale}/order-recipes', 'OrderRecipeController@index')
              ->name('sales.recipes.index');
-
         // Sales delivery
         Route::post('sales/{sale}/deliveries', 'DeliveryController@store')
              ->name('deliveries.create');
+
+        Route::put('sales/{sale}/deliveries/{delivery}', 'DeliveryController@update')
+             ->name('deliveries.update');
     });
 
 Route::model('sale', SalesOrder::class);
+Route::model('delivery', Delivery::class);

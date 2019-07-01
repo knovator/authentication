@@ -36,22 +36,23 @@ class Formula
     /**
      * @param $type
      * @param $threadDetail
-     * @param $items
+     * @param $designDetail
+     * @param $totalMeters
      * @return int|string
      */
-    public function getTotalKgQty($type, $threadDetail, $items) {
+    public function getTotalKgQty($type, $threadDetail, $designDetail, $totalMeters) {
 
         switch ($type) {
             case ThreadType::WEFT:
 
-                $value = ($threadDetail['denier'] * ($items['designDetail']->panno +
-                            $items['designDetail']->additional_panno) * $threadDetail['pick'] * $items['total_meters']) / (9000 * 1000);
+                $value = ($threadDetail['denier'] * ($designDetail->panno +
+                            $designDetail->additional_panno) * $threadDetail['pick'] * $totalMeters) / (9000 * 1000);
 
                 return $this->convertRoundValue($value);
             case ThreadType::WARP:
 
-                $value = ($threadDetail['denier'] * ($items['designDetail']->panno + $items['designDetail']->reed) *
-                        $items['total_meters']) / (9000 * 1000);
+                $value = ($threadDetail['denier'] * ($designDetail->panno + $designDetail->reed) *
+                        $totalMeters) / (9000 * 1000);
 
                 return $this->convertRoundValue($value);
 
