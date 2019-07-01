@@ -34,9 +34,24 @@ class CreateRequest extends FormRequest
             'customer_id'               => 'required|exists:customers,id',
             'threads'                   => 'required|array',
             'threads.*.thread_color_id' => 'required|integer',
-            'threads.*.kg_qty'          => 'required|integer',
+            'threads.*.kg_qty'          => 'required|numeric',
         ];
     }
 
+
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array
+     */
+    public function messages() {
+        return [
+            'threads.required'                   => 'Please select at least one thread.',
+            'threads.*.thread_color_id.required' => 'Please fill all the selected Threads and Quantity.',
+            'threads.*.kg_qty.required'          => 'Please fill all the selected Threads and Quantity.',
+            'threads.*.kg_qty.numeric'           => 'Quantity must be numeric value.',
+        ];
+
+    }
 
 }
