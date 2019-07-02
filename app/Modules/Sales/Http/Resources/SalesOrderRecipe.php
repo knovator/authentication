@@ -28,8 +28,8 @@ class SalesOrderRecipe extends JsonResource
             'recipe'        => new RecipeResource($this->whenLoaded('recipe')),
             'partialOrders' => RecipePartialOrder::collection($this->whenLoaded('partialOrders')),
         ];
-
-        if ($this->whenLoaded('remainingQuantity')) {
+        /** @var \App\Modules\Sales\Models\SalesOrderRecipe $this */
+        if ($this->relationLoaded('remainingQuantity')) {
             $orderRecipe['remaining_meters'] = $this->remaining_meters;
         }
 
