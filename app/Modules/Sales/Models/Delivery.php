@@ -5,6 +5,7 @@ namespace App\Modules\Sales\Models;
 
 use App\Models\Master;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Knovators\Support\Traits\HasModelEvent;
 
 /**
@@ -14,7 +15,7 @@ use Knovators\Support\Traits\HasModelEvent;
 class Delivery extends Model
 {
 
-    use HasModelEvent;
+    use HasModelEvent, SoftDeletes;
 
     protected $table = 'deliveries';
 
