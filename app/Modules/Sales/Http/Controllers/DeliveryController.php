@@ -2,6 +2,7 @@
 
 namespace App\Modules\Sales\Http\Controllers;
 
+use App\Constants\GenerateNumber;
 use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
 use App\Modules\Design\Repositories\DesignDetailRepository;
@@ -16,10 +17,13 @@ use App\Modules\Stock\Repositories\StockRepository;
 use App\Modules\Thread\Constants\ThreadType;
 use App\Repositories\MasterRepository;
 use App\Support\Formula;
+use App\Support\UniqueIdGenerator;
 use DB;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Knovators\Support\Helpers\HTTPCode;
+use Knovators\Support\Traits\DestroyObject;
 use Log;
 
 /**
@@ -28,6 +32,8 @@ use Log;
  */
 class DeliveryController extends Controller
 {
+
+    use DestroyObject, UniqueIdGenerator;
 
     protected $deliveryRepository;
 
@@ -75,6 +81,7 @@ class DeliveryController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
         $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::SO_PENDING)->id;
+        $input['delivery_no'] = $this->generateUniqueId(GenerateNumber::DELIVERY);
         try {
             DB::beginTransaction();
             $delivery = $salesOrder->delivery()->create($input);
@@ -117,7 +124,7 @@ class DeliveryController extends Controller
                 $this->masterRepository->findByCode(MasterConstant::SO_PENDING)->id);
             DB::commit();
 
-            return $this->sendResponse($delivery,
+            return $this->sendResponse($delivery->fresh(),
                 __('messages.updated', ['module' => 'Sales']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -308,6 +315,36 @@ class DeliveryController extends Controller
         }
 
         return false;
+    }
+
+
+    /**
+     * @param SalesOrder $salesOrder
+     * @param Delivery   $delivery
+     * @return JsonResponse
+     */
+    public function destroy(SalesOrder $salesOrder, Delivery $delivery) {
+        try {
+            $delivery->load('status');
+            if (($delivery->status->code === MasterConstant::SO_PENDING) ||
+                $delivery->status->code === MasterConstant::SO_CANCELED) {
+                $response = $this->destroyModelObject([], $salesOrder, 'Delivery');
+                $this->storeStockDetails($salesOrder,
+                    $this->masterRepository->findByCode(MasterConstant::SO_PENDING)->id);
+
+                return $response;
+            }
+
+            return $this->sendResponse(null,
+                __('messages.delivery_can_not_delete', ['status' => $delivery->status->name]),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
     }
 
 }
