@@ -328,7 +328,7 @@ class DeliveryController extends Controller
             $delivery->load('status');
             if (($delivery->status->code === MasterConstant::SO_PENDING) ||
                 $delivery->status->code === MasterConstant::SO_CANCELED) {
-                $response = $this->destroyModelObject([], $salesOrder, 'Delivery');
+                $response = $this->destroyModelObject([], $delivery, 'Delivery');
                 $this->storeStockDetails($salesOrder,
                     $this->masterRepository->findByCode(MasterConstant::SO_PENDING)->id);
 

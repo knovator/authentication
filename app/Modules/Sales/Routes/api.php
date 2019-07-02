@@ -20,6 +20,9 @@ Route::group([
 
         Route::put('sales/{sale}/deliveries/{delivery}', 'DeliveryController@update')
              ->name('deliveries.update');
+
+        Route::delete('sales/{sale}/deliveries/{delivery}', 'DeliveryController@destroy')
+             ->name('deliveries.destroy');
     });
 
 Route::model('sale', SalesOrder::class);

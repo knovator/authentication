@@ -5,6 +5,7 @@ namespace App\Modules\Sales\Models;
 
 use App\Models\Master;
 use Illuminate\Database\Eloquent\Model;
+use Knovators\Support\Traits\HasModelEvent;
 
 /**
  * Class Delivery
@@ -12,6 +13,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Delivery extends Model
 {
+
+    use HasModelEvent;
 
     protected $table = 'deliveries';
 
@@ -22,6 +25,17 @@ class Delivery extends Model
         'delivery_date',
         'status_id'
     ];
+
+
+    public static function boot() {
+        parent::boot();
+        static::deleting(function (Delivery $delivery) {
+            $delivery->partialOrders->each(function (RecipePartialOrder $recipePartialOrder) {
+                $recipePartialOrder->stocks()->delete();
+            });
+            $delivery->partialOrders()->delete();
+        });
+    }
 
 
     /**

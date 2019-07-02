@@ -5,6 +5,7 @@ namespace App\Modules\Sales\Models;
 
 use App\Models\Master;
 use App\Modules\Machine\Models\Machine;
+use App\Modules\Stock\Models\Stock;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -54,6 +55,14 @@ class RecipePartialOrder extends Model
      */
     public function machine() {
         return $this->belongsTo(Machine::class, 'machine_id',
+            'id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function stocks() {
+        return $this->hasMany(Stock::class, 'partial_order_id',
             'id');
     }
 
