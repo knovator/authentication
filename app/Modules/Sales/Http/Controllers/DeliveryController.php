@@ -347,4 +347,19 @@ class DeliveryController extends Controller
         }
     }
 
+
+    /**
+     * @param SalesOrder $salesOrder
+     * @param Delivery   $delivery
+     * @return JsonResponse
+     */
+    public function index(SalesOrder $salesOrder) {
+        $deliveries = $this->deliveryRepository->getDeliveryList($salesOrder->id);
+
+        return $this->sendResponse($deliveries,
+            __('messages.retrieved', ['module' => 'Delivery']),
+            HTTPCode::OK);
+    }
+
+
 }

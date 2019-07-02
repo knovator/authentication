@@ -32,11 +32,24 @@ class RecipePartialOrder extends Model
     ];
 
 
+    protected $hidden = [
+        'deleted_at'
+    ];
+
     /**
      * @return mixed
      */
     public function status() {
         return $this->belongsTo(Master::class, 'status_id',
+            'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function orderRecipe() {
+        return $this->belongsTo(SalesOrderRecipe::class, 'sales_order_recipe_id',
             'id');
     }
 

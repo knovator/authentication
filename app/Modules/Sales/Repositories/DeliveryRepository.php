@@ -31,4 +31,27 @@ class DeliveryRepository extends BaseRepository
     }
 
 
+    /**
+     * @param $salesOrderId
+     * @return
+     * @throws RepositoryException
+     * @throws \Exception
+     */
+    public function getDeliveryList($salesOrderId) {
+        $this->applyCriteria();
+        $deliveries = datatables()->of($this->model->where('sales_order_id', $salesOrderId)->with
+        ([
+            'status:id,name,code',
+            'partialOrders.orderRecipe.recipe.fiddles.thread:id,name,denier',
+            'partialOrders.orderRecipe.recipe.fiddles.color:id,name,code',
+
+        ]))->make(true);
+        $this->resetModel();
+
+        return $deliveries;
+
+
+    }
+
+
 }

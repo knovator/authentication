@@ -23,6 +23,9 @@ Route::group([
 
         Route::delete('sales/{sale}/deliveries/{delivery}', 'DeliveryController@destroy')
              ->name('deliveries.destroy');
+
+        Route::get('sales/{sale}/deliveries', 'DeliveryController@index')
+             ->name('deliveries.index');
     });
 
 Route::model('sale', SalesOrder::class);
