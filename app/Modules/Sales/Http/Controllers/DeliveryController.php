@@ -25,6 +25,7 @@ use Illuminate\Http\JsonResponse;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;
+use Prettus\Repository\Exceptions\RepositoryException;
 
 /**
  * Class DeliveryController
@@ -350,15 +351,22 @@ class DeliveryController extends Controller
 
     /**
      * @param SalesOrder $salesOrder
-     * @param Delivery   $delivery
      * @return JsonResponse
+     * @throws RepositoryException
      */
     public function index(SalesOrder $salesOrder) {
-        $deliveries = $this->deliveryRepository->getDeliveryList($salesOrder->id);
+        try {
+            $deliveries = $this->deliveryRepository->getDeliveryList($salesOrder->id);
 
-        return $this->sendResponse($deliveries,
-            __('messages.retrieved', ['module' => 'Delivery']),
-            HTTPCode::OK);
+            return $this->sendResponse($deliveries,
+                __('messages.retrieved', ['module' => 'Delivery']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
     }
 
 
