@@ -4,6 +4,7 @@ namespace App\Modules\Sales\Models;
 
 
 use App\Models\Master;
+use App\Modules\Stock\Models\Stock;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Knovators\Support\Traits\HasModelEvent;
@@ -58,6 +59,15 @@ class Delivery extends Model
      */
     public function partialOrders() {
         return $this->hasMany(RecipePartialOrder::class, 'delivery_id', 'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function orderStocks() {
+        return $this->hasManyThrough(Stock::class, RecipePartialOrder::class, 'delivery_id',
+            'partial_order_id', 'id', 'id');
     }
 
 }

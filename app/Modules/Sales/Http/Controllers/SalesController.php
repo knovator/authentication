@@ -369,16 +369,13 @@ class SalesController extends Controller
         ([MasterConstant::SO_DELIVERED, MasterConstant::SO_CANCELED]);
 
         $salesOrder->load([
-            'partialOrders' => function ($partialOrder) use ($statusIds) {
-                /** @var Builder $partialOrder */
-                $partialOrder->whereHas('delivery', function ($delivery) use ($statusIds) {
-                    /** @var Builder $delivery */
-                    $delivery->whereNotIn('status_id', $statusIds);
-                });
+            'deliveries' => function ($deliveries) use ($statusIds) {
+                /** @var Builder $deliveries */
+                $deliveries->whereNotIn('status_id', $statusIds);
             }
         ]);
 
-        if ($salesOrder->partialOrders->isNotEmpty()) {
+        if ($salesOrder->deliveries->isNotEmpty()) {
             return $this->sendResponse(null, __('messages.complete_order'),
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }

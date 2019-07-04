@@ -44,6 +44,7 @@ class DeliveryRepository extends BaseRepository
             'status:id,name,code',
             'partialOrders.orderRecipe.recipe.fiddles.thread:id,name,denier',
             'partialOrders.orderRecipe.recipe.fiddles.color:id,name,code',
+            'deliveries:id,delivery_no,delivery_date',
 
         ]))->make(true);
         $this->resetModel();

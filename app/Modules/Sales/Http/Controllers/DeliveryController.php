@@ -7,6 +7,7 @@ use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
 use App\Modules\Design\Repositories\DesignDetailRepository;
 use App\Modules\Sales\Http\Requests\Delivery\CreateRequest;
+use App\Modules\Sales\Http\Requests\Delivery\StatusRequest;
 use App\Modules\Sales\Http\Requests\Delivery\UpdateRequest;
 use App\Modules\Sales\Models\Delivery;
 use App\Modules\Sales\Models\RecipePartialOrder;
@@ -26,6 +27,7 @@ use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;
 use Prettus\Repository\Exceptions\RepositoryException;
+use Str;
 
 /**
  * Class DeliveryController
@@ -85,7 +87,7 @@ class DeliveryController extends Controller
         $input['delivery_no'] = $this->generateUniqueId(GenerateNumber::DELIVERY);
         try {
             DB::beginTransaction();
-            $delivery = $salesOrder->delivery()->create($input);
+            $delivery = $salesOrder->deliveries()->create($input);
             /** @var Delivery $delivery */
             $delivery->partialOrders()->createMany($input['orders']);
             $this->storeStockDetails($salesOrder, $input['status_id']);
@@ -352,7 +354,6 @@ class DeliveryController extends Controller
     /**
      * @param SalesOrder $salesOrder
      * @return JsonResponse
-     * @throws RepositoryException
      */
     public function index(SalesOrder $salesOrder) {
         try {
@@ -369,5 +370,118 @@ class DeliveryController extends Controller
         }
     }
 
+
+    /**
+     * @param StatusRequest $request
+     * @return JsonResponse
+     * @throws RepositoryException
+     */
+    public function changeStatus(StatusRequest $request) {
+        $status = $request->get('code');
+        $method = 'update' . Str::studly($status) . 'Status';
+        $delivery = $this->deliveryRepository->find($request->get('delivery_id'));
+        if (method_exists($this, $method)) {
+            return $this->{$method}($delivery);
+        }
+        Log::error('Unable to find status method: ' . $status);
+
+        return $this->sendResponse(null, __('messages.something_wrong'),
+            HTTPCode::UNPROCESSABLE_ENTITY);
+
+    }
+
+
+    /**
+     * @param Delivery $delivery
+     * @return JsonResponse
+     */
+    private function updateSOPENDINGStatus(Delivery $delivery) {
+        try {
+            return $this->updateStatus($delivery, MasterConstant::SO_PENDING);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+
+
+    }
+
+
+    /**
+     * @param Delivery $delivery
+     * @return JsonResponse
+     */
+    private function updateSOCANCELEDStatus(Delivery $delivery) {
+        try {
+            return $this->updateStatus($delivery, MasterConstant::SO_CANCELED);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+
+
+    }
+
+
+    /**
+     * @param Delivery $delivery
+     * @return JsonResponse
+     */
+    private function updateSODELIVEREDStatus(Delivery $delivery) {
+        try {
+            return $this->updateStatus($delivery, MasterConstant::SO_DELIVERED);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+
+    }
+
+    /**
+     * @param Delivery $delivery
+     * @return JsonResponse
+     */
+    private function updateSOMANUFACTURINGStatus(Delivery $delivery) {
+        try {
+            return $this->updateStatus($delivery, MasterConstant::SO_MANUFACTURING);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+
+    }
+
+
+    /**
+     * @param Delivery $delivery
+     * @param          $code
+     * @return JsonResponse
+     * @throws Exception
+     */
+    private function updateStatus(Delivery $delivery, $code) {
+        $input['status_id'] = $this->masterRepository->findByCode($code)->id;
+        try {
+            DB::beginTransaction();
+            $delivery->orderStocks()->update($input);
+            $delivery->update($input);
+            DB::commit();
+
+            return $this->sendResponse(null,
+                __('messages.updated', ['module' => 'Status']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            DB::rollBack();
+            Log::error($exception);
+            throw $exception;
+        }
+    }
 
 }
