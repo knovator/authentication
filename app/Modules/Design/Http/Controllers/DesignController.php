@@ -298,8 +298,27 @@ class DesignController extends Controller
      * @return Factory|View
      */
     public function export(Design $design, Request $request) {
-        $design->load(['detail', 'beams.recipes', 'beams.threadColor', 'mainImage.file']);
-//        dd($design);
+
+//        $hex = "#00FF00";
+//        dd(sscanf($hex, "#%02x%02x%02x"));
+//        list($red, $green, $blue) = sscanf($hex, "#%02x%02x%02x");
+//        dd($red,$green,$blue);
+
+
+        $design->load([
+            'detail',
+            'fiddlePicks',
+            'beams.recipes.fiddles.thread',
+            'beams.recipes.fiddles.color',
+            'beams.threadColor.thread',
+            'beams.threadColor.color:id,name,code',
+            'mainImage.file'
+        ]);
+
+
+
+
+
         return view('receipts.design.design', compact('design'));
     }
 }
