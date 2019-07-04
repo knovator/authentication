@@ -29,6 +29,9 @@ Route::group([
 
         Route::post('deliveries/change-status', 'DeliveryController@changeStatus')
              ->name('deliveries.change-status');
+
+        Route::get('sales-thread-analysis', 'SalesController@threadAnalysis')
+             ->name('sales.thread.analysis');
     });
 
 Route::model('sale', SalesOrder::class);

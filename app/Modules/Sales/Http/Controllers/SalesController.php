@@ -6,6 +6,7 @@ use App\Constants\GenerateNumber;
 use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
 use App\Modules\Design\Repositories\DesignDetailRepository;
+use App\Modules\Sales\Http\Requests\AnalysisRequest;
 use App\Modules\Sales\Http\Requests\CreateRequest;
 use App\Modules\Sales\Http\Requests\StatusRequest;
 use App\Modules\Sales\Http\Requests\UpdateRequest;
@@ -17,6 +18,7 @@ use App\Modules\Sales\Repositories\SalesOrderRepository;
 use App\Modules\Sales\Repositories\SalesRecipeRepository;
 use App\Modules\Stock\Repositories\StockRepository;
 use App\Modules\Thread\Constants\ThreadType;
+use App\Modules\Thread\Repositories\ThreadColorRepository;
 use App\Repositories\MasterRepository;
 use App\Support\Formula;
 use App\Support\UniqueIdGenerator;
@@ -48,6 +50,7 @@ class SalesController extends Controller
 
     protected $recipePartialOrderRepo;
 
+    protected $threadColorRepository;
 
     /**
      * SalesController constructor.
@@ -60,12 +63,14 @@ class SalesController extends Controller
         SalesOrderRepository $salesOrderRepository,
         MasterRepository $masterRepository,
         DesignDetailRepository $designDetailRepository,
-        RecipePartialRepository $recipePartialOrderRepository
+        RecipePartialRepository $recipePartialOrderRepository,
+        ThreadColorRepository $threadColorRepository
     ) {
         $this->salesOrderRepository = $salesOrderRepository;
         $this->masterRepository = $masterRepository;
         $this->designDetailRepository = $designDetailRepository;
         $this->recipePartialOrderRepo = $recipePartialOrderRepository;
+        $this->threadColorRepository = $threadColorRepository;
     }
 
 
@@ -420,5 +425,41 @@ class SalesController extends Controller
         }
     }
 
+    /**
+     * @param AnalysisRequest $request
+     * @return JsonResponse
+     */
+    public function threadAnalysis(AnalysisRequest $request) {
+        $input = $request->all();
+        $collection = collect($input['reports'])->keyBy('thread_color_id');
+        try {
+            $threadColors = $this->threadColorRepository->with([
+                'availableStock',
+                'thread' => function($thread){
+                    /** @var Builder $thread */
+                    $thread->select(['id','name','type_id'])->with('type:id,name');
+                },
+                'color:id,name,code'
+            ])->findWhereIn('id', $collection->pluck('thread_color_id')->toArray());
+
+            foreach ($threadColors as &$threadColor) {
+                $threadColor['available'] = ($threadColor->availableStock) ?
+                    $threadColor->availableStock->available_qty : 0;
+                $threadColor['used_in_design'] = $collection[$threadColor->id]['total_kg'];
+                unset($threadColor->availableStock);
+            }
+
+            return $this->sendResponse($threadColors,
+                __('messages.retrieved', ['module' => 'Stocks']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY,$exception);
+        }
+
+
+    }
 
 }
