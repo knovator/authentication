@@ -9,9 +9,9 @@ Route::group([
     function () {
         Route::resource('designs', 'DesignController');
         Route::put('designs/partiallyUpdate/{design}', 'DesignController@partiallyUpdate')
-             ->name('design.partially-update');
+             ->name('designs.partially-update');
         Route::put('designs/partiallyApprove/{design}', 'DesignController@partiallyApprove')
-             ->name('design.partially-approve');
+             ->name('designs.partially-approve');
     });
 
 Route::group([
