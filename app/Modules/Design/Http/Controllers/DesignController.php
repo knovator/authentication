@@ -16,8 +16,10 @@ use App\Modules\Design\Repositories\DesignRepository;
 use App\Support\UniqueIdGenerator;
 use DB;
 use Exception;
+use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;
@@ -292,13 +294,9 @@ class DesignController extends Controller
 
     /**
      * @param Request $request
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return Factory|View
      */
-    public function export(Request $request){
-
-
-
-
+    public function export(Request $request) {
 
 
         return view('receipts.design.design');
