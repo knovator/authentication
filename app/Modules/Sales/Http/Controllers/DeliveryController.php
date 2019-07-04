@@ -287,7 +287,7 @@ class DeliveryController extends Controller
             'product_id'      => $threadColorId,
             'product_type'    => 'thread_color',
             'status_id'       => $statusId,
-            'kg_qty'          => $kgQty,
+            'kg_qty'          => '-' . $kgQty,
         ];
 
         if ($partialOrder) {
@@ -363,6 +363,7 @@ class DeliveryController extends Controller
                 __('messages.retrieved', ['module' => 'Delivery']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
+            Log::error($exception);
 
             return $this->sendResponse(null, __('messages.something_wrong'),
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
