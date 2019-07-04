@@ -293,16 +293,15 @@ class DesignController extends Controller
 
 
     /**
+     * @param Design  $design
      * @param Request $request
      * @return Factory|View
      */
-    public function export(Request $request) {
-
-
-        return view('receipts.design.design');
+    public function export(Design $design, Request $request) {
+        $design->load(['detail', 'beams.recipes', 'beams.threadColor', 'mainImage.file']);
+//        dd($design);
+        return view('receipts.design.design', compact('design'));
     }
-
-
 }
 
 

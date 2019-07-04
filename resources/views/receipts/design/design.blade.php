@@ -8,24 +8,24 @@
 <main class="without-border">
     <section class="section-1">
         <div class="preview-box">
-            <img alt="design name" class="preview" src="{{asset('images/design/qsds_1560773376.jpeg')}}"/>
+            <img alt="design name" class="preview" src="{{$design->mainImage->file->url}}"/>
         </div>
         <div class="details-box">
-            <div class="detail-row design-name">Quality Name
+            <div class="detail-row design-name">{{$design->quality_name}}
             </div>
             <table>
                 <tbody>
                 <tr>
                     <td class="text-left label">Reed</td>
-                    <td>: 99</td>
+                    <td>: {{$design->detail->reed}}</td>
                     <td class="text-left label">Avg. Pick</td>
-                    <td>: 128</td>
+                    <td>: {{$design->detail->avg_pick}}</td>
                 </tr>
                 <tr>
                     <td class="text-left label">Feeder</td>
-                    <td>: 5</td>
+                    <td>: {{$design->fiddles}}</td>
                     <td class="text-left label">Panno</td>
-                    <td>: 38</td>
+                    <td>: {{$design->detail->panno}} (+4)</td>
                 </tr>
                 <tr>
                     <td class="text-left label">Type</td>

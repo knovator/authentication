@@ -80,7 +80,7 @@ class Design extends Model
      * @return mixed
      */
     public function fiddlePicks() {
-        return $this->hasMany(DesignFiddlePick::class, 'design_id', 'id');
+        return $this->hasMany(DesignFiddlePick::class, 'design_id', 'id')->orderBy('fiddle_no');
     }
 
     /**

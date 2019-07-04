@@ -318,23 +318,23 @@ tbody tr:first-child {
   font-family: "Gotham Book";
   font-style: normal;
   font-weight: normal;
-  src: url("fontsothamBook.eot");
+  src: url("../fonts/GothamBook.eot");
   src: local("Gotham-Book"),
-    url("fontsothamBook.eot?#iefix") format("embedded-opentype"),
-    url("fontsothamBook.woff2") format("woff2"),
-    url("fontsothamBook.woff") format("woff"),
-    url("fontsothamBook.ttf") format("truetype"),
-    url("fontsothamBook.svg#Gotham-Book") format("svg");
+    url("../fonts/GothamBook.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/GothamBook.woff2") format("woff2"),
+    url("../fonts/GothamBook.woff") format("woff"),
+    url("../fonts/GothamBook.ttf") format("truetype"),
+    url("../fonts/GothamBook.svg#Gotham-Book") format("svg");
 }
 
 @font-face {
   font-family: "Gotham Book";
-  src: url("fontsotham-Bold.eot");
+  src: url("../fonts/Gotham-Bold.eot");
   src: local("Gotham-Book"),
-    url("fontsotham-Bold.eot?#iefix") format("embedded-opentype"),
-    url("fontsotham-Bold.woff2") format("woff2"),
-    url("fontsotham-Bold.woff") format("woff"),
-    url("fontsotham-Bold.ttf") format("truetype");
+    url("../fonts/Gotham-Bold.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/Gotham-Bold.woff2") format("woff2"),
+    url("../fonts/Gotham-Bold.woff") format("woff"),
+    url("../fonts/Gotham-Bold.ttf") format("truetype");
   font-weight: 600;
   font-style: normal;
 }
