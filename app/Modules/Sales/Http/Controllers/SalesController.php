@@ -10,7 +10,6 @@ use App\Modules\Sales\Http\Requests\CreateRequest;
 use App\Modules\Sales\Http\Requests\StatusRequest;
 use App\Modules\Sales\Http\Requests\UpdateRequest;
 use App\Modules\Sales\Http\Resources\SalesOrder as SalesOrderResource;
-use App\Modules\Sales\Models\RecipePartialOrder;
 use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Sales\Models\SalesOrderRecipe;
 use App\Modules\Sales\Repositories\RecipePartialRepository;
@@ -18,6 +17,7 @@ use App\Modules\Sales\Repositories\SalesOrderRepository;
 use App\Modules\Sales\Repositories\SalesRecipeRepository;
 use App\Modules\Stock\Repositories\StockRepository;
 use App\Modules\Thread\Constants\ThreadType;
+use App\Repositories\MasterRepository;
 use App\Support\Formula;
 use App\Support\UniqueIdGenerator;
 use DB;
@@ -25,7 +25,6 @@ use Exception;
 use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
-use App\Repositories\MasterRepository;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;
@@ -265,7 +264,7 @@ class SalesController extends Controller
         $salesOrder->load([
             'customer',
             'status',
-            'design',
+            'design.detail',
             'designBeam.threadColor.thread',
             'designBeam.threadColor.color',
             'orderRecipes',
