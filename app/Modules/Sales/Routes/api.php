@@ -26,6 +26,9 @@ Route::group([
 
         Route::get('sales/{sale}/deliveries', 'DeliveryController@index')
              ->name('deliveries.index');
+
+        Route::post('deliveries/change-status', 'DeliveryController@changeStatus')
+             ->name('deliveries.change-status');
     });
 
 Route::model('sale', SalesOrder::class);
