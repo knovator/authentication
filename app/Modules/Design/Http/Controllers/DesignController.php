@@ -299,12 +299,6 @@ class DesignController extends Controller
      */
     public function export(Design $design, Request $request) {
 
-//        $hex = "#00FF00";
-//        dd(sscanf($hex, "#%02x%02x%02x"));
-//        list($red, $green, $blue) = sscanf($hex, "#%02x%02x%02x");
-//        dd($red,$green,$blue);
-
-
         $design->load([
             'detail',
             'fiddlePicks',
@@ -314,11 +308,6 @@ class DesignController extends Controller
             'beams.threadColor.color:id,name,code',
             'mainImage.file'
         ]);
-
-
-
-
-
         return view('receipts.design.design', compact('design'));
     }
 }

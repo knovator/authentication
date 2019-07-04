@@ -53,7 +53,7 @@
         <div class="beams-box">
             <div class="beam-name">
                 <div class="color-preview -block"
-                     style="background-color: {{$beam->threadColor->color->code}}; margin: 5px">{{$beam->threadColor->thread->denier}}</div>
+                     style="color:{{getFontColor($beam->threadColor->color->code)}};background-color: {{$beam->threadColor->color->code}}; margin: 5px">{{$beam->threadColor->thread->denier}}</div>
                 {{$beam->threadColor->thread->name}} ({{$beam->threadColor->color->name}})
             </div>
             <table class="listing-table">
@@ -62,7 +62,7 @@
                     <tr class="content-row">
                         @foreach($recipe->fiddles as $fiddle)
                             <td class="text-center"><span class="color-preview -block"
-                                                          style="background-color: {{$fiddle->color->code}}">{{$fiddle->thread->denier}}</span>
+                                                          style="color:{{getFontColor($fiddle->color->code)}};background-color: {{$fiddle->color->code}}">{{$fiddle->thread->denier}}</span>
                                 {{$fiddle->thread->name}} ({{$fiddle->color->name}})
                             </td>
                         @endforeach
