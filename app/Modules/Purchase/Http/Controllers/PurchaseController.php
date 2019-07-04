@@ -110,6 +110,7 @@ class PurchaseController extends Controller
                 'customer',
                 'status'
             ]);
+
             return $this->sendResponse($this->makeResource($purchaseOrder),
                 __('messages.updated', ['module' => 'Purchase']),
                 HTTPCode::OK);

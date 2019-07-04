@@ -11,6 +11,7 @@ namespace App\Constants;
 class Master
 {
 
+    const COLOR = 'COLOR';
 
     // Purchase Order Statuses
     const PURCHASE_STATUS = 'PURCHASE_STATUS'; // parent

@@ -31,5 +31,8 @@ return [
     'current_password_wrong'        => 'Current password is incorrect.',
     'password_changed'              => 'Password changed successfully.',
 
-    'something_wrong' => 'Oops! something went wrong ,please try again later.',
+    'something_wrong'     => 'Oops! something went wrong ,please try again later.',
+
+    // partial order messages
+    'quantity_not_exists' => 'Quantity you are trying to do should be less than or equal to the remaining quantity.'
 ];

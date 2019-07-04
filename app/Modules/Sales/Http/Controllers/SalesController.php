@@ -161,9 +161,8 @@ class SalesController extends Controller
             $orderRecipeId = isset($items['id']) ? $items['id'] : null;
             $orderRecipe = $salesOrder->orderRecipes()
                                       ->updateOrCreate(['id' => $orderRecipeId], $items);
-            $items['designDetail'] = $designDetail;
             $items['status_id'] = $salesOrder->status_id;
-            $this->storeRecipeOrderQuantities($salesOrder, $orderRecipe, $items);
+            $this->storeRecipeOrderQuantities($salesOrder, $orderRecipe, $items, $designDetail);
         }
 
         if ($update && isset($input['removed_order_recipes_id']) && !empty($input['removed_order_recipes_id'])) {
@@ -187,11 +186,13 @@ class SalesController extends Controller
      * @param SalesOrder         $salesOrder
      * @param SalesOrderRecipe   $orderRecipe
      * @param                    $items
+     * @param                    $designDetail
      */
     private function storeRecipeOrderQuantities(
         SalesOrder $salesOrder,
         SalesOrderRecipe $orderRecipe,
-        $items
+        $items,
+        $designDetail
     ) {
         $formula = Formula::getInstance();
         $data = [];
@@ -204,7 +205,7 @@ class SalesController extends Controller
                 'product_type'    => 'thread_color',
                 'status_id'       => $items['status_id'],
                 'kg_qty'          => $formula->getTotalKgQty(ThreadType::WEFT,
-                    $quantityDetails, $items),
+                    $quantityDetails, $designDetail, $items['total_meters']),
             ];
         }
         $threadDetail['denier'] = $salesOrder->designBeam->threadColor->thread->denier;
@@ -215,7 +216,7 @@ class SalesController extends Controller
             'product_type'    => 'thread_color',
             'status_id'       => $items['status_id'],
             'kg_qty'          => $formula->getTotalKgQty(ThreadType::WARP,
-                $threadDetail, $items),
+                $threadDetail, $designDetail, $items['total_meters']),
         ]);
 
         $salesOrder->orderStocks()->createMany($data);

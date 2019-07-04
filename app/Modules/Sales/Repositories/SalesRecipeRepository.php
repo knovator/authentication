@@ -3,6 +3,9 @@
 namespace App\Modules\Sales\Repositories;
 
 use App\Modules\Sales\Models\SalesOrderRecipe;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
 use Prettus\Repository\Exceptions\RepositoryException;
@@ -40,13 +43,22 @@ class SalesRecipeRepository extends BaseRepository
 
 
     /**
-     * @param $salesOrderId
-     * @return
+     * @param       $salesOrderId
+     * @param array $ids
+     * @param null  $skipDeliveryId
+     * @return Builder[]|Collection|Model[]
      */
-    public function getOrderRecipeList($salesOrderId) {
-        return $this->model->with('remainingQuantity')->where('sales_order_id', '=', $salesOrderId)
-                           ->get();
-
+    public function getOrderRecipeList($salesOrderId, $skipDeliveryId = null) {
+        $orderRecipes = $this->model->with([
+            'remainingQuantity' => function ($remainingQuantity) use ($skipDeliveryId) {
+                /** @var Builder $remainingQuantity */
+                if (isset($skipDeliveryId)) {
+                    $remainingQuantity->where('delivery_id', '<>', $skipDeliveryId);
+                }
+            }
+        ])->where('sales_order_id', '=',
+            $salesOrderId);
+        return $orderRecipes->get();
     }
 
 }
