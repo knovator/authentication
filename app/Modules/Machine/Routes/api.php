@@ -9,7 +9,7 @@ Route::group([
     function () {
         Route::resource('machines', 'MachineController');
         Route::put('machines/partiallyUpdate/{machine}', 'MachineController@partiallyUpdate')
-             ->name('machine.partially-update');
+             ->name('machines.partially-update');
     });
 
 Route::group([

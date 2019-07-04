@@ -9,7 +9,7 @@ Route::group([
     function () {
         Route::resource('customers', 'CustomerController');
         Route::put('customers/partiallyUpdate/{customer}', 'CustomerController@partiallyUpdate')
-             ->name('customer.partially-update');
+             ->name('customers.partially-update');
     });
 
 Route::model('customer', Customer::class);
