@@ -25,4 +25,9 @@ class Stock extends Model
         'order_recipe_id'
     ];
 
+
+
+
+
+
 }

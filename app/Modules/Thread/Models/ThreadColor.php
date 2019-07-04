@@ -4,6 +4,7 @@ namespace App\Modules\Thread\Models;
 
 
 use App\Modules\Recipe\Models\Recipe;
+use App\Modules\Stock\Models\Stock;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Knovators\Masters\Models\Master;
@@ -42,6 +43,15 @@ class ThreadColor extends Model
      */
     public function thread() {
         return $this->belongsTo(Thread::class, 'thread_id', 'id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function availableStock() {
+        return $this->morphOne(Stock::class, 'product', 'product_type', 'product_id')
+                    ->selectRaw('product_id,product_type,sum(kg_qty) as available_qty')
+                    ->groupBy(['product_id', 'product_type']);
     }
 
 
