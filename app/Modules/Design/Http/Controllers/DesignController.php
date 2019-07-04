@@ -56,7 +56,6 @@ class DesignController extends Controller
         $input = $request->all();
         try {
             DB::beginTransaction();
-            DB::enableQueryLog();
             $input['design_no'] = $this->generateUniqueId(GenerateNumber::DESIGN);
             $design = $this->designRepository->create($input);
             $this->storeDesignDetails($design, $input);
@@ -67,7 +66,7 @@ class DesignController extends Controller
                 __('messages.created', ['module' => 'Design']),
                 HTTPCode::CREATED);
         } catch (Exception $exception) {
-//            DB::rollBack();
+            DB::rollBack();
             Log::error($exception);
 
             return $this->sendResponse(null, __('messages.something_wrong'),
@@ -82,7 +81,7 @@ class DesignController extends Controller
      * @throws \Prettus\Validator\Exceptions\ValidatorException
      */
     private function storeDesignDetails(Design $design, $input) {
-        $this->designDetailRepository->updateOrCreate(['design_id'=> $design->id], $input);
+        $this->designDetailRepository->updateOrCreate(['design_id' => $design->id], $input);
         $this->storeDesignAttributes($design, $input, 'images', 'images');
         $this->storeDesignAttributes($design, $input, 'fiddle_picks', 'fiddlePicks');
         $this->storeDesignBeams($design, $input);
