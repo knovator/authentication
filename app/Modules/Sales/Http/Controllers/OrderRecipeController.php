@@ -3,12 +3,9 @@
 namespace App\Modules\Sales\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Modules\Sales\Http\Resources\RecipePartialOrder;
 use App\Modules\Sales\Http\Resources\SalesOrderRecipe as SalesOrderRecipeResource;
 use App\Modules\Sales\Models\SalesOrder;
-use App\Modules\Sales\Repositories\DeliveryRepository;
 use App\Modules\Sales\Repositories\SalesRecipeRepository;
-use DB;
 use Exception;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Knovators\Support\Helpers\HTTPCode;
