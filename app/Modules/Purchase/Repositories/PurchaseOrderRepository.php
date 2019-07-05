@@ -31,11 +31,13 @@ class PurchaseOrderRepository extends BaseRepository
 
 
     /**
+     * @param array $input
+     * @param       $export
      * @return mixed
      * @throws RepositoryException
      * @throws \Exception
      */
-    public function getPurchaseOrderList() {
+    public function getPurchaseOrderList($input = [], $export = false) {
         $this->applyCriteria();
         $orders = datatables()->of($this->model->with([
             'threadQty',
@@ -43,7 +45,11 @@ class PurchaseOrderRepository extends BaseRepository
             'threads.threadColor.color:id,name,code',
             'customer.state:id,name,code,gst_code',
             'status:id,name,code'
-        ])->select('purchase_orders.*'))->make(true);
+        ])->select('purchase_orders.*'));
+        if ($export){
+            $orders = $orders->skipPaging();
+        }
+        $orders = $orders->make(true);
         $this->resetModel();
 
         return $orders;
