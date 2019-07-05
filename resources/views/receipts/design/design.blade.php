@@ -6,37 +6,41 @@
 </head>
 <body>
 <main class="without-border">
-    <section class="section-1">
-        <div class="preview-box">
-            <img alt="design name" class="preview" src="{{$design->mainImage->file->url}}"/>
-        </div>
-        <div class="details-box">
-            <div class="detail-row design-name">{{$design->quality_name}}
-            </div>
-            <table>
-                <tbody>
-                <tr>
-                    <td class="text-left label">Reed</td>
-                    <td>: {{$design->detail->reed}}</td>
-                    <td class="text-left label">Avg. Pick</td>
-                    <td>: {{$design->detail->avg_pick}}</td>
-                </tr>
-                <tr>
-                    <td class="text-left label">Feeder</td>
-                    <td>: {{$design->fiddles}}</td>
-                    <td class="text-left label">Panno</td>
-                    <td>: {{$design->detail->panno}} (+4)</td>
-                </tr>
-                <tr>
-                    <td class="text-left label">Type</td>
-                    <td>: {{ucfirst($design->type)}}</td>
-                    <td class="text-left label">Creming</td>
-                    <td>: {{ ($design->detail->creming) ? 'Yes':'No' }}</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
+    <table class="section-1 auto-layout">
+        <tbody style="width: 100%;">
+            <tr>
+                <td class="preview-box" style="border-bottom: 0">
+               <img alt="design name" class="preview" src="{{$design->mainImage->file->url}}"/>
+           </td>
+                <td class="details-box" style="border-bottom: 0">
+               <div class="detail-row design-name">{{$design->quality_name}}
+               </div>
+               <table>
+                   <tbody>
+                   <tr>
+                       <td class="text-left label">Reed</td>
+                       <td>: {{$design->detail->reed}}</td>
+                       <td class="text-left label">Avg. Pick</td>
+                       <td>: {{$design->detail->avg_pick}}</td>
+                   </tr>
+                   <tr>
+                       <td class="text-left label">Feeder</td>
+                       <td>: {{$design->fiddles}}</td>
+                       <td class="text-left label">Panno</td>
+                       <td>: {{$design->detail->panno}} (+4)</td>
+                   </tr>
+                   <tr>
+                       <td class="text-left label">Type</td>
+                       <td>: {{ucfirst($design->type)}}</td>
+                       <td class="text-left label">Creming</td>
+                       <td>: {{ ($design->detail->creming) ? 'Yes':'No' }}</td>
+                   </tr>
+                   </tbody>
+               </table>
+           </td>
+            </tr>
+        </tbody>
+    </table>
     <br/>
     <table class="listing-table">
         <thead class="recipes-header">
