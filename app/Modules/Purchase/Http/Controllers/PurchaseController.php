@@ -15,6 +15,7 @@ use App\Support\UniqueIdGenerator;
 use DB;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Knovators\Masters\Repository\MasterRepository;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
@@ -116,6 +117,32 @@ class PurchaseController extends Controller
                 HTTPCode::OK);
         } catch (Exception $exception) {
             DB::rollBack();
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
+
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function exportCsv(Request $request) {
+        $input = $request->all();
+        try {
+            $purchases = $this->purchaseOrderRepository->exportCsvList($input);
+            if ($purchases->isEmpty()) {
+                return $this->sendResponse(null,
+                    __('messages.cand
+                    
+                    idates_not_available', ['module' => 'Purchase orders']),
+                    HTTPCode::OK);
+            }
+
+            return $this->downloadCsv($purchases);
+        } catch (Exception $exception) {
             Log::error($exception);
 
             return $this->sendResponse(null, __('messages.something_wrong'),

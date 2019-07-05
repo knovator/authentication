@@ -10,6 +10,9 @@ Route::group([
         Route::resource('purchases', 'PurchaseController');
         Route::put('purchases/order/change-status', 'PurchaseController@changeStatus')
              ->name('purchases.change-status');
+
+        Route::get('purchases/orders/export', 'PurchaseController@export')
+             ->name('purchases.export');
     });
 
 Route::model('purchase', PurchaseOrder::class);
