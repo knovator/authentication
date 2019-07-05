@@ -31,7 +31,7 @@ class PurchaseOrder implements FromView, ShouldAutoSize, WithEvents
      * @return View
      */
     public function view() : View {
-        return view('purchase_orders', [
+        return view('exports.purchase_orders', [
             'orders' => $this->orders,
         ]);
     }

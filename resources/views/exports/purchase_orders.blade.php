@@ -3,10 +3,6 @@
     <tr>
         <th>Sr No</th>
         <th>Customer Name</th>
-        <th>Customer Details</th>
-        <th>Order Date</th>
-        <th>Order No</th>
-        <th>Status</th>
     </tr>
     </thead>
 
@@ -14,7 +10,7 @@
     @foreach($orders as $orderKey => $order)
         <tr>
             <td>{{$orderKey + 1}}</td>
-            <td>{{$appliedCandidate->status->name}}</td>
+            <td>{{$order->customer->full_name}}</td>
         </tr>
     @endforeach
     </tbody>
