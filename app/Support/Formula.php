@@ -41,7 +41,6 @@ class Formula
      * @return int|string
      */
     public function getTotalKgQty($type, $threadDetail, $designDetail, $totalMeters) {
-
         switch ($type) {
             case ThreadType::WEFT:
 

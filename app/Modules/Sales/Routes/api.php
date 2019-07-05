@@ -20,6 +20,18 @@ Route::group([
 
         Route::put('sales/{sale}/deliveries/{delivery}', 'DeliveryController@update')
              ->name('deliveries.update');
+
+        Route::delete('sales/{sale}/deliveries/{delivery}', 'DeliveryController@destroy')
+             ->name('deliveries.destroy');
+
+        Route::get('sales/{sale}/deliveries', 'DeliveryController@index')
+             ->name('deliveries.index');
+
+        Route::post('deliveries/change-status', 'DeliveryController@changeStatus')
+             ->name('deliveries.change-status');
+
+        Route::get('sales-thread-analysis', 'SalesController@threadAnalysis')
+             ->name('sales.thread.analysis');
     });
 
 Route::model('sale', SalesOrder::class);

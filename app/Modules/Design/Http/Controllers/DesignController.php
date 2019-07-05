@@ -14,9 +14,14 @@ use App\Modules\Design\Models\DesignBeam;
 use App\Modules\Design\Repositories\DesignDetailRepository;
 use App\Modules\Design\Repositories\DesignRepository;
 use App\Support\UniqueIdGenerator;
+use Barryvdh\Snappy\Facades\SnappyImage;
+use Barryvdh\Snappy\ImageWrapper;
 use DB;
 use Exception;
+use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;
@@ -56,7 +61,6 @@ class DesignController extends Controller
         $input = $request->all();
         try {
             DB::beginTransaction();
-            DB::enableQueryLog();
             $input['design_no'] = $this->generateUniqueId(GenerateNumber::DESIGN);
             $design = $this->designRepository->create($input);
             $this->storeDesignDetails($design, $input);
@@ -67,7 +71,7 @@ class DesignController extends Controller
                 __('messages.created', ['module' => 'Design']),
                 HTTPCode::CREATED);
         } catch (Exception $exception) {
-//            DB::rollBack();
+            DB::rollBack();
             Log::error($exception);
 
             return $this->sendResponse(null, __('messages.something_wrong'),
@@ -82,7 +86,7 @@ class DesignController extends Controller
      * @throws \Prettus\Validator\Exceptions\ValidatorException
      */
     private function storeDesignDetails(Design $design, $input) {
-        $this->designDetailRepository->updateOrCreate(['design_id'=> $design->id], $input);
+        $this->designDetailRepository->updateOrCreate(['design_id' => $design->id], $input);
         $this->storeDesignAttributes($design, $input, 'images', 'images');
         $this->storeDesignAttributes($design, $input, 'fiddle_picks', 'fiddlePicks');
         $this->storeDesignBeams($design, $input);
@@ -290,6 +294,24 @@ class DesignController extends Controller
     }
 
 
+    /**
+     * @param Design  $design
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function export(Design $design, Request $request) {
+        $design->load([
+            'detail',
+            'fiddlePicks',
+            'beams.recipes.fiddles.thread',
+            'beams.recipes.fiddles.color',
+            'beams.threadColor.thread',
+            'beams.threadColor.color:id,name,code',
+            'mainImage.file'
+        ]);
+        $image = SnappyImage::loadView('receipts.design.design', compact('design'));
+        return $image->download($design->design_no . ".jpg");
+    }
 }
 
 

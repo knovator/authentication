@@ -4,14 +4,16 @@ use App\Modules\Design\Models\Design;
 
 Route::group([
     'prefix'     => 'admin',
-    'middleware' => 'auth_active'
+//    'middleware' => 'auth_active'
 ],
     function () {
         Route::resource('designs', 'DesignController');
         Route::put('designs/partiallyUpdate/{design}', 'DesignController@partiallyUpdate')
-             ->name('design.partially-update');
+             ->name('designs.partially-update');
         Route::put('designs/partiallyApprove/{design}', 'DesignController@partiallyApprove')
-             ->name('design.partially-approve');
+             ->name('designs.partially-approve');
+        Route::get('designs/export/{design}', 'DesignController@export')
+             ->name('designs.export');
     });
 
 Route::group([

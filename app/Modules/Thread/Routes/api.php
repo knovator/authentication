@@ -9,7 +9,7 @@ Route::group([
     function () {
         Route::resource('threads', 'ThreadController');
         Route::put('threads/partiallyUpdate/{thread}', 'ThreadController@partiallyUpdate')
-             ->name('thread.partially-update');
+             ->name('threads.partially-update');
         Route::get('thread/colors-list', 'ThreadController@threadColorsList');
     });
 

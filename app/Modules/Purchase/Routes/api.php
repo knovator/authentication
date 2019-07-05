@@ -9,7 +9,7 @@ Route::group([
     function () {
         Route::resource('purchases', 'PurchaseController');
         Route::put('purchases/order/change-status', 'PurchaseController@changeStatus')
-             ->name('purchase.change-status');
+             ->name('purchases.change-status');
     });
 
 Route::model('purchase', PurchaseOrder::class);

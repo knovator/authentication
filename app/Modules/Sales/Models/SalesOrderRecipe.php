@@ -30,6 +30,8 @@ class SalesOrderRecipe extends Model
         'recipe_id',
     ];
 
+    protected $hidden = ['deleted_at'];
+
     /**
      * @return HasMany
      */

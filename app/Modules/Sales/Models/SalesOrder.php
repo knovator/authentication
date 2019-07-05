@@ -69,7 +69,7 @@ class SalesOrder extends Model
     /**
      * @return mixed
      */
-    public function delivery() {
+    public function deliveries() {
         return $this->hasMany(Delivery::class, 'sales_order_id', 'id');
     }
 
@@ -113,7 +113,7 @@ class SalesOrder extends Model
      * @return mixed
      */
     public function orderStocks() {
-        return $this->morphMany(Stock::class, 'order');
+        return $this->morphMany(Stock::class, 'order','order_type','order_id');
     }
 
     /**
