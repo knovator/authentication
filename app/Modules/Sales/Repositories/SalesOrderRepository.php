@@ -38,7 +38,8 @@ class SalesOrderRepository extends BaseRepository
         $this->applyCriteria();
         $orders = datatables()->of($this->model->with([
             'customer.state:id,name,code,gst_code',
-            'status:id,name,code'
+            'status:id,name,code',
+            'deliveries:id,delivery_no,delivery_date,sales_order_id',
         ])->select('sales_orders.*'))->make(true);
         $this->resetModel();
 

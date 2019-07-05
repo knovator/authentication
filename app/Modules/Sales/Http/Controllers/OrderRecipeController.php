@@ -37,7 +37,9 @@ class OrderRecipeController extends Controller
      */
     public function index(SalesOrder $salesOrder) {
         try {
-            $orderRecipes = $this->orderRecipeRepository->getOrderRecipeList($salesOrder->id);
+            $orderRecipes = $this->orderRecipeRepository->getOrderRecipeList($salesOrder->id,
+                null, true);
+
             return $this->sendResponse($this->makeResourceCollection($orderRecipes),
                 __('messages.retrieved', ['module' => 'Order recipes']),
                 HTTPCode::OK);
