@@ -15,6 +15,7 @@ use App\Modules\Design\Repositories\DesignDetailRepository;
 use App\Modules\Design\Repositories\DesignRepository;
 use App\Support\UniqueIdGenerator;
 use Barryvdh\Snappy\Facades\SnappyImage;
+use Barryvdh\Snappy\Facades\SnappyPdf;
 use Barryvdh\Snappy\ImageWrapper;
 use DB;
 use Exception;
@@ -309,8 +310,11 @@ class DesignController extends Controller
             'beams.threadColor.color:id,name,code',
             'mainImage.file'
         ]);
-        $image = SnappyImage::loadView('receipts.design.design', compact('design'));
-        return $image->download($design->design_no . ".jpg");
+//        $image = SnappyPdf::loadView('receipts.design.design', compact('design'));
+//        return $image->download($design->design_no . ".pdf");
+
+        return view('receipts.design.design',compact('design'));
+
     }
 }
 

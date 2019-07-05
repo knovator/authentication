@@ -15,11 +15,15 @@ use App\Support\UniqueIdGenerator;
 use DB;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Knovators\Masters\Repository\MasterRepository;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;
+use Maatwebsite\Excel\Facades\Excel;
 use Str;
+use App\Modules\Requirement\Http\Exports\PurchaseOrder as ExportPurchaseOrder;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Class PurchaseController
@@ -121,6 +125,39 @@ class PurchaseController extends Controller
             return $this->sendResponse(null, __('messages.something_wrong'),
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
+    }
+
+
+    /**
+     * @param Request $request
+     * @return JsonResponse|BinaryFileResponse
+     */
+    public function exportCsv(Request $request) {
+        $input = $request->all();
+        try {
+            $purchases = $this->purchaseOrderRepository->getPurchaseOrderList($input, true);
+            if (($purchases = collect($purchases->getData()->data))->isEmpty()) {
+                return $this->sendResponse(null,
+                    __('messages.can_not_export', ['module' => 'Purchase orders']),
+                    HTTPCode::OK);
+            }
+            return $this->downloadCsv($purchases);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
+
+
+    /**
+     * @param $purchases
+     * @return BinaryFileResponse
+     */
+    private function downloadCsv($purchases) {
+        return Excel::download(new ExportPurchaseOrder($purchases),
+            'orders.xlsx');
     }
 
 
