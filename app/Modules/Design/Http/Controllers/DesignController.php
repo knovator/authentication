@@ -14,6 +14,8 @@ use App\Modules\Design\Models\DesignBeam;
 use App\Modules\Design\Repositories\DesignDetailRepository;
 use App\Modules\Design\Repositories\DesignRepository;
 use App\Support\UniqueIdGenerator;
+use Barryvdh\Snappy\Facades\SnappyImage;
+use Barryvdh\Snappy\ImageWrapper;
 use DB;
 use Exception;
 use Illuminate\Contracts\View\Factory;
@@ -295,7 +297,7 @@ class DesignController extends Controller
     /**
      * @param Design  $design
      * @param Request $request
-     * @return Factory|View
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function export(Design $design, Request $request) {
         $design->load([
@@ -307,12 +309,8 @@ class DesignController extends Controller
             'beams.threadColor.color:id,name,code',
             'mainImage.file'
         ]);
-
-
-
-
-
-        return view('receipts.design.design', compact('design'));
+        $image = SnappyImage::loadView('receipts.design.design', compact('design'));
+        return $image->download($design->design_no . ".jpg");
     }
 }
 

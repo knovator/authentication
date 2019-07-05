@@ -56,6 +56,10 @@ return [
 
     'asset_url' => env('ASSET_URL', null),
 
+    'snappy_image' => env('SNAPPY_IMAGE_URL', ''),
+
+    'snappy_pdf' => env('SNAPPY_PDF_URL', ''),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone
@@ -182,6 +186,7 @@ return [
 
         DougSisk\CountryState\CountryStateServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        Barryvdh\Snappy\ServiceProvider::class,
 
 
     ],
@@ -235,6 +240,8 @@ return [
         'Validator'    => Illuminate\Support\Facades\Validator::class,
         'View'         => Illuminate\Support\Facades\View::class,
         'DataTables'   => Yajra\DataTables\Facades\DataTables::class,
+        'PDF'          => Barryvdh\Snappy\Facades\SnappyPdf::class,
+        'SnappyImage'  => Barryvdh\Snappy\Facades\SnappyImage::class,
     ],
 
 ];
