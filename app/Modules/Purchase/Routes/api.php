@@ -11,7 +11,7 @@ Route::group([
         Route::put('purchases/order/change-status', 'PurchaseController@changeStatus')
              ->name('purchases.change-status');
 
-        Route::get('purchases/orders/export', 'PurchaseController@export')
+        Route::get('purchases/orders/export', 'PurchaseController@exportCsv')
              ->name('purchases.export');
     });
 
