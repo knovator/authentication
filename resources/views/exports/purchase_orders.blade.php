@@ -11,9 +11,9 @@
     </thead>
 
     <tbody>
-    @foreach($appliedCandidates as $key => $appliedCandidate)
+    @foreach($orders as $orderKey => $order)
         <tr>
-            <td>{{$key + 1}}</td>
+            <td>{{$orderKey + 1}}</td>
             <td>{{$appliedCandidate->status->name}}</td>
         </tr>
     @endforeach

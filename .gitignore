@@ -18,5 +18,9 @@ yarn-error.log
 _ide_helper.php
 
 !.gitKeep
-/public/uploads/*
+!/public/fonts/*
+!/public/css/*
+!/public/js/*
 
+/public/uploads/*
+!/public/uploads/
