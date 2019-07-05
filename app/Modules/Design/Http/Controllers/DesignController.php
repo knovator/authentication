@@ -298,7 +298,6 @@ class DesignController extends Controller
      * @return Factory|View
      */
     public function export(Design $design, Request $request) {
-
         $design->load([
             'detail',
             'fiddlePicks',
@@ -308,6 +307,11 @@ class DesignController extends Controller
             'beams.threadColor.color:id,name,code',
             'mainImage.file'
         ]);
+
+
+
+
+
         return view('receipts.design.design', compact('design'));
     }
 }

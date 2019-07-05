@@ -13,7 +13,6 @@ if (!function_exists('getFontColor')) {
             return "#000000";
         }
         return "#ffffff";
-
     }
 
 }
