@@ -16,7 +16,10 @@ use App\Modules\Design\Repositories\DesignRepository;
 use App\Support\UniqueIdGenerator;
 use DB;
 use Exception;
+use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;
@@ -289,6 +292,28 @@ class DesignController extends Controller
     }
 
 
+    /**
+     * @param Design  $design
+     * @param Request $request
+     * @return Factory|View
+     */
+    public function export(Design $design, Request $request) {
+        $design->load([
+            'detail',
+            'fiddlePicks',
+            'beams.recipes.fiddles.thread',
+            'beams.recipes.fiddles.color',
+            'beams.threadColor.thread',
+            'beams.threadColor.color:id,name,code',
+            'mainImage.file'
+        ]);
+
+
+
+
+
+        return view('receipts.design.design', compact('design'));
+    }
 }
 
 
