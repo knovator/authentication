@@ -26,6 +26,7 @@ use Illuminate\View\View;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class DesignController
@@ -298,7 +299,7 @@ class DesignController extends Controller
     /**
      * @param Design  $design
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function export(Design $design, Request $request) {
         $design->load([
@@ -310,10 +311,9 @@ class DesignController extends Controller
             'beams.threadColor.color:id,name,code',
             'mainImage.file'
         ]);
-//        $image = SnappyPdf::loadView('receipts.design.design', compact('design'));
-//        return $image->download($design->design_no . ".pdf");
-
-        return view('receipts.design.design',compact('design'));
+        $image = SnappyPdf::loadView('receipts.design.design', compact('design'));
+        return $image->download($design->design_no . ".pdf");
+//        return view('receipts.design.design',compact('design'));
 
     }
 }
