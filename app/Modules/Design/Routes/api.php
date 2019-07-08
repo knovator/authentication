@@ -4,7 +4,7 @@ use App\Modules\Design\Models\Design;
 
 Route::group([
     'prefix'     => 'admin',
-//    'middleware' => 'auth_active'
+    'middleware' => 'auth_active'
 ],
     function () {
         Route::resource('designs', 'DesignController');
