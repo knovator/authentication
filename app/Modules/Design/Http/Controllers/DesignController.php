@@ -310,10 +310,9 @@ class DesignController extends Controller
             'beams.threadColor.color:id,name,code',
             'mainImage.file'
         ]);
-//        $image = SnappyPdf::loadView('receipts.design.design', compact('design'));
-//        return $image->download($design->design_no . ".pdf");
-
-        return view('receipts.design.design',compact('design'));
+        $image = SnappyPdf::loadView('receipts.design.design', compact('design'));
+        return $image->download($design->design_no . ".pdf");
+//        return view('receipts.design.design',compact('design'));
 
     }
 }
