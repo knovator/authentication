@@ -133,9 +133,8 @@ class PurchaseController extends Controller
      * @return JsonResponse|BinaryFileResponse
      */
     public function exportCsv(Request $request) {
-        $input = $request->all();
         try {
-            $purchases = $this->purchaseOrderRepository->getPurchaseOrderList($input, true);
+            $purchases = $this->purchaseOrderRepository->getPurchaseOrderList($request->all(), true);
             if (($purchases = collect($purchases->getData()->data))->isEmpty()) {
                 return $this->sendResponse(null,
                     __('messages.can_not_export', ['module' => 'Purchase orders']),
@@ -339,11 +338,12 @@ class PurchaseController extends Controller
 
 
     /**
+     * @param Request $request
      * @return JsonResponse
      */
-    public function index() {
+    public function index(Request $request) {
         try {
-            $orders = $this->purchaseOrderRepository->getPurchaseOrderList();
+            $orders = $this->purchaseOrderRepository->getPurchaseOrderList($request->all());
 
             return $this->sendResponse($orders,
                 __('messages.retrieved', ['module' => 'Orders']),

@@ -35,7 +35,7 @@ class PurchaseOrder extends Model
         'created_by',
         'deleted_by',
         'deleted_at',
-        'created_at',
+//        'created_at',
         'updated_at'
     ];
 
