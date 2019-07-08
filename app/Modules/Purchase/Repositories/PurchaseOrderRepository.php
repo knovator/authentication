@@ -49,8 +49,12 @@ class PurchaseOrderRepository extends BaseRepository
         ])->select('purchase_orders.*');
 
 
-        if (isset($input['date_range'])) {
-            $orders = $orders->whereBetween('created_at', $input['date_range']);
+        if (isset($input['start_date'])) {
+            $orders = $orders->whereDate('created_at', '>=', $input['start_date']);
+        }
+
+        if (isset($input['end_date'])) {
+            $orders = $orders->whereDate('created_at', '<=', $input['end_date']);
         }
 
         $orders = datatables()->of($orders);
