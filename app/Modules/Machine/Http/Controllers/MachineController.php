@@ -9,8 +9,11 @@ use App\Modules\Machine\Http\Requests\UpdateRequest;
 use App\Modules\Machine\Http\Resources\Machine as MachineResource;
 use App\Modules\Machine\Models\Machine;
 use App\Modules\Machine\Repositories\MachineRepository;
+use App\Modules\Sales\Repositories\SalesOrderRepository;
+use DB;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;
@@ -26,14 +29,19 @@ class MachineController extends Controller
 
     protected $machineRepository;
 
+    protected $salesOrderRepository;
+
     /**
      * MachineController constructor.
-     * @param MachineRepository $machineRepository
+     * @param MachineRepository    $machineRepository
+     * @param SalesOrderRepository $salesOrderRepository
      */
     public function __construct(
-        MachineRepository $machineRepository
+        MachineRepository $machineRepository,
+        SalesOrderRepository $salesOrderRepository
     ) {
         $this->machineRepository = $machineRepository;
+        $this->salesOrderRepository = $salesOrderRepository;
     }
 
     /**
@@ -141,7 +149,7 @@ class MachineController extends Controller
         try {
             // Machine associated relations
             $relations = [
-
+                'soPartialOrders'
             ];
 
             return $this->destroyModelObject($relations, $machine, 'Machine');
@@ -173,12 +181,17 @@ class MachineController extends Controller
     }
 
     /**
+     * @param Request $request
      * @return JsonResponse
      */
-    public function activeMachines() {
+    public function activeMachines(Request $request) {
+        $input = $request->all();
         try {
-            $machines = $this->machineRepository->getActiveMachines();
-
+            if (isset($input['sales_order_id'])) {
+                $input['sales_order'] = $this->salesOrderRepository->with('design.detail')
+                                                                   ->find($input['sales_order_id']);
+            }
+            $machines = $this->machineRepository->getActiveMachines($input);
             return $this->sendResponse($machines,
                 __('messages.retrieved', ['module' => 'Machines']),
                 HTTPCode::OK);
