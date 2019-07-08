@@ -469,12 +469,20 @@ class SalesController extends Controller
      * @return Response
      */
     public function exportSummary(SalesOrder $salesOrder) {
+
+        $statusId = $this->masterRepository->findByCode(MasterConstant::SO_DELIVERED)->id;
         $salesOrder->load([
-            'orderRecipes' => function ($orderRecipes) {
+            'orderRecipes'               => function ($orderRecipes) {
                 /** @var Builder $orderRecipes */
                 $orderRecipes->orderBy('id')->with('recipe');
             },
-            'orderRecipes.partialOrders.delivery',
+            'orderRecipes.partialOrders' => function ($partialOrders) use ($statusId) {
+                /** @var Builder $partialOrders */
+                $partialOrders->whereHas('delivery', function ($delivery) use ($statusId) {
+                    /** @var Builder $delivery */
+                    $delivery->where('status_id', $statusId);
+                });
+            },
             'design.detail',
             'design.mainImage.file',
             'customer.state'

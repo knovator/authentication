@@ -102,28 +102,36 @@
         <!--  for one recipe details starts here-->
 
 
+        @php $totalQuantity = 0 @endphp
+
         @foreach($salesOrder->orderRecipes as $orderRecipeKey => $orderRecipe)
-            @php $key = $orderRecipeKey + 1 @endphp
+            @php
+                $key = $orderRecipeKey + 1;
+            @endphp
+
             <tr>
                 <td class="sr-no text-left"><b>{{$key}}</b></td>
                 <td><b>{{$orderRecipe->recipe->name}}</b></td>
-                <td class="text-center"><b>{{$orderRecipe->total_meters}}</b></td>
+                <td class="text-center"><b>{{$orderRecipe->total_meters}}</b><span
+                        style="font-size: 12px">({{0}})</span></td>
                 <td class="text-center"></td>
                 <td class="text-right"></td>
             </tr>
             <!-- recipes partial orders delivery wise details -->
-            @foreach($orderRecipe->partialOrders->sortBy('delivery.delivery_date')->values()->all() as $partialOrderKey => $partialOrder)
-                <tr>
-                    <td class="sr-no text-left"></td>
-                    <td>
-                        {{$key.'.'.($partialOrderKey + 1).') '.\Carbon\Carbon::parse($partialOrder->delivery->delivery_date)->format('d, M Y')}}
-                        <small><em>({{$partialOrder->delivery->delivery_no}})</em></small>
-                    </td>
-                    <td class="text-center">{{$partialOrder->total_meters}}</td>
-                    <td class="text-center"></td>
-                    <td class="text-right">{{$partialOrder->total_meters * $salesOrder->cost_per_meter }}</td>
-                </tr>
-            @endforeach
+            @if($orderRecipe->partialOrders->isNotEmpty())
+                @foreach($orderRecipe->partialOrders->sortBy('delivery.delivery_date')->values()->all() as $partialOrderKey => $partialOrder)
+                    <tr>
+                        <td class="sr-no text-left"></td>
+                        <td>
+                            {{$key.'.'.($partialOrderKey + 1).') '.\Carbon\Carbon::parse($partialOrder->delivery->delivery_date)->format('d, M Y')}}
+                            <small><em>({{$partialOrder->delivery->delivery_no}})</em></small>
+                        </td>
+                        <td class="text-center">{{$partialOrder->total_meters}}</td>
+                        <td class="text-center"></td>
+                        <td class="text-right">{{$partialOrder->total_meters * $salesOrder->cost_per_meter }}</td>
+                    </tr>
+                @endforeach
+            @endif
         @endforeach
         </tbody>
         <tfoot>
