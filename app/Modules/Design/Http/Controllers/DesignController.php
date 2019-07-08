@@ -2,27 +2,23 @@
 
 namespace App\Modules\Design\Http\Controllers;
 
-use App\Modules\Design\Http\Resources\Design as DesignResource;
 use App\Constants\GenerateNumber;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PartiallyUpdateRequest;
 use App\Modules\Design\Http\Requests\ApproveRequest;
 use App\Modules\Design\Http\Requests\CreateRequest;
 use App\Modules\Design\Http\Requests\UpdateRequest;
+use App\Modules\Design\Http\Resources\Design as DesignResource;
 use App\Modules\Design\Models\Design;
 use App\Modules\Design\Models\DesignBeam;
 use App\Modules\Design\Repositories\DesignDetailRepository;
 use App\Modules\Design\Repositories\DesignRepository;
 use App\Support\UniqueIdGenerator;
-use Barryvdh\Snappy\Facades\SnappyImage;
 use Barryvdh\Snappy\Facades\SnappyPdf;
-use Barryvdh\Snappy\ImageWrapper;
 use DB;
 use Exception;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;

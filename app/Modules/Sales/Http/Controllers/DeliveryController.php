@@ -415,7 +415,16 @@ class DeliveryController extends Controller
      */
     private function updateSOCANCELEDStatus(Delivery $delivery) {
         try {
-            return $this->updateStatus($delivery, MasterConstant::SO_CANCELED);
+            $input['status_id'] = $this->findMasterIdByCode(MasterConstant::SO_CANCELED);
+            $delivery->partialOrders()->delete();
+            $delivery->update($input);
+            $delivery->load('salesOrder');
+            $this->storeStockDetails($delivery->salesOrder,
+                $this->findMasterIdByCode(MasterConstant::SO_PENDING));
+
+            return $this->sendResponse(null,
+                __('messages.updated', ['module' => 'Status']),
+                HTTPCode::OK);
         } catch (Exception $exception) {
             Log::error($exception);
 
@@ -424,6 +433,15 @@ class DeliveryController extends Controller
         }
 
 
+    }
+
+
+    /**
+     * @param $code
+     * @return integer
+     */
+    private function findMasterIdByCode($code) {
+        return $this->masterRepository->findByCode($code)->id;
     }
 
 
@@ -467,7 +485,7 @@ class DeliveryController extends Controller
      * @throws Exception
      */
     private function updateStatus(Delivery $delivery, $code) {
-        $input['status_id'] = $this->masterRepository->findByCode($code)->id;
+        $input['status_id'] = $this->findMasterIdByCode($code);
         try {
             DB::beginTransaction();
             $delivery->orderStocks()->update($input);

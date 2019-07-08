@@ -57,6 +57,14 @@ class Delivery extends Model
     /**
      * @return mixed
      */
+    public function salesOrder() {
+        return $this->belongsTo(SalesOrder::class, 'sales_order_id',
+            'id');
+    }
+
+    /**
+     * @return mixed
+     */
     public function partialOrders() {
         return $this->hasMany(RecipePartialOrder::class, 'delivery_id', 'id');
     }

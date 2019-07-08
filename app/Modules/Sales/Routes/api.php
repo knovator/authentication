@@ -5,7 +5,7 @@ use App\Modules\Sales\Models\Delivery;
 
 Route::group([
     'prefix'     => 'admin',
-    'middleware' => 'auth_active'
+//    'middleware' => 'auth_active'
 ],
     function () {
         Route::resource('sales', 'SalesController');
@@ -32,6 +32,9 @@ Route::group([
 
         Route::get('sales-thread-analysis', 'SalesController@threadAnalysis')
              ->name('sales.thread.analysis');
+
+        Route::get('sales/{sale}/export-summary', 'SalesController@exportSummary')
+             ->name('sales.export.summary');
     });
 
 Route::model('sale', SalesOrder::class);
