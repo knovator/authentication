@@ -11,7 +11,7 @@ return [
     'added'                         => ':module successfully added.',
     'sent'                          => ':module sent successfully.',
     'associated'                    => 'Please remove all :related of this :module.',
-    'can_not_export'                => ':module are not available, so you can not export.',
+    'can_not_export'                => ':module are not available, so you can not export it.',
 
 
     // Design Messages

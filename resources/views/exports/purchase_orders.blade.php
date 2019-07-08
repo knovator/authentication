@@ -7,6 +7,7 @@
         <th>Customer Details</th>
         <th>Threads</th>
         <th>Status</th>
+        <th>Challan No</th>
     </tr>
     </thead>
     <tbody>
@@ -17,10 +18,11 @@
             <td rowspan="4">{{\Carbon\Carbon::parse($order->order_date)->format('D m Y')}}</td>
             <td>{{$order->customer->full_name}}</td>
             <td rowspan="4">@foreach($order->threads as $orderThread){{$orderThread->thread_color->thread->name}}
-                ({{$orderThread->kg_qty}})@if(!$loop->last){{','}}@endif @endforeach
+                ({{$orderThread->kg_qty. 'KG'}})@if(!$loop->last){{','}}@endif @endforeach
 
             </td>
             <td rowspan="4">{{$order->status->name}}</td>
+            <td rowspan="4">{{$order->challan_no}}</td>
         </tr>
         <tr>
             <td>Phone: {{$order->customer->phone}}</td>
