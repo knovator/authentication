@@ -6,7 +6,7 @@
 </head>
 <body>
 <main>
-    <div class="receipt-heading text-center">TAX INVOICE</div>
+    <div class="receipt-heading text-center">{{($isInvoice) ? 'TAX INVOICE':'ORDER FORM'}}</div>
     <div class="text-center">
         <small
         >(Invoice For supply of goods u/s 31 of GST Act, 2017 read with Rule 1
@@ -102,37 +102,62 @@
         <!--  for one recipe details starts here-->
 
 
+        @php
+            $totalQuantity = 0;
+        @endphp
+
         @foreach($salesOrder->orderRecipes as $orderRecipeKey => $orderRecipe)
-            @php $key = $orderRecipeKey + 1 @endphp
+            @php
+                $key = $orderRecipeKey + 1;
+                    if ($isInvoice){
+                        $partialQuantity =  $orderRecipe->partialOrders->sum('total_meters');
+                        $totalQuantity =+ $partialQuantity;
+
+                    }else{
+                      $totalQuantity =+ $orderRecipe->total_meters;
+                    }
+
+            @endphp
             <tr>
                 <td class="sr-no text-left"><b>{{$key}}</b></td>
                 <td><b>{{$orderRecipe->recipe->name}}</b></td>
-                <td class="text-center"><b>{{$orderRecipe->total_meters}}</b></td>
+                <td class="text-center"><b>{{$orderRecipe->total_meters}}</b>
+                    @if($isInvoice && $partialQuantity)
+                        <span style="font-size: 12px">({{$partialQuantity}})</span>
+                    @endif
+                </td>
                 <td class="text-center"></td>
                 <td class="text-right"></td>
             </tr>
             <!-- recipes partial orders delivery wise details -->
-            @foreach($orderRecipe->partialOrders->sortBy('delivery.delivery_date')->values()->all() as $partialOrderKey => $partialOrder)
-                <tr>
-                    <td class="sr-no text-left"></td>
-                    <td>
-                        {{$key.'.'.($partialOrderKey + 1).') '.\Carbon\Carbon::parse($partialOrder->delivery->delivery_date)->format('d, M Y')}}
-                        <small><em>({{$partialOrder->delivery->delivery_no}})</em></small>
-                    </td>
-                    <td class="text-center">{{$partialOrder->total_meters}}</td>
-                    <td class="text-center"></td>
-                    <td class="text-right">{{$partialOrder->total_meters * $salesOrder->cost_per_meter }}</td>
-                </tr>
-            @endforeach
+            @if($orderRecipe->partialOrders->isNotEmpty())
+                @foreach($orderRecipe->partialOrders->sortBy('delivery.delivery_date')->values()->all() as $partialOrderKey => $partialOrder)
+                    <tr>
+                        <td class="sr-no text-left"></td>
+                        <td>
+                            {{$key.'.'.($partialOrderKey + 1).') '.\Carbon\Carbon::parse($partialOrder->delivery->delivery_date)->format('d, M Y')}}
+                            <small><em>({{$partialOrder->delivery->delivery_no}})</em></small>
+                        </td>
+                        <td class="text-center">{{$partialOrder->total_meters}}</td>
+                        <td class="text-center"></td>
+                        <td class="text-right">{{$partialOrder->total_meters * $salesOrder->cost_per_meter }}</td>
+                    </tr>
+                @endforeach
+            @endif
         @endforeach
+
+        @php
+            $price = $totalQuantity * $salesOrder->cost_per_meter;
+        @endphp
+
         </tbody>
         <tfoot>
         <tr>
             <td></td>
             <td><b>TOTAL : </b></td>
-            <td class="text-center"><b>750</b></td>
-            <td class="text-center"></td>
-            <td class="text-right"><b>20,000</b></td>
+            <td class="text-center"><b>{{$totalQuantity}}</b></td>
+            <td class="text-center">{{$salesOrder->cost_per_meter}}</td>
+            <td class="text-right"><b>{{$price}}</b></td>
         </tr>
         </tfoot>
     </table>
@@ -214,47 +239,42 @@
                 class="text-left"
                 style="
     padding: 0;
+    position: relative;
     border: 0;
-        vertical-align: top;
+    vertical-align: top;
 "
             >
                 <div>
-                    <table class="right-bordered gst-table ">
+                    <table class="right-bordered gst-table">
                         <tbody>
-                        <tr>
-                            <td class=" label">Freight :</td>
-                            <td class="text-center"></td>
-                            <td class="text-right">0.00</td>
-                        </tr>
-                        <tr>
-                            <td class=" label"><b>Discount </b>0.00 %</td>
-                            <td class="text-center"></td>
-                            <td class="text-right">0.00</td>
-                        </tr>
-                        <tr>
-                            <td class=" label">Round Off:</td>
-                            <td class="text-center"></td>
-                            <td class="text-right">-0.45</td>
-                        </tr>
-                        <tr>
-                            <td class=" label">IGST</td>
-                            <td class="text-center">0.00 %</td>
-                            <td class="text-right">0.00</td>
-                        </tr>
-                        <tr>
-                            <td class=" label">SGST</td>
-                            <td class="text-center">6.00 %</td>
-                            <td class="text-right">1520.17</td>
-                        </tr>
-                        <tr>
-                            <td class=" label">CGST</td>
-                            <td class="text-center">6.00 %</td>
-                            <td class="text-right">1520.17</td>
-                        </tr>
-                        <tr class="highlight-row">
-                            <td class=" label">GRAND TOTAL :</td>
-                            <td class="text-center"></td>
-                            <td class="text-right">28,376.00</td>
+                        @if($salesOrder->customer->state->code == 'GUJARAT')
+                            <tr>
+                                <td class=" label">SGST</td>
+                                <td class="text-center">2.50 %</td>
+                                <td class="text-right">{{($price / 100) * 2.5}}</td>
+                            </tr>
+                            <tr>
+                                <td class=" label">CGST</td>
+                                <td class="text-center">2.50 %</td>
+                                <td class="text-right">{{($price / 100) * 2.5}}</td>
+                            </tr>
+                        @else
+                            <tr>
+                                <td class=" label">IGST</td>
+                                <td class="text-center">5.00 %</td>
+                                <td class="text-right">{{($price / 100) * 5}}</td>
+                            </tr>
+                        @endif
+                        <tr class="highlight-row" style="
+
+    position: absolute;
+    width: 100%;bottom: 0;">
+                            <td colspan="2" class="label" style="display: flex;
+    border-bottom: 0;
+    justify-content: space-between;">
+                                GRAND TOTAL :
+                            </td>
+                            <td class="text-right" style="border-bottom: 0;position: absolute;right: 0;">{{$price = $price + (($price / 100) * 5) }}</td>
                         </tr>
                         <tr></tr>
                         <tr></tr>
@@ -268,7 +288,7 @@
     <div class="rupees-in-words">
         Total Value Of Goods In Word:
         <span>
-          <b>Rupees Twenty-Eight Thousand Three Hundred Seventy-Six Only</b>
+          <b>{{displayWords($price)}}</b>
         </span>
     </div>
     <div class="receipt-footer">

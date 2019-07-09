@@ -188,7 +188,7 @@ class MachineController extends Controller
         $input = $request->all();
         try {
             if (isset($input['sales_order_id'])) {
-                $input['sales_order'] = $this->salesOrderRepository->with('design.detail')
+                $input['sales_order'] = $this->salesOrderRepository->with(['design.detail','designBeam'])
                                                                    ->find($input['sales_order_id']);
             }
             $machines = $this->machineRepository->getActiveMachines($input);

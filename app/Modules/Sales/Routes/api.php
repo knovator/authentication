@@ -4,8 +4,8 @@ use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Sales\Models\Delivery;
 
 Route::group([
-    'prefix'     => 'admin',
-//    'middleware' => 'auth_active'
+    'prefix' => 'admin',
+    //    'middleware' => 'auth_active'
 ],
     function () {
         Route::resource('sales', 'SalesController');
@@ -23,6 +23,10 @@ Route::group([
 
         Route::delete('sales/{sale}/deliveries/{delivery}', 'DeliveryController@destroy')
              ->name('deliveries.destroy');
+
+        Route::get('sales/{sale}/deliveries/{delivery}/export-manufacturing',
+            'DeliveryController@exportManufacturing')
+             ->name('deliveries.export.manufacturing');
 
         Route::get('sales/{sale}/deliveries', 'DeliveryController@index')
              ->name('deliveries.index');
