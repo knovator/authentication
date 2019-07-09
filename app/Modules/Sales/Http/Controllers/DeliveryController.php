@@ -563,4 +563,10 @@ class DeliveryController extends Controller
             compact('salesOrder', 'delivery'));*/
     }
 
+
+
+    private function downloadPdf(){
+
+    }
+
 }
