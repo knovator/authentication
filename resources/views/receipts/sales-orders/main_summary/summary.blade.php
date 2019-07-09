@@ -6,7 +6,7 @@
 </head>
 <body>
 <main>
-    <div class="receipt-heading text-center">TAX INVOICE</div>
+    <div class="receipt-heading text-center">{{($isInvoice) ? 'TAX INVOICE':'ORDER FORM'}}</div>
     <div class="text-center">
         <small
         >(Invoice For supply of goods u/s 31 of GST Act, 2017 read with Rule 1
@@ -102,18 +102,30 @@
         <!--  for one recipe details starts here-->
 
 
-        @php $totalQuantity = 0 @endphp
+        @php
+            $totalQuantity = 0;
+        @endphp
 
         @foreach($salesOrder->orderRecipes as $orderRecipeKey => $orderRecipe)
             @php
                 $key = $orderRecipeKey + 1;
-            @endphp
+                    if ($isInvoice){
+                        $partialQuantity =  $orderRecipe->partialOrders->sum('total_meters');
+                        $totalQuantity =+ $partialQuantity;
 
+                    }else{
+                      $totalQuantity =+ $orderRecipe->total_meters;
+                    }
+
+            @endphp
             <tr>
                 <td class="sr-no text-left"><b>{{$key}}</b></td>
                 <td><b>{{$orderRecipe->recipe->name}}</b></td>
-                <td class="text-center"><b>{{$orderRecipe->total_meters}}</b><span
-                        style="font-size: 12px">({{0}})</span></td>
+                <td class="text-center"><b>{{$orderRecipe->total_meters}}</b>
+                    @if($isInvoice && $partialQuantity)
+                        <span style="font-size: 12px">({{$partialQuantity}})</span>
+                    @endif
+                </td>
                 <td class="text-center"></td>
                 <td class="text-right"></td>
             </tr>
@@ -133,14 +145,19 @@
                 @endforeach
             @endif
         @endforeach
+
+        @php
+            $price = $totalQuantity * $salesOrder->cost_per_meter;
+        @endphp
+
         </tbody>
         <tfoot>
         <tr>
             <td></td>
             <td><b>TOTAL : </b></td>
-            <td class="text-center"><b>750</b></td>
+            <td class="text-center"><b>{{$totalQuantity}}</b></td>
             <td class="text-center"></td>
-            <td class="text-right"><b>20,000</b></td>
+            <td class="text-right"><b>{{$price}}</b></td>
         </tr>
         </tfoot>
     </table>
@@ -262,7 +279,7 @@
                         <tr class="highlight-row">
                             <td class=" label">GRAND TOTAL :</td>
                             <td class="text-center"></td>
-                            <td class="text-right">28,376.00</td>
+                            <td class="text-right">{{$price}}</td>
                         </tr>
                         <tr></tr>
                         <tr></tr>

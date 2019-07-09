@@ -469,7 +469,10 @@ class SalesController extends Controller
      * @return Response
      */
     public function exportSummary(SalesOrder $salesOrder) {
-
+        $isInvoice = false;
+        if ($salesOrder->deliveries()->exists()) {
+            $isInvoice = true;
+        }
         $statusId = $this->masterRepository->findByCode(MasterConstant::SO_DELIVERED)->id;
         $salesOrder->load([
             'orderRecipes'               => function ($orderRecipes) {
@@ -488,12 +491,14 @@ class SalesController extends Controller
             'customer.state'
         ]);
 
+
         /* $image = SnappyPdf::loadView('receipts.sales-orders.main_summary.summary',
              compact('salesOrder'));
 
          return $image->download($salesOrder->order_no . ".pdf");*/
 
-        return view('receipts.sales-orders.main_summary.summary', compact('salesOrder'));
+        return view('receipts.sales-orders.main_summary.summary',
+            compact('salesOrder', 'isInvoice'));
 
     }
 
