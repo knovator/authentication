@@ -46,6 +46,10 @@ class RecipeRepository extends BaseRepository
             'fiddles.color:id,name,code'
         ])->withCount('designBeams as associated_count');
 
+        if (isset($input['is_active'])) {
+            $recipes = $recipes->where('is_active', $input['is_active']);
+        }
+
         if (isset($input['not_ids']) && (!empty($input['not_ids']))) {
             $recipes = $recipes->whereNotIn('id', $input['not_ids']);
         }
