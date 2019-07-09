@@ -501,5 +501,4 @@ class SalesController extends Controller
             compact('salesOrder', 'isInvoice'));*/
     }
 
-
 }

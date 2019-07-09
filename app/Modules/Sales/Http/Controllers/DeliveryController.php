@@ -6,6 +6,7 @@ use App\Constants\GenerateNumber;
 use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
 use App\Modules\Design\Repositories\DesignDetailRepository;
+use App\Modules\Machine\Repositories\MachineRepository;
 use App\Modules\Sales\Http\Requests\Delivery\CreateRequest;
 use App\Modules\Sales\Http\Requests\Delivery\StatusRequest;
 use App\Modules\Sales\Http\Requests\Delivery\UpdateRequest;
@@ -19,15 +20,21 @@ use App\Modules\Thread\Constants\ThreadType;
 use App\Repositories\MasterRepository;
 use App\Support\Formula;
 use App\Support\UniqueIdGenerator;
+use Barryvdh\Snappy\Facades\SnappyPdf;
+use Barryvdh\Snappy\ImageWrapper;
 use DB;
 use Exception;
+use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
+use Knp\Snappy\Pdf;
 use Log;
 use Prettus\Repository\Exceptions\RepositoryException;
 use Str;
+use View;
 
 /**
  * Class DeliveryController
@@ -500,6 +507,23 @@ class DeliveryController extends Controller
             Log::error($exception);
             throw $exception;
         }
+    }
+
+    /**
+     * @param SalesOrder $salesOrder
+     * @param Delivery   $delivery
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function exportManufacturing(SalesOrder $salesOrder, Delivery $delivery) {
+        $salesOrder->load(['design.detail', 'design.fiddlePicks']);
+        $machineRepo = new MachineRepository(new Container());
+        $machines = $machineRepo->manufacturingReceipts($delivery->id);
+//        $pdf = SnappyPdf::loadView('receipts.sales-orders.manufacturing.manufacturing',
+//            compact('machines', 'salesOrder', 'delivery'));
+//        /** @var ImageWrapper $pdf */
+//        return $pdf->download($delivery->delivery_no . ".pdf");
+        return view('receipts.sales-orders.manufacturing.manufacturing',
+            compact('machines', 'salesOrder', 'delivery'));
     }
 
 }
