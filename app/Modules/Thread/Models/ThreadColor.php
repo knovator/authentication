@@ -3,6 +3,7 @@
 namespace App\Modules\Thread\Models;
 
 
+use App\Modules\Purchase\Models\PurchaseOrderThread;
 use App\Modules\Recipe\Models\Recipe;
 use App\Modules\Stock\Models\Stock;
 use Illuminate\Database\Eloquent\Model;
@@ -45,6 +46,24 @@ class ThreadColor extends Model
         return $this->belongsTo(Thread::class, 'thread_id', 'id');
     }
 
+
+    /**
+     * @return mixed
+     */
+    public function purchaseThreads() {
+        return $this->hasMany(PurchaseOrderThread::class, 'thread_color_id', 'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function inPurchaseQty() {
+        return $this->hasOne(PurchaseOrderThread::class, 'thread_color_id', 'id')
+                    ->selectRaw('thread_color_id,SUM(kg_qty) as total')
+                    ->groupBy('thread_color_id');
+    }
+
     /**
      * @return mixed
      */
@@ -62,5 +81,6 @@ class ThreadColor extends Model
         return $this->belongsToMany(Recipe::class, 'recipes_fiddles', 'thread_color_id',
             'recipe_id');
     }
+
 
 }

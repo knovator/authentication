@@ -12,7 +12,11 @@ use Illuminate\Http\Request;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
-Route::get('/stock', function (Request $request) {
-    // return $request->stock();
-})->middleware('auth:api');
+Route::group([
+    'prefix'     => 'admin',
+    'middleware' => 'auth_active'
+],
+    function () {
+        Route::get('stocks', 'StockController@index')
+             ->name('stocks.index');
+    });

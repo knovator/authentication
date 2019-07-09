@@ -4,8 +4,8 @@ use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Sales\Models\Delivery;
 
 Route::group([
-    'prefix' => 'admin',
-    //    'middleware' => 'auth_active'
+    'prefix'     => 'admin',
+    'middleware' => 'auth_active'
 ],
     function () {
         Route::resource('sales', 'SalesController');
