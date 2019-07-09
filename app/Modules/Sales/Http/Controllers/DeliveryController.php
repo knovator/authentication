@@ -545,6 +545,7 @@ class DeliveryController extends Controller
         ]);
         $delivery->load([
             'partialOrders' => function ($partialOrders) {
+                /** @var Builder $partialOrders */
                 $partialOrders->with('orderRecipe.recipe')->orderByDesc('id');
             }
         ]);
@@ -557,7 +558,7 @@ class DeliveryController extends Controller
             compact('salesOrder', 'delivery'));
 
         /** @var ImageWrapper $pdf */
-        return $pdf->download($delivery->delivery_no . ' - accounting' . ".pdf");
+        return $pdf->download($delivery->delivery_no . '-accounting' . ".pdf");
         /*return view('receipts.sales-orders.accounting.accounting',
             compact('salesOrder', 'delivery'));*/
     }
