@@ -28,6 +28,11 @@ Route::group([
             'DeliveryController@exportManufacturing')
              ->name('deliveries.export.manufacturing');
 
+        Route::get('sales/{sale}/deliveries/{delivery}/export-accounting',
+            'DeliveryController@exportAccounting')
+             ->name('deliveries.export.accounting');
+
+
         Route::get('sales/{sale}/deliveries', 'DeliveryController@index')
              ->name('deliveries.index');
 

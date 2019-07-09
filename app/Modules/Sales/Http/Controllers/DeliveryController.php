@@ -518,12 +518,48 @@ class DeliveryController extends Controller
         $salesOrder->load(['design.detail', 'design.fiddlePicks']);
         $machineRepo = new MachineRepository(new Container());
         $machines = $machineRepo->manufacturingReceipts($delivery->id);
+
+        if ($machines->isEmpty()) {
+            return $this->sendResponse(null, __('messages.partial_order_not_present'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+
         $pdf = SnappyPdf::loadView('receipts.sales-orders.manufacturing.manufacturing',
             compact('machines', 'salesOrder', 'delivery'));
+
         /** @var ImageWrapper $pdf */
-        return $pdf->download($delivery->delivery_no . ".pdf");
+        return $pdf->download($delivery->delivery_no . '-manufacturing' . ".pdf");
         /*return view('receipts.sales-orders.manufacturing.manufacturing',
             compact('machines', 'salesOrder', 'delivery'));*/
+    }
+
+    /**
+     * @param SalesOrder $salesOrder
+     * @param Delivery   $delivery
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function exportAccounting(SalesOrder $salesOrder, Delivery $delivery) {
+        $salesOrder->load([
+            'design.mainImage.file',
+            'customer.state'
+        ]);
+        $delivery->load([
+            'partialOrders' => function ($partialOrders) {
+                $partialOrders->with('orderRecipe.recipe')->orderByDesc('id');
+            }
+        ]);
+        if ($delivery->partialOrders->isEmpty()) {
+            return $this->sendResponse(null, __('messages.partial_order_not_present'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+
+        $pdf = SnappyPdf::loadView('receipts.sales-orders.accounting.accounting',
+            compact('salesOrder', 'delivery'));
+
+        /** @var ImageWrapper $pdf */
+        return $pdf->download($delivery->delivery_no . ' - accounting' . ".pdf");
+        /*return view('receipts.sales-orders.accounting.accounting',
+            compact('salesOrder', 'delivery'));*/
     }
 
 }
