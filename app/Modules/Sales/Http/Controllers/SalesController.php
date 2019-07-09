@@ -499,7 +499,6 @@ class SalesController extends Controller
 
         /*return view('receipts.sales-orders.main_summary.summary',
             compact('salesOrder', 'isInvoice'));*/
-
     }
 
 

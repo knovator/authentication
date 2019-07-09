@@ -35,6 +35,10 @@ Route::group([
 
         Route::get('sales/{sale}/export-summary', 'SalesController@exportSummary')
              ->name('sales.export.summary');
+
+
+        Route::get('sales/{sale}/export-summary', 'SalesController@exportSummary')
+             ->name('sales.export.summary');
     });
 
 Route::model('sale', SalesOrder::class);
