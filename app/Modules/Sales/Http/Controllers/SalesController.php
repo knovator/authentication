@@ -492,14 +492,15 @@ class SalesController extends Controller
         ]);
 
 
-        /* $image = SnappyPdf::loadView('receipts.sales-orders.main_summary.summary',
-             compact('salesOrder'));
+        $pdf = SnappyPdf::loadView('receipts.sales-orders.main_summary.summary',
+            compact('salesOrder','isInvoice'));
 
-         return $image->download($salesOrder->order_no . ".pdf");*/
+        return $pdf->download($salesOrder->order_no . ".pdf");
 
-        return view('receipts.sales-orders.main_summary.summary',
-            compact('salesOrder', 'isInvoice'));
+        /*return view('receipts.sales-orders.main_summary.summary',
+            compact('salesOrder', 'isInvoice'));*/
 
     }
+
 
 }

@@ -156,7 +156,7 @@
             <td></td>
             <td><b>TOTAL : </b></td>
             <td class="text-center"><b>{{$totalQuantity}}</b></td>
-            <td class="text-center"></td>
+            <td class="text-center">{{$salesOrder->cost_per_meter}}</td>
             <td class="text-right"><b>{{$price}}</b></td>
         </tr>
         </tfoot>
@@ -239,47 +239,42 @@
                 class="text-left"
                 style="
     padding: 0;
+    position: relative;
     border: 0;
-        vertical-align: top;
+    vertical-align: top;
 "
             >
                 <div>
-                    <table class="right-bordered gst-table ">
+                    <table class="right-bordered gst-table">
                         <tbody>
-                        <tr>
-                            <td class=" label">Freight :</td>
-                            <td class="text-center"></td>
-                            <td class="text-right">0.00</td>
-                        </tr>
-                        <tr>
-                            <td class=" label"><b>Discount </b>0.00 %</td>
-                            <td class="text-center"></td>
-                            <td class="text-right">0.00</td>
-                        </tr>
-                        <tr>
-                            <td class=" label">Round Off:</td>
-                            <td class="text-center"></td>
-                            <td class="text-right">-0.45</td>
-                        </tr>
-                        <tr>
-                            <td class=" label">IGST</td>
-                            <td class="text-center">0.00 %</td>
-                            <td class="text-right">0.00</td>
-                        </tr>
-                        <tr>
-                            <td class=" label">SGST</td>
-                            <td class="text-center">6.00 %</td>
-                            <td class="text-right">1520.17</td>
-                        </tr>
-                        <tr>
-                            <td class=" label">CGST</td>
-                            <td class="text-center">6.00 %</td>
-                            <td class="text-right">1520.17</td>
-                        </tr>
-                        <tr class="highlight-row">
-                            <td class=" label">GRAND TOTAL :</td>
-                            <td class="text-center"></td>
-                            <td class="text-right">{{$price}}</td>
+                        @if($salesOrder->customer->state->code == 'GUJARAT')
+                            <tr>
+                                <td class=" label">SGST</td>
+                                <td class="text-center">2.50 %</td>
+                                <td class="text-right">{{($price / 100) * 2.5}}</td>
+                            </tr>
+                            <tr>
+                                <td class=" label">CGST</td>
+                                <td class="text-center">2.50 %</td>
+                                <td class="text-right">{{($price / 100) * 2.5}}</td>
+                            </tr>
+                        @else
+                            <tr>
+                                <td class=" label">IGST</td>
+                                <td class="text-center">5.00 %</td>
+                                <td class="text-right">{{($price / 100) * 5}}</td>
+                            </tr>
+                        @endif
+                        <tr class="highlight-row" style="
+
+    position: absolute;
+    width: 100%;bottom: 0;">
+                            <td colspan="2" class="label" style="display: flex;
+    border-bottom: 0;
+    justify-content: space-between;">
+                                GRAND TOTAL :
+                            </td>
+                            <td class="text-right" style="border-bottom: 0;position: absolute;right: 0;">{{$price = $price + (($price / 100) * 5) }}</td>
                         </tr>
                         <tr></tr>
                         <tr></tr>
@@ -293,7 +288,7 @@
     <div class="rupees-in-words">
         Total Value Of Goods In Word:
         <span>
-          <b>Rupees Twenty-Eight Thousand Three Hundred Seventy-Six Only</b>
+          <b>{{displayWords($price)}}</b>
         </span>
     </div>
     <div class="receipt-footer">
