@@ -3,6 +3,9 @@
 namespace App\Modules\Machine\Repositories;
 
 use App\Modules\Machine\Models\Machine;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Knovators\Support\Criteria\IsActiveCriteria;
 use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
@@ -48,19 +51,59 @@ class MachineRepository extends BaseRepository
 
     }
 
-
     /**
+     * @param $input
      * @return mixed
      * @throws RepositoryException
-     * @throws \Exception
      */
-    public function getActiveMachines() {
+    public function getActiveMachines($input) {
         $this->pushCriteria(IsActiveCriteria::class);
         $this->applyCriteria();
-        $machines = $this->model->select('id', 'name', 'panno')->get();
+        $machines = $this->model->select('id', 'name', 'panno');
+        if (isset($input['sales_order'])) {
+            /** @var Builder $machines */
+            $machines = $machines->where([
+                'thread_color_id' => $input['sales_order']->designBeam->thread_color_id,
+                'reed'            => $input['sales_order']->design->detail->reed
+            ]);
+        }
+        $machines = $machines->get();
         $this->resetModel();
 
         return $machines;
+    }
+
+
+    /**
+     * @param $deliveryId
+     * @return Builder[]|Collection|Model[]
+     */
+    public function manufacturingReceipts($deliveryId) {
+        $machines = $this->model->with([
+            'soPartialOrders' =>
+                function ($soPartialOrders) use ($deliveryId) {
+                    /** @var Builder $soPartialOrders */
+                    $soPartialOrders->with([
+                        'orderRecipe.recipe.fiddles' => function ($fiddles) {
+                            /** @var Builder $fiddles */
+                            $fiddles->with('thread', 'color')->orderByDesc('id');
+                        },
+                    ])->where('delivery_id',
+                        $deliveryId);
+                },
+            'threadColor.thread',
+            'threadColor.color'
+        ])->whereHas(
+            'soPartialOrders',
+            function ($soPartialOrders) use ($deliveryId) {
+                /** @var Builder $soPartialOrders */
+                $soPartialOrders->where('delivery_id', $deliveryId);
+            }
+        );
+
+        return $machines->get();
+
+
     }
 
 

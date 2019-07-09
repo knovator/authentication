@@ -44,11 +44,15 @@ class SalesRecipeRepository extends BaseRepository
 
     /**
      * @param       $salesOrderId
-     * @param array $ids
      * @param null  $skipDeliveryId
+     * @param       $loadRelation
      * @return Builder[]|Collection|Model[]
      */
-    public function getOrderRecipeList($salesOrderId, $skipDeliveryId = null) {
+    public function getOrderRecipeList(
+        $salesOrderId,
+        $skipDeliveryId = null,
+        $loadRelation = false
+    ) {
         $orderRecipes = $this->model->with([
             'remainingQuantity' => function ($remainingQuantity) use ($skipDeliveryId) {
                 /** @var Builder $remainingQuantity */
@@ -58,6 +62,12 @@ class SalesRecipeRepository extends BaseRepository
             }
         ])->where('sales_order_id', '=',
             $salesOrderId);
+
+
+        if ($loadRelation){
+            $orderRecipes = $orderRecipes->with(['recipe.fiddles.thread','recipe.fiddles.color']);
+        }
+
         return $orderRecipes->get();
     }
 

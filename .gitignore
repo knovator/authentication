@@ -17,5 +17,10 @@ yarn-error.log
 /public/bower_components
 _ide_helper.php
 
+!.gitKeep
+!/public/fonts/*
+!/public/css/*
+!/public/js/*
+
 /public/uploads/*
-!/public/uploads/.gitKeep
+!/public/uploads/

@@ -180,7 +180,7 @@ img.preview {
 }
 
 .text-right {
-  text-align: unset;
+  text-align: right;
   padding-left: 7px;
 }
 

@@ -6,6 +6,7 @@ use App\Constants\GenerateNumber;
 use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
 use App\Modules\Design\Repositories\DesignDetailRepository;
+use App\Modules\Machine\Repositories\MachineRepository;
 use App\Modules\Sales\Http\Requests\Delivery\CreateRequest;
 use App\Modules\Sales\Http\Requests\Delivery\StatusRequest;
 use App\Modules\Sales\Http\Requests\Delivery\UpdateRequest;
@@ -19,15 +20,21 @@ use App\Modules\Thread\Constants\ThreadType;
 use App\Repositories\MasterRepository;
 use App\Support\Formula;
 use App\Support\UniqueIdGenerator;
+use Barryvdh\Snappy\Facades\SnappyPdf;
+use Barryvdh\Snappy\ImageWrapper;
 use DB;
 use Exception;
+use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
+use Knp\Snappy\Pdf;
 use Log;
 use Prettus\Repository\Exceptions\RepositoryException;
 use Str;
+use View;
 
 /**
  * Class DeliveryController
@@ -415,7 +422,16 @@ class DeliveryController extends Controller
      */
     private function updateSOCANCELEDStatus(Delivery $delivery) {
         try {
-            return $this->updateStatus($delivery, MasterConstant::SO_CANCELED);
+            $input['status_id'] = $this->findMasterIdByCode(MasterConstant::SO_CANCELED);
+            $delivery->partialOrders()->delete();
+            $delivery->update($input);
+            $delivery->load('salesOrder');
+            $this->storeStockDetails($delivery->salesOrder,
+                $this->findMasterIdByCode(MasterConstant::SO_PENDING));
+
+            return $this->sendResponse(null,
+                __('messages.updated', ['module' => 'Status']),
+                HTTPCode::OK);
         } catch (Exception $exception) {
             Log::error($exception);
 
@@ -424,6 +440,15 @@ class DeliveryController extends Controller
         }
 
 
+    }
+
+
+    /**
+     * @param $code
+     * @return integer
+     */
+    private function findMasterIdByCode($code) {
+        return $this->masterRepository->findByCode($code)->id;
     }
 
 
@@ -467,7 +492,7 @@ class DeliveryController extends Controller
      * @throws Exception
      */
     private function updateStatus(Delivery $delivery, $code) {
-        $input['status_id'] = $this->masterRepository->findByCode($code)->id;
+        $input['status_id'] = $this->findMasterIdByCode($code);
         try {
             DB::beginTransaction();
             $delivery->orderStocks()->update($input);
@@ -482,6 +507,66 @@ class DeliveryController extends Controller
             Log::error($exception);
             throw $exception;
         }
+    }
+
+    /**
+     * @param SalesOrder $salesOrder
+     * @param Delivery   $delivery
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function exportManufacturing(SalesOrder $salesOrder, Delivery $delivery) {
+        $salesOrder->load(['design.detail', 'design.fiddlePicks']);
+        $machineRepo = new MachineRepository(new Container());
+        $machines = $machineRepo->manufacturingReceipts($delivery->id);
+
+        if ($machines->isEmpty()) {
+            return $this->sendResponse(null, __('messages.partial_order_not_present'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+
+        $pdf = SnappyPdf::loadView('receipts.sales-orders.manufacturing.manufacturing',
+            compact('machines', 'salesOrder', 'delivery'));
+
+        /** @var ImageWrapper $pdf */
+        return $pdf->download($delivery->delivery_no . '-manufacturing' . ".pdf");
+        /*return view('receipts.sales-orders.manufacturing.manufacturing',
+            compact('machines', 'salesOrder', 'delivery'));*/
+    }
+
+    /**
+     * @param SalesOrder $salesOrder
+     * @param Delivery   $delivery
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function exportAccounting(SalesOrder $salesOrder, Delivery $delivery) {
+        $salesOrder->load([
+            'design.mainImage.file',
+            'customer.state'
+        ]);
+        $delivery->load([
+            'partialOrders' => function ($partialOrders) {
+                /** @var Builder $partialOrders */
+                $partialOrders->with('orderRecipe.recipe')->orderByDesc('id');
+            }
+        ]);
+        if ($delivery->partialOrders->isEmpty()) {
+            return $this->sendResponse(null, __('messages.partial_order_not_present'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+
+        $pdf = SnappyPdf::loadView('receipts.sales-orders.accounting.accounting',
+            compact('salesOrder', 'delivery'));
+
+        /** @var ImageWrapper $pdf */
+        return $pdf->download($delivery->delivery_no . '-accounting' . ".pdf");
+        /*return view('receipts.sales-orders.accounting.accounting',
+            compact('salesOrder', 'delivery'));*/
+    }
+
+
+
+    private function downloadPdf(){
+
     }
 
 }

@@ -22,11 +22,14 @@ use App\Modules\Thread\Repositories\ThreadColorRepository;
 use App\Repositories\MasterRepository;
 use App\Support\Formula;
 use App\Support\UniqueIdGenerator;
+use Barryvdh\Snappy\Facades\SnappyPdf;
 use DB;
 use Exception;
 use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;
@@ -435,9 +438,9 @@ class SalesController extends Controller
         try {
             $threadColors = $this->threadColorRepository->with([
                 'availableStock',
-                'thread' => function($thread){
+                'thread' => function ($thread) {
                     /** @var Builder $thread */
-                    $thread->select(['id','name','type_id'])->with('type:id,name');
+                    $thread->select(['id', 'name', 'type_id'])->with('type:id,name');
                 },
                 'color:id,name,code'
             ])->findWhereIn('id', $collection->pluck('thread_color_id')->toArray());
@@ -456,10 +459,46 @@ class SalesController extends Controller
             Log::error($exception);
 
             return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY,$exception);
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
+    }
 
 
+    /**
+     * @param SalesOrder $salesOrder
+     * @return Response
+     */
+    public function exportSummary(SalesOrder $salesOrder) {
+        $isInvoice = false;
+        if ($salesOrder->deliveries()->exists()) {
+            $isInvoice = true;
+        }
+        $statusId = $this->masterRepository->findByCode(MasterConstant::SO_DELIVERED)->id;
+        $salesOrder->load([
+            'orderRecipes'               => function ($orderRecipes) {
+                /** @var Builder $orderRecipes */
+                $orderRecipes->orderBy('id')->with('recipe');
+            },
+            'orderRecipes.partialOrders' => function ($partialOrders) use ($statusId) {
+                /** @var Builder $partialOrders */
+                $partialOrders->whereHas('delivery', function ($delivery) use ($statusId) {
+                    /** @var Builder $delivery */
+                    $delivery->where('status_id', $statusId);
+                });
+            },
+            'design.detail',
+            'design.mainImage.file',
+            'customer.state'
+        ]);
+
+
+        $pdf = SnappyPdf::loadView('receipts.sales-orders.main_summary.summary',
+            compact('salesOrder','isInvoice'));
+
+        return $pdf->download($salesOrder->order_no . ".pdf");
+
+        /*return view('receipts.sales-orders.main_summary.summary',
+            compact('salesOrder', 'isInvoice'));*/
     }
 
 }

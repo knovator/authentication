@@ -37,6 +37,8 @@ class Customer extends Model
         'address',
     ];
 
+    protected $appends = ['full_name'];
+
 
     protected $hidden = [
         'created_by',
@@ -46,6 +48,13 @@ class Customer extends Model
         'deleted_at',
     ];
 
+
+    /**
+     * @return string
+     */
+    public function getFullNameAttribute() {
+        return ucfirst($this->first_name . ' ' . $this->last_name);
+    }
 
     /**
      * @return mixed

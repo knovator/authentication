@@ -187,6 +187,8 @@ return [
         DougSisk\CountryState\CountryStateServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         Barryvdh\Snappy\ServiceProvider::class,
+        Maatwebsite\Excel\ExcelServiceProvider::class,
+        App\Providers\ExcelSheetProvider::class,
 
 
     ],
@@ -242,6 +244,7 @@ return [
         'DataTables'   => Yajra\DataTables\Facades\DataTables::class,
         'PDF'          => Barryvdh\Snappy\Facades\SnappyPdf::class,
         'SnappyImage'  => Barryvdh\Snappy\Facades\SnappyImage::class,
+        'Excel'          => Maatwebsite\Excel\Facades\Excel::class,
     ],
 
 ];

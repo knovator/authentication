@@ -11,6 +11,7 @@ return [
     'added'                         => ':module successfully added.',
     'sent'                          => ':module sent successfully.',
     'associated'                    => 'Please remove all :related of this :module.',
+    'can_not_export'                => ':module are not available, so you can not export it.',
 
 
     // Design Messages
@@ -35,5 +36,8 @@ return [
     'something_wrong'     => 'Oops! something went wrong ,please try again later.',
 
     // partial order messages
-    'quantity_not_exists' => 'Quantity you are trying to do should be less than or equal to the remaining quantity.'
+    'quantity_not_exists' => 'Quantity you are trying to do should be less than or equal to the remaining quantity.',
+
+    // Delivery messages
+    'partial_order_not_present'   => "This delivery doesn't have any partial orders, so you can not export it.",
 ];

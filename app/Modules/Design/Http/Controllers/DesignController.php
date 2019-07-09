@@ -2,29 +2,27 @@
 
 namespace App\Modules\Design\Http\Controllers;
 
-use App\Modules\Design\Http\Resources\Design as DesignResource;
 use App\Constants\GenerateNumber;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PartiallyUpdateRequest;
 use App\Modules\Design\Http\Requests\ApproveRequest;
 use App\Modules\Design\Http\Requests\CreateRequest;
 use App\Modules\Design\Http\Requests\UpdateRequest;
+use App\Modules\Design\Http\Resources\Design as DesignResource;
 use App\Modules\Design\Models\Design;
 use App\Modules\Design\Models\DesignBeam;
 use App\Modules\Design\Repositories\DesignDetailRepository;
 use App\Modules\Design\Repositories\DesignRepository;
 use App\Support\UniqueIdGenerator;
-use Barryvdh\Snappy\Facades\SnappyImage;
-use Barryvdh\Snappy\ImageWrapper;
+use Barryvdh\Snappy\Facades\SnappyPdf;
 use DB;
 use Exception;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\DestroyObject;
 use Log;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class DesignController
@@ -297,7 +295,7 @@ class DesignController extends Controller
     /**
      * @param Design  $design
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function export(Design $design, Request $request) {
         $design->load([
@@ -309,8 +307,10 @@ class DesignController extends Controller
             'beams.threadColor.color:id,name,code',
             'mainImage.file'
         ]);
-        $image = SnappyImage::loadView('receipts.design.design', compact('design'));
-        return $image->download($design->design_no . ".jpg");
+        $image = SnappyPdf::loadView('receipts.design.design', compact('design'));
+        return $image->download($design->design_no . ".pdf");
+//        return view('receipts.design.design',compact('design'));
+
     }
 }
 

@@ -209,6 +209,27 @@ class RecipeController extends Controller
         }
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function activeRecipes(Request $request) {
+        $input = $request->all();
+        try {
+            $input['is_active'] = true;
+            $recipes = $this->recipeRepository->getRecipeList($input);
+
+            return $this->sendResponse($recipes,
+                __('messages.retrieved', ['module' => 'Recipes']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+    }
+
 
     /**
      * @param Recipe $recipe

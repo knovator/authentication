@@ -3,6 +3,7 @@
 namespace App\Modules\Machine\Models;
 
 
+use App\Modules\Sales\Models\RecipePartialOrder;
 use App\Modules\Thread\Models\ThreadColor;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -42,5 +43,12 @@ class Machine extends Model
      */
     public function threadColor() {
         return $this->belongsTo(ThreadColor::class, 'thread_color_id', 'id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function soPartialOrders() {
+        return $this->hasMany(RecipePartialOrder::class, 'machine_id', 'id');
     }
 }

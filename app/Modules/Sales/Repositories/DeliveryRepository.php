@@ -42,9 +42,13 @@ class DeliveryRepository extends BaseRepository
         $deliveries = datatables()->of($this->model->where('sales_order_id', $salesOrderId)->with
         ([
             'status:id,name,code',
-            'partialOrders.orderRecipe.recipe.fiddles.thread:id,name,denier',
-            'partialOrders.orderRecipe.recipe.fiddles.color:id,name,code',
-            'deliveries:id,delivery_no,delivery_date',
+            'partialOrders' => function ($partialOrders) {
+                $partialOrders->with([
+                    'machine',
+                    'orderRecipe.recipe.fiddles.thread:id,name,denier',
+                    'orderRecipe.recipe.fiddles.color:id,name,code'
+                ]);
+            }
 
         ]))->make(true);
         $this->resetModel();
