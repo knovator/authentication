@@ -518,12 +518,12 @@ class DeliveryController extends Controller
         $salesOrder->load(['design.detail', 'design.fiddlePicks']);
         $machineRepo = new MachineRepository(new Container());
         $machines = $machineRepo->manufacturingReceipts($delivery->id);
-//        $pdf = SnappyPdf::loadView('receipts.sales-orders.manufacturing.manufacturing',
-//            compact('machines', 'salesOrder', 'delivery'));
-//        /** @var ImageWrapper $pdf */
-//        return $pdf->download($delivery->delivery_no . ".pdf");
-        return view('receipts.sales-orders.manufacturing.manufacturing',
+        $pdf = SnappyPdf::loadView('receipts.sales-orders.manufacturing.manufacturing',
             compact('machines', 'salesOrder', 'delivery'));
+        /** @var ImageWrapper $pdf */
+        return $pdf->download($delivery->delivery_no . ".pdf");
+        /*return view('receipts.sales-orders.manufacturing.manufacturing',
+            compact('machines', 'salesOrder', 'delivery'));*/
     }
 
 }
