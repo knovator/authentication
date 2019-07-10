@@ -12,6 +12,7 @@ namespace App\Support;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Knovators\Support\Helpers\YajraEloquentDataTable as BaseDataTable;
 use Yajra\DataTables\Exceptions\Exception;
 
@@ -58,6 +59,10 @@ class YajraEloquentDataTable extends BaseDataTable
                 $this->performJoin($table, $foreign, $other);*/
 
                 //break;
+
+                case $model instanceof MorphTo:
+                    return $relation . '.' . $relationColumn;
+                    break;
 
                 case $model instanceof HasOneOrMany:
                     $table = $model->getRelated()->getTable();

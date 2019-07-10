@@ -101,6 +101,8 @@ class DeliveryController extends Controller
             $this->storeStockDetails($salesOrder, $input['status_id']);
             DB::commit();
 
+            $delivery->load('status');
+
             return $this->sendResponse($delivery,
                 __('messages.created', ['module' => 'Delivery']),
                 HTTPCode::CREATED);
@@ -135,7 +137,10 @@ class DeliveryController extends Controller
                 $this->masterRepository->findByCode(MasterConstant::SO_PENDING)->id);
             DB::commit();
 
-            return $this->sendResponse($delivery->fresh(),
+            $delivery->fresh();
+            $delivery->load('status');
+
+            return $this->sendResponse($delivery,
                 __('messages.updated', ['module' => 'Sales']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
