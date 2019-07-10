@@ -5,6 +5,7 @@ namespace App\Modules\Sales\Http\Controllers;
 use App\Constants\GenerateNumber;
 use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
+use App\Models\Master;
 use App\Modules\Design\Repositories\DesignDetailRepository;
 use App\Modules\Machine\Repositories\MachineRepository;
 use App\Modules\Sales\Http\Requests\Delivery\CreateRequest;
@@ -419,20 +420,27 @@ class DeliveryController extends Controller
     /**
      * @param Delivery $delivery
      * @return JsonResponse
+     * @throws Exception
      */
     private function updateSOCANCELEDStatus(Delivery $delivery) {
+        /** @var Master $status */
+        $status = $this->findMasterIdByCode(MasterConstant::SO_CANCELED);
         try {
-            $input['status_id'] = $this->findMasterIdByCode(MasterConstant::SO_CANCELED);
+
+            DB::beginTransaction();
             $delivery->partialOrders()->delete();
-            $delivery->update($input);
+            $delivery->update(['status_id' => $status->id]);
             $delivery->load('salesOrder');
             $this->storeStockDetails($delivery->salesOrder,
-                $this->findMasterIdByCode(MasterConstant::SO_PENDING));
+                $this->findMasterIdByCode(MasterConstant::SO_PENDING)->id);
 
-            return $this->sendResponse(null,
+            DB::commit();
+
+            return $this->sendResponse($status,
                 __('messages.updated', ['module' => 'Status']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
+            DB::rollBack();
             Log::error($exception);
 
             return $this->sendResponse(null, __('messages.something_wrong'),
@@ -448,7 +456,7 @@ class DeliveryController extends Controller
      * @return integer
      */
     private function findMasterIdByCode($code) {
-        return $this->masterRepository->findByCode($code)->id;
+        return $this->masterRepository->findByCode($code);
     }
 
 
@@ -492,14 +500,16 @@ class DeliveryController extends Controller
      * @throws Exception
      */
     private function updateStatus(Delivery $delivery, $code) {
-        $input['status_id'] = $this->findMasterIdByCode($code);
+        $status = $this->findMasterIdByCode($code);
         try {
+            /** @var Master $status */
+            $input['status_id'] = $status->id;
             DB::beginTransaction();
             $delivery->orderStocks()->update($input);
             $delivery->update($input);
             DB::commit();
 
-            return $this->sendResponse(null,
+            return $this->sendResponse($status,
                 __('messages.updated', ['module' => 'Status']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -564,8 +574,7 @@ class DeliveryController extends Controller
     }
 
 
-
-    private function downloadPdf(){
+    private function downloadPdf() {
 
     }
 
