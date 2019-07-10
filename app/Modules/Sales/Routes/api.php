@@ -24,15 +24,6 @@ Route::group([
         Route::delete('sales/{sale}/deliveries/{delivery}', 'DeliveryController@destroy')
              ->name('deliveries.destroy');
 
-        Route::get('sales/{sale}/deliveries/{delivery}/export-manufacturing',
-            'DeliveryController@exportManufacturing')
-             ->name('deliveries.export.manufacturing');
-
-        Route::get('sales/{sale}/deliveries/{delivery}/export-accounting',
-            'DeliveryController@exportAccounting')
-             ->name('deliveries.export.accounting');
-
-
         Route::get('sales/{sale}/deliveries', 'DeliveryController@index')
              ->name('deliveries.index');
 
@@ -41,6 +32,20 @@ Route::group([
 
         Route::get('sales-thread-analysis', 'SalesController@threadAnalysis')
              ->name('sales.thread.analysis');
+
+    });
+
+Route::group([
+    'prefix' => 'admin',
+],
+    function () {
+        Route::get('sales/{sale}/deliveries/{delivery}/export-manufacturing',
+            'DeliveryController@exportManufacturing')
+             ->name('deliveries.export.manufacturing');
+
+        Route::get('sales/{sale}/deliveries/{delivery}/export-accounting',
+            'DeliveryController@exportAccounting')
+             ->name('deliveries.export.accounting');
 
         Route::get('sales/{sale}/export-summary', 'SalesController@exportSummary')
              ->name('sales.export.summary');
