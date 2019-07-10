@@ -78,7 +78,7 @@ td {
 }
 
 .-signatory {
-  position: absolute;
+  /*position: absolute;*/
   right: 5px;
   font-size: smaller;
   bottom: 3px;
