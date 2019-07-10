@@ -30,7 +30,7 @@ class YajraEloquentDataTable extends BaseDataTable
      * @param $keyword
      * @param $boolean
      */
-    protected function compileColumnQuerySearch(Builder $query, $columnName, $keyword, $boolean) {
+    protected function compileColumnQuerySearch($query, $columnName, $keyword, $boolean) {
 
         $parts = explode('.', $columnName);
         $column = array_pop($parts);
@@ -42,6 +42,7 @@ class YajraEloquentDataTable extends BaseDataTable
 
         $baseRelation = array_shift($parts);
 
+        /** @var Builder $query */
         if ($query->getRelation($baseRelation) instanceof MorphTo) {
             return $query->{$boolean . 'whereHasMorph'}($baseRelation, '*',
                 function (Builder $query) use ($column, $keyword, $parts) {
