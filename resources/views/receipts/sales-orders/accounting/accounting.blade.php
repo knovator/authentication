@@ -258,22 +258,26 @@ fontSize: 100% / (totalFiddle * 7)  <= 14 && 100% / (totalFiddle * 7) >= 10
           <b>{{displayWords($price)}}</b>
         </span>
     </div>
-    <div class="receipt-footer">
-        <div class="declaration">
-            <p>
-                Certified that the perticulars given above are true amd correct and
-                the amount indicated represents tje price actually charged and that
-                there is no flow of additional consideration directly or indirectly
-                from the buyer.
-            </p>
-            <br/>
-            <b>Prepared By:</b>
-        </div>
-        <div class="signature">
-            <span class="text-center -agency"><b>For, JENNY/SIDDHI TEXO FAB</b></span>
-            <span class="text-center -signatory"><b>Authorised Signatory</b></span>
-        </div>
-    </div>
+    <table class="auto-layout receipt-footer">
+        <tbody>
+        <tr>
+            <td class="declaration">
+                <p>
+                    Certified that the perticulars given above are true amd correct and
+                    the amount indicated represents tje price actually charged and that
+                    there is no flow of additional consideration directly or indirectly
+                    from the buyer.
+                </p>
+                <br/>
+                <b>Prepared By:</b>
+            </td>
+            <td class="signature" style="vertical-align: top">
+                <span class="text-center -agency"><b>For, JENNY/SIDDHI TEXO FAB</b></span>
+                <span class="text-center -signatory"><b>Authorised Signatory</b></span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
 </main>
 </body>
 <link href="{{asset('css/global_receipt.css')}}" rel="stylesheet" type="text/css"/>
