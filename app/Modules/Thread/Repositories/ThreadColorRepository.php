@@ -4,6 +4,8 @@
 namespace App\Modules\Thread\Repositories;
 
 use App\Modules\Thread\Models\ThreadColor;
+use DB;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
@@ -48,6 +50,64 @@ class ThreadColorRepository extends BaseRepository
 
         })->with(['thread:id,name,denier,price', 'color:id,name,code'])->get();
         $this->resetModel();
+
+        return $threadColors;
+    }
+
+    /**
+     * @param $input
+     * @param $poPendingId
+     * @return mixed
+     * @throws RepositoryException
+     * @throws \Exception
+     */
+    public function getStockOverview($input, $poPendingId) {
+
+        $this->applyCriteria();
+        $threadColors = $this->model->with([
+            'thread:id,name,denier',
+            'color:id,name,code',
+            'inPurchaseQty' => function ($inPurchaseQty) use ($poPendingId) {
+                /** @var Builder $inPurchaseQty */
+                $inPurchaseQty->whereHas('purchaseOrder',
+                    function ($purchaseOrder) use ($poPendingId) {
+                        /** @var Builder $purchaseOrder */
+                        $purchaseOrder->where('status_id', $poPendingId);
+                    });
+            },
+            'availableStock',
+            'pendingStock',
+            'manufacturingStock',
+        ])->has('purchaseThreads');
+
+        $threadColors = datatables()->of($threadColors)->make(true);
+        $this->resetModel();
+
+        return $threadColors;
+    }
+
+
+    /**
+     * @param $threadColorId
+     * @param $poPendingId
+     * @return mixed
+     */
+    public function stockCount($threadColorId, $poPendingId) {
+
+        $threadColors = $this->model->with([
+            'inPurchaseQty' => function ($inPurchaseQty) use ($poPendingId) {
+                /** @var Builder $inPurchaseQty */
+                $inPurchaseQty->whereHas('purchaseOrder',
+                    function ($purchaseOrder) use ($poPendingId) {
+                        /** @var Builder $purchaseOrder */
+                        $purchaseOrder->where('status_id', $poPendingId);
+                    });
+            },
+            'availableStock',
+            'pendingStock',
+            'manufacturingStock',
+        ])->find($threadColorId);
+
 
         return $threadColors;
     }

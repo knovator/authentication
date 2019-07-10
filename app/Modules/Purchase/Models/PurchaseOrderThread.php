@@ -39,5 +39,12 @@ class PurchaseOrderThread extends Model
         return $this->belongsTo(ThreadColor::class, 'thread_color_id', 'id');
     }
 
+    /**
+     * @return mixed
+     */
+    public function purchaseOrder() {
+        return $this->belongsTo(PurchaseOrder::class, 'purchase_order_id', 'id');
+    }
+
 
 }

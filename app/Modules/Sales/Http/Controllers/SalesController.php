@@ -341,11 +341,10 @@ class SalesController extends Controller
      */
     private function updateSOPENDINGStatus(SalesOrder $salesOrder, $input) {
 
-        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::SO_PENDING)->id;
+        $status = $this->masterRepository->findByCode(MasterConstant::SO_PENDING);
+        $salesOrder->orderStocks()->update(['status_id' => $status->id]);
 
-        $salesOrder->orderStocks()->update(['status_id' => $input['status_id']]);
-
-        return $this->updateStatus($salesOrder, $input);
+        return $this->updateStatus($salesOrder, $status);
 
     }
 
@@ -357,10 +356,9 @@ class SalesController extends Controller
      * @throws Exception
      */
     private function updateSOMANUFACTURINGStatus(SalesOrder $salesOrder, $input) {
+        $status = $this->masterRepository->findByCode(MasterConstant::SO_MANUFACTURING);
 
-        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::SO_MANUFACTURING)->id;
-
-        return $this->updateStatus($salesOrder, $input);
+        return $this->updateStatus($salesOrder, $status);
 
     }
 
@@ -387,9 +385,9 @@ class SalesController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
 
-        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::SO_DELIVERED)->id;
+        $status = $this->masterRepository->findByCode(MasterConstant::SO_DELIVERED);
 
-        return $this->updateStatus($salesOrder, $input);
+        return $this->updateStatus($salesOrder, $status);
 
     }
 
@@ -400,25 +398,26 @@ class SalesController extends Controller
      * @throws Exception
      */
     private function updateSOCANCELEDStatus(SalesOrder $salesOrder, $input) {
-        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::SO_CANCELED)->id;
 
-        $salesOrder->orderStocks()->update(['status_id' => $input['status_id']]);
+        $status = $this->masterRepository->findByCode(MasterConstant::SO_CANCELED);
 
-        return $this->updateStatus($salesOrder, $input);
+        $salesOrder->orderStocks()->update(['status_id' => $status->id]);
+
+        return $this->updateStatus($salesOrder, $status);
 
     }
 
     /**
      * @param SalesOrder $salesOrder
-     * @param            $input
+     * @param            $status
      * @return JsonResponse
      * @throws Exception
      */
-    private function updateStatus(SalesOrder $salesOrder, $input) {
+    private function updateStatus(SalesOrder $salesOrder, $status) {
         try {
-            $salesOrder->update($input);
+            $salesOrder->update(['status_id' => $status->id]);
 
-            return $this->sendResponse($this->makeResource($salesOrder->fresh()),
+            return $this->sendResponse($status,
                 __('messages.updated', ['module' => 'Status']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -493,7 +492,7 @@ class SalesController extends Controller
 
 
         $pdf = SnappyPdf::loadView('receipts.sales-orders.main_summary.summary',
-            compact('salesOrder','isInvoice'));
+            compact('salesOrder', 'isInvoice'));
 
         return $pdf->download($salesOrder->order_no . ".pdf");
 
