@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Modules\Thread\Models\ThreadColor;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,6 +17,15 @@ Route::group([
     'middleware' => 'auth_active'
 ],
     function () {
+
         Route::get('stocks', 'StockController@index')
              ->name('stocks.index');
+
+        Route::get('stocks/thread-color/{threadColor}/count', 'StockController@threadCount')
+             ->name('stocks.count');
+
+        Route::get('stocks/thread-color/{threadColor}/report', 'StockController@threadReport')
+             ->name('stocks.report');
     });
+
+Route::model('threadColor', ThreadColor::class);

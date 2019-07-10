@@ -38,4 +38,18 @@ class StockRepository extends BaseRepository
             $partialOrderIds)->delete();
     }
 
+    /**
+     * @param $threadColor
+     * @return
+     * @throws \Exception
+     */
+    public function getThreadOrderReport($threadColor) {
+        $reports = $this->model->selectRaw('order_id,order_type,SUM(kg_qty) as stock')->where([
+            'product_id'   => $threadColor->id,
+            'product_type' => 'thread_color'
+        ])->groupBy(['order_id', 'order_type'])->with('order.customer.state:id,name,code');
+
+        return datatables()->of($reports)->make(true);
+    }
+
 }

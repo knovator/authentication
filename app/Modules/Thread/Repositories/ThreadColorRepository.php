@@ -59,6 +59,7 @@ class ThreadColorRepository extends BaseRepository
      * @param $poPendingId
      * @return mixed
      * @throws RepositoryException
+     * @throws \Exception
      */
     public function getStockOverview($input, $poPendingId) {
 
@@ -77,8 +78,35 @@ class ThreadColorRepository extends BaseRepository
             'availableStock',
             'pendingStock',
             'manufacturingStock',
-        ])->has('purchaseThreads')->get();
+        ])->has('purchaseThreads');
+
+        $threadColors = datatables()->of($threadColors)->make(true);
         $this->resetModel();
+
+        return $threadColors;
+    }
+
+
+    /**
+     * @param $threadColorId
+     * @param $poPendingId
+     * @return mixed
+     */
+    public function stockCount($threadColorId, $poPendingId) {
+
+        $threadColors = $this->model->with([
+            'inPurchaseQty' => function ($inPurchaseQty) use ($poPendingId) {
+                /** @var Builder $inPurchaseQty */
+                $inPurchaseQty->whereHas('purchaseOrder',
+                    function ($purchaseOrder) use ($poPendingId) {
+                        /** @var Builder $purchaseOrder */
+                        $purchaseOrder->where('status_id', $poPendingId);
+                    });
+            },
+            'availableStock',
+            'pendingStock',
+            'manufacturingStock',
+        ])->find($threadColorId);
 
 
         return $threadColors;
