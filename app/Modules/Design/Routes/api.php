@@ -12,8 +12,6 @@ Route::group([
              ->name('designs.partially-update');
         Route::put('designs/partiallyApprove/{design}', 'DesignController@partiallyApprove')
              ->name('designs.partially-approve');
-        Route::get('designs/export/{design}', 'DesignController@export')
-             ->name('designs.export');
     });
 
 Route::group([
@@ -22,6 +20,15 @@ Route::group([
     function () {
         Route::get('active-designs', 'DesignController@activeDesigns')
              ->name('active-designs');
+    });
+
+
+Route::group([
+    'prefix' => 'admin',
+],
+    function () {
+        Route::get('designs/export/{design}', 'DesignController@export')
+             ->name('designs.export');
     });
 
 Route::model('design', Design::class);
