@@ -9,9 +9,11 @@
 namespace App\Support;
 
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Knovators\Support\Helpers\YajraEloquentDataTable as BaseDataTable;
 use Yajra\DataTables\Exceptions\Exception;
 
@@ -21,6 +23,48 @@ use Yajra\DataTables\Exceptions\Exception;
  */
 class YajraEloquentDataTable extends BaseDataTable
 {
+
+    /**
+     * @param $query
+     * @param $columnName
+     * @param $keyword
+     * @param $boolean
+     */
+    protected function compileColumnQuerySearch(Builder $query, $columnName, $keyword, $boolean) {
+
+        $parts = explode('.', $columnName);
+        $column = array_pop($parts);
+        $relation = implode('.', $parts);
+
+        if ($this->isNotEagerLoaded($relation)) {
+            return $this->querySearch($query, $columnName, $keyword, $boolean);
+        }
+
+        $baseRelation = array_shift($parts);
+
+        if ($query->getRelation($baseRelation) instanceof MorphTo) {
+            return $query->{$boolean . 'whereHasMorph'}($baseRelation, '*',
+                function (Builder $query) use ($column, $keyword, $parts) {
+                    if (!empty($parts)) {
+                        $childRelation = implode('.', $parts);
+                        $query->whereHas($childRelation,
+                            function (Builder $query) use ($column, $keyword) {
+                                $this->querySearch($query, $column, $keyword, '');
+                            });
+                    } else {
+                        $this->querySearch($query, $column, $keyword, '');
+                    }
+
+
+                });
+        }
+
+        return $query->{$boolean . 'WhereHas'}($relation,
+            function (Builder $query) use ($column, $keyword) {
+                $this->querySearch($query, $column, $keyword, '');
+            });
+
+    }
 
     /**
      * Join eager loaded relation and get the related column name.
@@ -39,25 +83,10 @@ class YajraEloquentDataTable extends BaseDataTable
             switch (true) {
                 case $model instanceof BelongsToMany:
                     return $relation . '.' . $relationColumn;
-                // belongs to many relationship does not work properly.
-                /*$pivot = $model->getTable();
-                $pivotPK = $model->getExistenceCompareKey();
-                $pivotFK = $model->getQualifiedParentKeyName();
-                $this->performJoin($pivot, $pivotPK, $pivotFK);
 
-                $related = $model->getRelated();
-                $table = $related->getTable();
-                // $tablePK = $related->getForeignKey() changed to $model->getRelatedPivotKeyName()
-                $tablePK = $model->getRelatedPivotKeyName();
-                $foreign = $pivot . '.' . $tablePK;
-                $other = $related->getQualifiedKeyName();
-
-                // removed conflict code when retrieving belongs to many relations data
-                $lastQuery->addSelect($table . '.' . $relationColumn . ' as ' . $table . '_'
-                    . $relationColumn );
-                $this->performJoin($table, $foreign, $other);*/
-
-                //break;
+                case $model instanceof MorphTo:
+                    return $relation . '.' . $relationColumn;
+                    break;
 
                 case $model instanceof HasOneOrMany:
                     $table = $model->getRelated()->getTable();

@@ -3,6 +3,7 @@
 namespace App\Modules\Stock\Repositories;
 
 use App\Modules\Stock\Models\Stock;
+use Illuminate\Database\Eloquent\Builder;
 use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
 use Prettus\Repository\Exceptions\RepositoryException;
@@ -48,6 +49,14 @@ class StockRepository extends BaseRepository
             'product_id'   => $threadColor->id,
             'product_type' => 'thread_color'
         ])->groupBy(['order_id', 'order_type'])->with('order.customer.state:id,name,code');
+
+
+        /** @var Builder $reports */
+//        $reports = $reports->whereHasMorph('order', '*',
+//            function ($query) {
+//                $query->where('customer_id', 'foo');
+//            });
+
 
         return datatables()->of($reports)->make(true);
     }
