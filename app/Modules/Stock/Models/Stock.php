@@ -3,6 +3,7 @@
 namespace App\Modules\Stock\Models;
 
 
+use App\Models\Master;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -24,6 +25,15 @@ class Stock extends Model
         'partial_order_id',
         'order_recipe_id'
     ];
+
+
+
+    /**
+     * @return mixed
+     */
+    public function status() {
+        return $this->belongsTo(Master::class, 'status_id', 'id');
+    }
 
 
 

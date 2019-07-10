@@ -4,6 +4,7 @@
 namespace App\Modules\Thread\Repositories;
 
 use App\Modules\Thread\Models\ThreadColor;
+use DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Knovators\Support\Criteria\OrderByDescId;
@@ -60,6 +61,7 @@ class ThreadColorRepository extends BaseRepository
      * @throws RepositoryException
      */
     public function getStockOverview($input, $poPendingId) {
+
         $this->applyCriteria();
         $threadColors = $this->model->with([
             'thread:id,name,denier',
@@ -71,9 +73,13 @@ class ThreadColorRepository extends BaseRepository
                         /** @var Builder $purchaseOrder */
                         $purchaseOrder->where('status_id', $poPendingId);
                     });
-            }
+            },
+            'availableStock',
+            'pendingStock',
+            'manufacturingStock',
         ])->has('purchaseThreads')->get();
         $this->resetModel();
+
 
         return $threadColors;
     }
