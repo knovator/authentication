@@ -3,6 +3,7 @@
 namespace App\Modules\Stock\Models;
 
 
+use App\Models\Master;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -26,8 +27,20 @@ class Stock extends Model
     ];
 
 
+    /**
+     * @return mixed
+     */
+    public function status() {
+        return $this->belongsTo(Master::class, 'status_id', 'id');
+    }
 
 
+    /**
+     * @return mixed
+     */
+    public function order() {
+        return $this->morphTo('order', 'order_type', 'order_id');
+    }
 
 
 }

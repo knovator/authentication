@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Modules\Thread\Models\ThreadColor;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,7 +12,20 @@ use Illuminate\Http\Request;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+Route::group([
+    'prefix'     => 'admin',
+    'middleware' => 'auth_active'
+],
+    function () {
 
-Route::get('/stock', function (Request $request) {
-    // return $request->stock();
-})->middleware('auth:api');
+        Route::get('stocks', 'StockController@index')
+             ->name('stocks.index');
+
+        Route::get('stocks/thread-color/{threadColor}/count', 'StockController@threadCount')
+             ->name('stocks.count');
+
+        Route::get('stocks/thread-color/{threadColor}/report', 'StockController@threadReport')
+             ->name('stocks.report');
+    });
+
+Route::model('threadColor', ThreadColor::class);

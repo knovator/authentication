@@ -231,17 +231,15 @@ fontSize: 100% / (totalFiddle * 7)  <= 14 && 100% / (totalFiddle * 7) >= 10
                                 <td class="text-right">{{($price / 100) * 5}}</td>
                             </tr>
                         @endif
-                        <tr class="highlight-row" style="
-
-    position: absolute;
-    width: 100%;bottom: 0;">
-                            <td colspan="2" class="label" style="display: flex;
+                        <tr class="highlight-row" style="position: absolute;bottom: 0;width: 100%;">
+                            <td class="label" style="
+        border-right: 0 !important;
     border-bottom: 0;
-    justify-content: space-between;">
+        float: left;
+    ">
                                 GRAND TOTAL :
                             </td>
-                            <td class="text-right"
-                                style="border-bottom: 0;position: absolute;right: 0;">{{$price = $price + (($price / 100) * 5) }}</td>
+                            <td class="text-right" style="border-bottom: 0;    float: right;">{{$price = $price + (($price / 100) * 5) }}</td>
                         </tr>
                         <tr></tr>
                         <tr></tr>
@@ -258,22 +256,30 @@ fontSize: 100% / (totalFiddle * 7)  <= 14 && 100% / (totalFiddle * 7) >= 10
           <b>{{displayWords($price)}}</b>
         </span>
     </div>
-    <div class="receipt-footer">
-        <div class="declaration">
-            <p>
-                Certified that the perticulars given above are true amd correct and
-                the amount indicated represents tje price actually charged and that
-                there is no flow of additional consideration directly or indirectly
-                from the buyer.
-            </p>
-            <br/>
-            <b>Prepared By:</b>
-        </div>
-        <div class="signature">
-            <span class="text-center -agency"><b>For, JENNY/SIDDHI TEXO FAB</b></span>
-            <span class="text-center -signatory"><b>Authorised Signatory</b></span>
-        </div>
-    </div>
+    <table class="auto-layout receipt-footer">
+        <tbody>
+        <tr>
+            <td class="declaration" style=  "border-left: 0">
+                <p>
+                    Certified that the perticulars given above are true amd correct and
+                    the amount indicated represents tje price actually charged and that
+                    there is no flow of additional consideration directly or indirectly
+                    from the buyer.
+                </p>
+                <br/>
+                <b>Prepared By:</b>
+            </td>
+            <td class="signature" style="vertical-align: top">
+                <span class="text-center -agency"><b>For, JENNY/SIDDHI TEXO FAB</b></span>
+                <br/>
+                <br/>
+                <br/>
+                <br/>
+                <span class="text-center -signatory"><b>Authorised Signatory</b></span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
 </main>
 </body>
 <link href="{{asset('css/global_receipt.css')}}" rel="stylesheet" type="text/css"/>
