@@ -111,10 +111,10 @@
                 $key = $orderRecipeKey + 1;
                     if ($isInvoice){
                         $partialQuantity =  $orderRecipe->partialOrders->sum('total_meters');
-                        $totalQuantity =+ $partialQuantity;
+                        $totalQuantity = $totalQuantity + $partialQuantity;
 
                     }else{
-                      $totalQuantity =+ $orderRecipe->total_meters;
+                      $totalQuantity = $totalQuantity +  $orderRecipe->total_meters;
                     }
 
             @endphp
