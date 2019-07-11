@@ -96,6 +96,16 @@ class ThreadColor extends Model
         });
     }
 
+    /**
+     * @return mixed
+     */
+    public function deliveredStock() {
+        return $this->stockQty()->whereHas('status', function ($status) {
+            /** @var Builder $status */
+            $status->where('code', MasterConstant::SO_DELIVERED);
+        });
+    }
+
 
     /**
      * @return mixed
