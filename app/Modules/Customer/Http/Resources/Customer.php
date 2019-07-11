@@ -29,7 +29,8 @@ class Customer extends JsonResource
             'gst_no'     => $this->gst_no,
             'address'    => $this->address,
             'city_name'  => $this->city_name,
-            'state'      => $this->whenLoaded('state')
+            'state'      => $this->whenLoaded('state'),
+            'agent'      => $this->whenLoaded('agent'),
         ];
     }
 }

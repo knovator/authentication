@@ -35,6 +35,7 @@ class Customer extends Model
         'city_name',
         'state_id',
         'address',
+        'agent_id'
     ];
 
     protected $appends = ['full_name'];
@@ -69,6 +70,14 @@ class Customer extends Model
      */
     public function state() {
         return $this->belongsTo(State::class, 'state_id', 'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function agent() {
+        return $this->belongsTo(Agent::class, 'agent_id', 'id');
     }
 
 
