@@ -468,10 +468,6 @@ class SalesController extends Controller
      * @return Response
      */
     public function exportSummary(SalesOrder $salesOrder) {
-        $isInvoice = false;
-        if ($salesOrder->deliveries()->exists()) {
-            $isInvoice = true;
-        }
 
         $statusId = $this->masterRepository->findByCode(MasterConstant::SO_DELIVERED)->id;
         $salesOrder->load([
@@ -491,6 +487,10 @@ class SalesController extends Controller
             'customer.state'
         ]);
 
+        $isInvoice = false;
+        if ($salesOrder->deliveries()->where('status_id', $statusId)->exists()) {
+            $isInvoice = true;
+        }
 
         $pdf = SnappyPdf::loadView('receipts.sales-orders.main_summary.summary',
             compact('salesOrder', 'isInvoice'));
