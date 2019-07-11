@@ -30,15 +30,17 @@ class CreateRequest extends FormRequest
      */
     public function rules() {
         return [
-            'first_name' => 'required|string|max:60',
-            'last_name'  => 'required|string|max:60',
-            'email'      => 'nullable|email',
-            'phone'      => 'required|numeric|digits:10',
-            'is_active'  => 'required|boolean',
-            'gst_no'     => 'required|string',
-            'city_name'  => 'required|string|max:60',
-            'state_id'   => 'required|integer',
-            'address'    => 'required|string',
+            'first_name'   => 'required|string|max:60',
+            'last_name'    => 'required|string|max:60',
+            'email'        => 'nullable|email',
+            'phone'        => 'required|numeric|digits:10',
+            'is_active'    => 'required|boolean',
+            'gst_no'       => 'required|string',
+            'city_name'    => 'required|string|max:60',
+            'state_id'     => 'required|integer',
+            'address'      => 'required|string',
+            'agent_name'   => 'required|string',
+            'agent_number' => 'required|integer',
         ];
     }
 
