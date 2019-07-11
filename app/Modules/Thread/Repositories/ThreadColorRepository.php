@@ -78,6 +78,7 @@ class ThreadColorRepository extends BaseRepository
             'availableStock',
             'pendingStock',
             'manufacturingStock',
+            'deliveredStock',
         ])->has('purchaseThreads');
 
         $threadColors = datatables()->of($threadColors)->make(true);
@@ -106,6 +107,7 @@ class ThreadColorRepository extends BaseRepository
             'availableStock',
             'pendingStock',
             'manufacturingStock',
+            'deliveredStock',
         ])->find($threadColorId);
 
 
