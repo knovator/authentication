@@ -25,12 +25,37 @@ class YajraEloquentDataTable extends BaseDataTable
 {
 
     /**
+     * Compile query builder where clause depending on configurations.
+     *
+     * @param mixed  $query
+     * @param string $columnName
+     * @param string $keyword
+     * @param string $boolean
+     */
+    protected function compileQuerySearch($query, $columnName, $keyword, $boolean = 'or') {
+        return $this->commonSearch($query, $columnName, $keyword, $boolean);
+    }
+
+    /**
      * @param $query
      * @param $columnName
      * @param $keyword
      * @param $boolean
      */
     protected function compileColumnQuerySearch($query, $columnName, $keyword, $boolean) {
+
+        return $this->commonSearch($query, $columnName, $keyword, $boolean);
+
+    }
+
+
+    /**
+     * @param $query
+     * @param $columnName
+     * @param $keyword
+     * @param $boolean
+     */
+    private function commonSearch($query, $columnName, $keyword, $boolean = '') {
 
         $parts = explode('.', $columnName);
         $column = array_pop($parts);
@@ -64,7 +89,6 @@ class YajraEloquentDataTable extends BaseDataTable
             function (Builder $query) use ($column, $keyword) {
                 $this->querySearch($query, $column, $keyword, '');
             });
-
     }
 
     /**
