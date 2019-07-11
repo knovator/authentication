@@ -472,6 +472,7 @@ class SalesController extends Controller
         if ($salesOrder->deliveries()->exists()) {
             $isInvoice = true;
         }
+
         $statusId = $this->masterRepository->findByCode(MasterConstant::SO_DELIVERED)->id;
         $salesOrder->load([
             'orderRecipes'               => function ($orderRecipes) {
