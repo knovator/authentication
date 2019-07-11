@@ -57,7 +57,7 @@
         <div class="beams-box">
             <div class="beam-name">
                 <div class="color-preview -block"
-                     style="color:{{getFontColor($beam->threadColor->color->code)}};background-color: {{$beam->threadColor->color->code}}; margin: 5px">{{$beam->threadColor->thread->denier}}</div>
+                     style="color:{{getFontColor($beam->threadColor->color->code)}};background-color: {{$beam->threadColor->color->code}}; margin: 0 5px">{{$beam->threadColor->thread->denier}}</div>
                 {{$beam->threadColor->thread->name}} ({{$beam->threadColor->color->name}})
             </div>
             <table class="listing-table">

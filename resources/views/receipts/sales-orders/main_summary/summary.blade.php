@@ -265,14 +265,15 @@
                                 <td class="text-right">{{($price / 100) * 5}}</td>
                             </tr>
                         @endif
-                        <tr class="highlight-row" style="position: absolute;bottom: 0;width: 100%;height:24px;display: flex;justify-content: space-between;">
+                        <tr class="highlight-row" style="position: absolute;bottom: 0;width: 100%;">
                             <td class="label" style="
         border-right: 0 !important;
     border-bottom: 0;
+        float: left;
     ">
                                 GRAND TOTAL :
                             </td>
-                            <td class="text-right" style="border-bottom: 0;">{{$price = $price + (($price / 100) * 5) }}</td>
+                            <td class="text-right" style="border-bottom: 0;    float: right;">{{$price = $price + (($price / 100) * 5) }}</td>
                         </tr>
                         <tr></tr>
                         <tr></tr>
