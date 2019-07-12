@@ -70,10 +70,11 @@ class CustomerController extends Controller
     /**
      * @param $input
      * @throws ValidatorException
+     * @throws \Prettus\Repository\Exceptions\RepositoryException
      */
     private function firstOrCreateAgent(&$input) {
-        $slug = str_replace(' ', '_', Str::upper($input['agent_name']));
-        if (!($agent = $this->agentRepository->findByField('slug', $slug))) {
+        $slug = str_replace(' ', '-', Str::lower($input['agent_name']));
+        if (!($agent = $this->agentRepository->findBy('slug', $slug))) {
             $agent = $this->agentRepository->create([
                 'name'           => $input['agent_name'],
                 'slug'           => $slug,
