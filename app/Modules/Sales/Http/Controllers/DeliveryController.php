@@ -101,7 +101,7 @@ class DeliveryController extends Controller
             $this->storeStockDetails($salesOrder, $input['status_id']);
             DB::commit();
 
-            $delivery->load(['status', 'partialOrders']);
+            $delivery->load(['status:id,name,code', 'partialOrders']);
 
             return $this->sendResponse($delivery,
                 __('messages.created', ['module' => 'Delivery']),
@@ -137,10 +137,7 @@ class DeliveryController extends Controller
                 $this->masterRepository->findByCode(MasterConstant::SO_PENDING)->id);
             DB::commit();
 
-            $delivery->fresh();
-            $delivery->load(['status', 'partialOrders']);
-
-            return $this->sendResponse($delivery,
+            return $this->sendResponse($delivery->fresh(['status:id,name,code', 'partialOrders']),
                 __('messages.updated', ['module' => 'Sales']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -513,8 +510,7 @@ class DeliveryController extends Controller
             $delivery->orderStocks()->update($input);
             $delivery->update($input);
             DB::commit();
-
-            return $this->sendResponse($status,
+            return $this->sendResponse($delivery->fresh(['status:id,name,code']),
                 __('messages.updated', ['module' => 'Status']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -577,7 +573,6 @@ class DeliveryController extends Controller
         /*return view('receipts.sales-orders.accounting.accounting',
             compact('salesOrder', 'delivery'));*/
     }
-
 
 
 }
