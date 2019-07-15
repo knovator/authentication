@@ -300,7 +300,7 @@ class SalesController extends Controller
             Log::error($exception);
 
             return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY);
+                HTTPCode::UNPROCESSABLE_ENTITY,$exception);
         }
     }
 
@@ -439,7 +439,7 @@ class SalesController extends Controller
                 'availableStock',
                 'thread' => function ($thread) {
                     /** @var Builder $thread */
-                    $thread->select(['id', 'name', 'type_id'])->with('type:id,name');
+                    $thread->select(['id', 'name', 'type_id', 'denier'])->with('type:id,name');
                 },
                 'color:id,name,code'
             ])->findWhereIn('id', $collection->pluck('thread_color_id')->toArray());

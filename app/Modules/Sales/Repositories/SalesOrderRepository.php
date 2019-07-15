@@ -39,10 +39,11 @@ class SalesOrderRepository extends BaseRepository
         $orders = datatables()->of($this->model->with([
             'customer.state:id,name,code,gst_code',
             'status:id,name,code',
+            'design:id,design_no,quality_name',
             'deliveries:id,delivery_no,delivery_date,sales_order_id',
+            'recipeMeters',
         ])->select('sales_orders.*'))->make(true);
         $this->resetModel();
-
         return $orders;
     }
 

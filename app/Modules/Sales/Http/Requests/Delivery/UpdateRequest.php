@@ -30,7 +30,8 @@ class UpdateRequest extends FormRequest
      */
     public function rules() {
         return [
-            'delivery_date'                  => 'required|date_format:Y-m-d',
+            'delivery_date'                  => 'required|date_format:Y-m-d|after_or_equal:'
+                . $this->sale->order_date,
             'orders'                         => 'required|array',
             'orders.*.id'                    => 'sometimes|required|integer|exists:recipes_partial_orders,id',
             'orders.*.sales_order_recipe_id' => 'required|integer|exists:sales_orders_recipes,id',
@@ -52,8 +53,7 @@ class UpdateRequest extends FormRequest
     public function messages() {
 
         return [
-
-
+            'delivery_date.after_or_equal' => 'Delivery date must be an after or equal to order date'
         ];
 
     }
