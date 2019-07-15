@@ -60,6 +60,9 @@ return [
 
     'snappy_pdf' => env('SNAPPY_PDF_URL', ''),
 
+
+    'beam_calculate_percentage' => env('BEAM_CALCULATE_PERCENTAGE', 10),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone
@@ -244,7 +247,7 @@ return [
         'DataTables'   => Yajra\DataTables\Facades\DataTables::class,
         'PDF'          => Barryvdh\Snappy\Facades\SnappyPdf::class,
         'SnappyImage'  => Barryvdh\Snappy\Facades\SnappyImage::class,
-        'Excel'          => Maatwebsite\Excel\Facades\Excel::class,
+        'Excel'        => Maatwebsite\Excel\Facades\Excel::class,
     ],
 
 ];

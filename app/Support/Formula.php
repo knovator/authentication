@@ -49,9 +49,8 @@ class Formula
 
                 return $this->convertRoundValue($value);
             case ThreadType::WARP:
-
-                $value = ($threadDetail['denier'] * ($designDetail->panno + $designDetail->reed) *
-                        $totalMeters) / (9000 * 1000);
+                $value = ($threadDetail['denier'] * ($designDetail->panno * $designDetail->reed) *
+                        ($totalMeters + (($totalMeters / 100) * (int) config('app.beam_calculate_percentage')))) / (9000 * 1000);
 
                 return $this->convertRoundValue($value);
 
