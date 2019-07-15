@@ -3,7 +3,6 @@
 namespace App\Modules\Stock\Repositories;
 
 use App\Modules\Stock\Models\Stock;
-use Illuminate\Database\Eloquent\Builder;
 use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
 use Prettus\Repository\Exceptions\RepositoryException;

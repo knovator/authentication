@@ -31,7 +31,7 @@ class CreateRequest extends FormRequest
     public function rules() {
         return [
             'order_date'                                         => 'required|date_format:Y-m-d',
-            'delivery_date'                                      => 'required|date_format:Y-m-d',
+            'delivery_date'                                      => 'required|date_format:Y-m-d|after_or_equal:order_date',
             'cost_per_meter'                                     => 'required|integer',
             'customer_id'                                        => 'required|exists:customers,id',
             'design_id'                                          => 'required|exists:designs,id',
