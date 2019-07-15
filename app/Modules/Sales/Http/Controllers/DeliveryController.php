@@ -101,7 +101,7 @@ class DeliveryController extends Controller
             $this->storeStockDetails($salesOrder, $input['status_id']);
             DB::commit();
 
-            $delivery->load('status');
+            $delivery->load(['status', 'partialOrders']);
 
             return $this->sendResponse($delivery,
                 __('messages.created', ['module' => 'Delivery']),
@@ -138,7 +138,7 @@ class DeliveryController extends Controller
             DB::commit();
 
             $delivery->fresh();
-            $delivery->load('status');
+            $delivery->load(['status', 'partialOrders']);
 
             return $this->sendResponse($delivery,
                 __('messages.updated', ['module' => 'Sales']),
@@ -579,8 +579,5 @@ class DeliveryController extends Controller
     }
 
 
-    private function downloadPdf() {
-
-    }
 
 }
