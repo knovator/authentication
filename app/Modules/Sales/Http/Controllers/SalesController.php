@@ -300,7 +300,7 @@ class SalesController extends Controller
             Log::error($exception);
 
             return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY,$exception);
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
     }
 
@@ -417,7 +417,7 @@ class SalesController extends Controller
         try {
             $salesOrder->update(['status_id' => $status->id]);
 
-            return $this->sendResponse($status,
+            return $this->sendResponse($this->makeResource($salesOrder->load('status:id,name,code')),
                 __('messages.updated', ['module' => 'Status']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
