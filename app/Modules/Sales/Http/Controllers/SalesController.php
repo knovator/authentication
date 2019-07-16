@@ -440,7 +440,7 @@ class SalesController extends Controller
                 'availableStock',
                 'thread' => function ($thread) {
                     /** @var Builder $thread */
-                    $thread->select(['id', 'name', 'type_id', 'denier'])->with('type:id,name');
+                    $thread->select(['id', 'name', 'type_id', 'denier','company_name'])->with('type:id,name');
                 },
                 'color:id,name,code'
             ])->findWhereIn('id', $collection->pluck('thread_color_id')->toArray());
