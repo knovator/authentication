@@ -273,6 +273,7 @@ class SalesController extends Controller
             'customer',
             'status',
             'design.detail',
+            'design.mainImage.file',
             'designBeam.threadColor.thread',
             'designBeam.threadColor.color',
             'orderRecipes',
