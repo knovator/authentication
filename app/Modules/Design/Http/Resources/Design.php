@@ -35,7 +35,7 @@ class Design extends JsonResource
             'detail'       => new DesignDetailResource($this->whenLoaded('detail')),
             'fiddlePicks'  => DesignFiddlePickResource::collection($this->whenLoaded('fiddlePicks')),
             'images'       => DesignImageResource::collection($this->whenLoaded('images')),
-            'mainImage'    => new DesignImageResource($this->whenLoaded('mainImage')),
+            'main_image'    => new DesignImageResource($this->whenLoaded('mainImage')),
             'beams'        => DesignBeamResource::collection($this->whenLoaded('beams')),
         ];
     }
