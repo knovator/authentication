@@ -99,7 +99,7 @@ class ThreadColorRepository extends BaseRepository
             'inPurchaseQty',
             'availableStock' => function ($availableStock) use ($poCancel) {
                 /** @var Builder $availableStock */
-                $availableStock->whereNotIn('id', [$poCancel->id]);
+                $availableStock->whereNotIn('status_id', [$poCancel->id]);
             },
             'pendingStock',
             'manufacturingStock',
