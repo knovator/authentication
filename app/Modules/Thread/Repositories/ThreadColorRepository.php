@@ -80,9 +80,8 @@ class ThreadColorRepository extends BaseRepository
      */
     public function stockCount($threadColorId, $poPendingId) {
 
-        $threadColors = $this->model->with($this->commonRelations($poPendingId))->find
-        ($threadColorId);
-
+        $threadColors = $this->model->with($this->commonRelations($poPendingId))
+                                    ->find($threadColorId);
 
         return $threadColors;
     }
