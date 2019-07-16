@@ -64,22 +64,7 @@ class ThreadColorRepository extends BaseRepository
     public function getStockOverview($input, $poPendingId) {
 
         $this->applyCriteria();
-        $threadColors = $this->model->with([
-            'thread:id,name,denier',
-            'color:id,name,code',
-            'inPurchaseQty' => function ($inPurchaseQty) use ($poPendingId) {
-                /** @var Builder $inPurchaseQty */
-                $inPurchaseQty->whereHas('purchaseOrder',
-                    function ($purchaseOrder) use ($poPendingId) {
-                        /** @var Builder $purchaseOrder */
-                        $purchaseOrder->where('status_id', $poPendingId);
-                    });
-            },
-            'availableStock',
-            'pendingStock',
-            'manufacturingStock',
-            'deliveredStock',
-        ])->has('purchaseThreads');
+        $threadColors = $this->model->with($this->commonRelations($poPendingId))->has('stocks');
 
         $threadColors = datatables()->of($threadColors)->make(true);
         $this->resetModel();
@@ -95,7 +80,22 @@ class ThreadColorRepository extends BaseRepository
      */
     public function stockCount($threadColorId, $poPendingId) {
 
-        $threadColors = $this->model->with([
+        $threadColors = $this->model->with($this->commonRelations($poPendingId))->find
+        ($threadColorId);
+
+
+        return $threadColors;
+    }
+
+
+    /**
+     * @param $poPendingId
+     * @return array
+     */
+    private function commonRelations($poPendingId) {
+        return [
+            'thread:id,name,denier',
+            'color:id,name,code',
             'inPurchaseQty' => function ($inPurchaseQty) use ($poPendingId) {
                 /** @var Builder $inPurchaseQty */
                 $inPurchaseQty->whereHas('purchaseOrder',
@@ -108,9 +108,6 @@ class ThreadColorRepository extends BaseRepository
             'pendingStock',
             'manufacturingStock',
             'deliveredStock',
-        ])->find($threadColorId);
-
-
-        return $threadColors;
+        ];
     }
 }
