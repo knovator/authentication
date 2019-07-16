@@ -211,8 +211,8 @@ class SalesController extends Controller
                 'product_id'      => $quantityDetails['thread_color_id'],
                 'product_type'    => 'thread_color',
                 'status_id'       => $items['status_id'],
-                'kg_qty'          => $formula->getTotalKgQty(ThreadType::WEFT,
-                    $quantityDetails, $designDetail, $items['total_meters']),
+                'kg_qty'          => '-' . $formula->getTotalKgQty(ThreadType::WEFT,
+                        $quantityDetails, $designDetail, $items['total_meters']),
             ];
         }
         $threadDetail['denier'] = $salesOrder->designBeam->threadColor->thread->denier;
@@ -222,8 +222,8 @@ class SalesController extends Controller
             'product_id'      => $salesOrder->designBeam->thread_color_id,
             'product_type'    => 'thread_color',
             'status_id'       => $items['status_id'],
-            'kg_qty'          => $formula->getTotalKgQty(ThreadType::WARP,
-                $threadDetail, $designDetail, $items['total_meters']),
+            'kg_qty'          => '-' . $formula->getTotalKgQty(ThreadType::WARP,
+                    $threadDetail, $designDetail, $items['total_meters']),
         ]);
 
         $salesOrder->orderStocks()->createMany($data);
