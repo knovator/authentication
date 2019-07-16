@@ -62,9 +62,9 @@ class ThreadColorRepository extends BaseRepository
      * @throws RepositoryException
      * @throws \Exception
      */
-    public function getStockOverview($poCancel) {
+    public function getStockOverview($statusIds) {
         $this->applyCriteria();
-        $threadColors = $this->model->with($this->commonRelations($poCancel))
+        $threadColors = $this->model->with($this->commonRelations($statusIds))
                                     ->has('stocks');
 
         $threadColors = datatables()->of($threadColors)->make(true);
@@ -79,9 +79,9 @@ class ThreadColorRepository extends BaseRepository
      * @param $poCancel
      * @return mixed
      */
-    public function stockCount($threadColorId, $poCancel) {
+    public function stockCount($threadColorId, $statusIds) {
 
-        $threadColors = $this->model->with($this->commonRelations($poCancel))
+        $threadColors = $this->model->with($this->commonRelations($statusIds))
                                     ->find($threadColorId);
 
         return $threadColors;
@@ -89,17 +89,17 @@ class ThreadColorRepository extends BaseRepository
 
 
     /**
-     * @param Master $poCancel
+     * @param $statusIds
      * @return array
      */
-    private function commonRelations(Master $poCancel) {
+    private function commonRelations($statusIds) {
         return [
             'thread:id,name,denier',
             'color:id,name,code',
             'inPurchaseQty',
-            'availableStock' => function ($availableStock) use ($poCancel) {
+            'availableStock' => function ($availableStock) use ($statusIds) {
                 /** @var Builder $availableStock */
-                $availableStock->whereNotIn('status_id', [$poCancel->id]);
+                $availableStock->whereNotIn('status_id', $statusIds);
             },
             'pendingStock',
             'manufacturingStock',
