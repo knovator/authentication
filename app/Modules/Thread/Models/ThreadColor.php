@@ -125,4 +125,12 @@ class ThreadColor extends Model
     }
 
 
+    /**
+     * @return mixed
+     */
+    public function stocks() {
+        return $this->morphMany(Stock::class, 'product', 'product_type', 'product_id');
+    }
+
+
 }
