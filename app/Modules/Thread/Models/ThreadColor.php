@@ -57,14 +57,26 @@ class ThreadColor extends Model
     }
 
 
+//    /**
+//     * @return mixed
+//     */
+//    public function inPurchaseQty() {
+//        return $this->hasOne(PurchaseOrderThread::class, 'thread_color_id', 'id')
+//                    ->selectRaw("thread_color_id,SUM(kg_qty) as total")
+//                    ->groupBy('thread_color_id');
+//    }
+
+
     /**
      * @return mixed
      */
     public function inPurchaseQty() {
-        return $this->hasOne(PurchaseOrderThread::class, 'thread_color_id', 'id')
-                    ->selectRaw("thread_color_id,SUM(kg_qty) as total")
-                    ->groupBy('thread_color_id');
+        return $this->stockQty()->whereHas('status', function ($status) {
+            /** @var Builder $status */
+            $status->where('code', MasterConstant::PO_PENDING);
+        });
     }
+
 
     /**
      * @return mixed

@@ -3,6 +3,7 @@
 
 namespace App\Modules\Thread\Repositories;
 
+use App\Models\Master;
 use App\Modules\Thread\Models\ThreadColor;
 use DB;
 use Illuminate\Database\Eloquent\Builder;
@@ -55,16 +56,16 @@ class ThreadColorRepository extends BaseRepository
     }
 
     /**
-     * @param $input
-     * @param $poPendingId
+     * @param $poPending
+     * @param $poCancel
      * @return mixed
      * @throws RepositoryException
      * @throws \Exception
      */
-    public function getStockOverview($input, $poPendingId) {
-
+    public function getStockOverview($poCancel) {
         $this->applyCriteria();
-        $threadColors = $this->model->with($this->commonRelations($poPendingId))->has('stocks');
+        $threadColors = $this->model->with($this->commonRelations($poCancel))
+                                    ->has('stocks');
 
         $threadColors = datatables()->of($threadColors)->make(true);
         $this->resetModel();
@@ -75,12 +76,12 @@ class ThreadColorRepository extends BaseRepository
 
     /**
      * @param $threadColorId
-     * @param $poPendingId
+     * @param $poCancel
      * @return mixed
      */
-    public function stockCount($threadColorId, $poPendingId) {
+    public function stockCount($threadColorId, $poCancel) {
 
-        $threadColors = $this->model->with($this->commonRelations($poPendingId))
+        $threadColors = $this->model->with($this->commonRelations($poCancel))
                                     ->find($threadColorId);
 
         return $threadColors;
@@ -88,22 +89,18 @@ class ThreadColorRepository extends BaseRepository
 
 
     /**
-     * @param $poPendingId
+     * @param Master $poCancel
      * @return array
      */
-    private function commonRelations($poPendingId) {
+    private function commonRelations(Master $poCancel) {
         return [
             'thread:id,name,denier',
             'color:id,name,code',
-            'inPurchaseQty' => function ($inPurchaseQty) use ($poPendingId) {
-                /** @var Builder $inPurchaseQty */
-                $inPurchaseQty->whereHas('purchaseOrder',
-                    function ($purchaseOrder) use ($poPendingId) {
-                        /** @var Builder $purchaseOrder */
-                        $purchaseOrder->where('status_id', $poPendingId);
-                    });
+            'inPurchaseQty',
+            'availableStock' => function ($availableStock) use ($poCancel) {
+                /** @var Builder $availableStock */
+                $availableStock->whereNotIn('id', [$poCancel->id]);
             },
-            'availableStock',
             'pendingStock',
             'manufacturingStock',
             'deliveredStock',
