@@ -52,9 +52,8 @@ class StockController extends Controller
      */
     public function index(Request $request) {
         try {
-            $poPendingId = $this->findMasterIdByCode(Master::PO_PENDING);
-            $stocks = $this->threadColorRepository->getStockOverview($request->all(),
-                $poPendingId);
+            $poCancel = $this->masterRepository->findByCode(Master::PO_CANCELED);
+            $stocks = $this->threadColorRepository->getStockOverview($poCancel);
 
             return $this->sendResponse($stocks,
                 __('messages.retrieved', ['module' => 'Stocks']),
@@ -74,8 +73,8 @@ class StockController extends Controller
      */
     public function threadCount(ThreadColor $threadColor) {
         try {
-            $poPendingId = $this->findMasterIdByCode(Master::PO_PENDING);
-            $stocks = $this->threadColorRepository->stockCount($threadColor->id, $poPendingId);
+            $poCancel = $this->masterRepository->findByCode(Master::PO_CANCELED);
+            $stocks = $this->threadColorRepository->stockCount($threadColor->id, $poCancel);
 
             return $this->sendResponse($stocks,
                 __('messages.retrieved', ['module' => 'Stocks']),
@@ -96,6 +95,7 @@ class StockController extends Controller
     public function threadReport(ThreadColor $threadColor) {
         try {
             $reports = $this->stockRepository->getThreadOrderReport($threadColor);
+
             return $this->sendResponse($reports,
                 __('messages.retrieved', ['module' => 'Stocks']),
                 HTTPCode::OK);

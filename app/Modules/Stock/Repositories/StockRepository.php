@@ -47,8 +47,10 @@ class StockRepository extends BaseRepository
         $reports = $this->model->selectRaw('order_id,order_type,SUM(kg_qty) as stock')->where([
             'product_id'   => $threadColor->id,
             'product_type' => 'thread_color'
-        ])->groupBy(['order_id', 'order_type'])->with('order.customer.state:id,name,code')
-                                               ->orderByDesc('order_id');
+        ])->groupBy(['order_id', 'order_type'])->with([
+            'order.customer.state:id,name,code',
+            'order.status:id,name,code'
+        ])->orderByDesc('order_id');
 
         $reports = datatables()->of($reports)->make(true);
 
