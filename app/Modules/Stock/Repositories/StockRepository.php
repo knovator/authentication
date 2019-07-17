@@ -48,7 +48,7 @@ class StockRepository extends BaseRepository
         $reports = $this->model->selectRaw('order_id,order_type,SUM(kg_qty) as stock')->where([
             'product_id'   => $threadColor->id,
             'product_type' => 'thread_color',
-        ])->whereNotIn('id', $statusIds)->groupBy(['order_id', 'order_type'])->with([
+        ])->whereNotIn('status_id', $statusIds)->groupBy(['order_id', 'order_type'])->with([
             'order.customer.state:id,name,code',
             'order.status:id,name,code'
         ])->orderByDesc('order_id');
