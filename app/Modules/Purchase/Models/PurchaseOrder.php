@@ -45,6 +45,7 @@ class PurchaseOrder extends Model
         self::creatingEvent();
         static::deleting(function (PurchaseOrder $model) {
             $model->threads()->delete();
+            $model->orderStocks()->delete();
         });
         self::deletedEvent();
     }

@@ -3,6 +3,7 @@
 use App\Constants\Master;
 use App\Modules\Purchase\Models\PurchaseOrder;
 use App\Modules\Purchase\Repositories\PurchaseOrderRepository;
+use App\Modules\Stock\Repositories\StockRepository;
 use App\Repositories\MasterRepository;
 use Illuminate\Database\Seeder;
 
@@ -16,23 +17,29 @@ class PurchaseOrderIssueSeeder extends Seeder
 
     protected $masterRepository;
 
+    protected $stockRepository;
+
     /**
      * PurchaseController constructor
      * @param PurchaseOrderRepository $purchaseOrderRepository
      * @param MasterRepository        $masterRepository
+     * @param StockRepository         $stockRepository
      */
     public function __construct(
         PurchaseOrderRepository $purchaseOrderRepository,
-        MasterRepository $masterRepository
+        MasterRepository $masterRepository,
+        StockRepository $stockRepository
     ) {
         $this->purchaseOrderRepository = $purchaseOrderRepository;
         $this->masterRepository = $masterRepository;
+        $this->stockRepository = $stockRepository;
     }
 
     /**
      * Run the database seeds.
      *
      * @return void
+     * @throws \Prettus\Repository\Exceptions\RepositoryException
      */
     public function run() {
         $purchaseOrders = $this->purchaseOrderRepository->with('threads')->all();
@@ -41,6 +48,12 @@ class PurchaseOrderIssueSeeder extends Seeder
             $purchaseOrder->orderStocks()->delete();
             $this->storeStockOrders($purchaseOrder);
         }
+        $removedPurchases = $this->purchaseOrderRepository->makeModel()
+                                                          ->onlyTrashed()
+                                                          ->pluck('id')->toArray();
+        $this->stockRepository->makeModel()->whereIn('order_id', $removedPurchases)
+                              ->where('order_type', 'purchase')->delete();
+
     }
 
     /**
