@@ -36,11 +36,10 @@ class PurchaseOrderIssueSeeder extends Seeder
      */
     public function run() {
         $purchaseOrders = $this->purchaseOrderRepository->with('threads')->all();
-        $statusId = $this->masterRepository->findByCode(Master::PO_PENDING)->id;
         foreach ($purchaseOrders as $purchaseOrder) {
             /** @var PurchaseOrder $purchaseOrder */
             $purchaseOrder->orderStocks()->delete();
-            $this->storeStockOrders($purchaseOrder, $statusId);
+            $this->storeStockOrders($purchaseOrder);
         }
     }
 
@@ -48,14 +47,14 @@ class PurchaseOrderIssueSeeder extends Seeder
      * @param $purchaseOrder
      * @param $input
      */
-    private function storeStockOrders(PurchaseOrder $purchaseOrder, $statusId) {
+    private function storeStockOrders(PurchaseOrder $purchaseOrder) {
         $stockItems = [];
         foreach ($purchaseOrder->threads as $key => $purchasedThread) {
             $stockItems[$key] = [
                 'product_id'   => $purchasedThread->thread_color_id,
                 'product_type' => 'thread_color',
                 'kg_qty'       => $purchasedThread->kg_qty,
-                'status_id'    => $statusId,
+                'status_id'    => $purchaseOrder->status_id,
             ];
         }
         $purchaseOrder->orderStocks()->createMany($stockItems);

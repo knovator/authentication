@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call(MasterSeeder::class);
         $this->call(UniqueIdSeeder::class);
         $this->call(StateSeeder::class);
+        // TODO: Remove this file
         $this->call(PurchaseOrderIssueSeeder::class);
     }
 }
