@@ -4,6 +4,7 @@ namespace App\Modules\Sales\Http\Controllers;
 
 use App\Constants\GenerateNumber;
 use App\Constants\Master as MasterConstant;
+use App\Constants\Master;
 use App\Http\Controllers\Controller;
 use App\Modules\Design\Repositories\DesignDetailRepository;
 use App\Modules\Sales\Http\Requests\AnalysisRequest;
@@ -436,11 +437,19 @@ class SalesController extends Controller
         $input = $request->all();
         $collection = collect($input['reports'])->keyBy('thread_color_id');
         try {
+
+            $statusIds = $this->masterRepository->findWhereIn('code',
+                [Master::PO_CANCELED, Master::PO_PENDING])->pluck('id')->toArray();
+
             $threadColors = $this->threadColorRepository->with([
-                'availableStock',
-                'thread' => function ($thread) {
+                'availableStock' => function ($availableStock) use ($statusIds) {
+                    /** @var Builder $availableStock */
+                    $availableStock->whereNotIn('status_id', $statusIds);
+                },
+                'thread'         => function ($thread) {
                     /** @var Builder $thread */
-                    $thread->select(['id', 'name', 'type_id', 'denier','company_name'])->with('type:id,name');
+                    $thread->select(['id', 'name', 'type_id', 'denier', 'company_name'])
+                           ->with('type:id,name');
                 },
                 'color:id,name,code'
             ])->findWhereIn('id', $collection->pluck('thread_color_id')->toArray());
