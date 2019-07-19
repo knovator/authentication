@@ -3,6 +3,7 @@
 namespace App\Modules\Thread\Models;
 
 
+use App\Modules\Design\Models\DesignBeam;
 use App\Modules\Purchase\Models\PurchaseOrderThread;
 use App\Modules\Recipe\Models\Recipe;
 use App\Modules\Stock\Models\Stock;
@@ -57,14 +58,12 @@ class ThreadColor extends Model
     }
 
 
-//    /**
-//     * @return mixed
-//     */
-//    public function inPurchaseQty() {
-//        return $this->hasOne(PurchaseOrderThread::class, 'thread_color_id', 'id')
-//                    ->selectRaw("thread_color_id,SUM(kg_qty) as total")
-//                    ->groupBy('thread_color_id');
-//    }
+    /**
+     * @return mixed
+     */
+    public function designBeams() {
+        return $this->hasMany(DesignBeam::class, 'thread_color_id', 'id');
+    }
 
 
     /**
