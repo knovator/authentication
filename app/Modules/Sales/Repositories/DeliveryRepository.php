@@ -40,7 +40,20 @@ class DeliveryRepository extends BaseRepository
     public function getDeliveryList($salesOrderId) {
         $this->applyCriteria();
         $deliveries = datatables()->of($this->model->where('sales_order_id', $salesOrderId)->with
-        ([
+        ($this->commonRelations()))->make(true);
+        $this->resetModel();
+
+        return $deliveries;
+
+
+    }
+
+
+    /**
+     * @return array
+     */
+    public function commonRelations() {
+        return [
             'status:id,name,code',
             'partialOrders' => function ($partialOrders) {
                 $partialOrders->with([
@@ -50,12 +63,7 @@ class DeliveryRepository extends BaseRepository
                 ]);
             }
 
-        ]))->make(true);
-        $this->resetModel();
-
-        return $deliveries;
-
-
+        ];
     }
 
 

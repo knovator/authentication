@@ -15,6 +15,7 @@ use App\Modules\Thread\Repositories\ThreadColorRepository;
 use App\Modules\Thread\Repositories\ThreadRepository;
 use DB;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Knovators\Masters\Repository\MasterRepository;
@@ -161,12 +162,21 @@ class ThreadController extends Controller
      * @return JsonResponse
      */
     public function show(Thread $thread) {
-        $thread->load(['type', 'threadColors.color']);
+        $thread->load([
+            'type',
+            'threadColors' => function ($threadColors) {
+                /** @var Builder $threadColors */
+                $threadColors->with('color')->withCount([
+                    'recipes as recipes_count',
+                    'designBeams as beam_count'
+                ]);
+            }
+        ]);
         // check associated relations
         $thread->threadColors->map(function ($threadColor) {
             /** @var ThreadColor $threadColor */
             $threadColor->updatable = true;
-            if (($threadColor->recipes()->exists())) {
+            if ($threadColor->recipes_count || $threadColor->beam_count) {
                 $threadColor->updatable = false;
             }
         });

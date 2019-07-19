@@ -100,10 +100,7 @@ class DeliveryController extends Controller
             $delivery->partialOrders()->createMany($input['orders']);
             $this->storeStockDetails($salesOrder, $input['status_id']);
             DB::commit();
-
-            $delivery->load(['status:id,name,code', 'partialOrders']);
-
-            return $this->sendResponse($delivery,
+            return $this->sendResponse($delivery->load($this->deliveryRepository->commonRelations()),
                 __('messages.created', ['module' => 'Delivery']),
                 HTTPCode::CREATED);
         } catch (Exception $exception) {
@@ -137,7 +134,7 @@ class DeliveryController extends Controller
                 $this->masterRepository->findByCode(MasterConstant::SO_PENDING)->id);
             DB::commit();
 
-            return $this->sendResponse($delivery->fresh(['status:id,name,code', 'partialOrders']),
+            return $this->sendResponse($delivery->fresh($this->deliveryRepository->commonRelations()),
                 __('messages.updated', ['module' => 'Sales']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -510,6 +507,7 @@ class DeliveryController extends Controller
             $delivery->orderStocks()->update($input);
             $delivery->update($input);
             DB::commit();
+
             return $this->sendResponse($delivery->fresh(['status:id,name,code']),
                 __('messages.updated', ['module' => 'Status']),
                 HTTPCode::OK);
