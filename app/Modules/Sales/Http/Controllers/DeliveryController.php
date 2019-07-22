@@ -568,8 +568,8 @@ class DeliveryController extends Controller
 
         /** @var ImageWrapper $pdf */
         return $pdf->download($delivery->delivery_no . '-accounting' . ".pdf");
-        /*return view('receipts.sales-orders.accounting.accounting',
-            compact('salesOrder', 'delivery'));*/
+//        return view('receipts.sales-orders.accounting.accounting',
+//            compact('salesOrder', 'delivery'));
     }
 
 

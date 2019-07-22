@@ -506,9 +506,6 @@ class SalesController extends Controller
             compact('salesOrder', 'isInvoice'));
 
         return $pdf->download($salesOrder->order_no . ".pdf");
-
-//        return view('receipts.sales-orders.main_summary.summary',
-//            compact('salesOrder', 'isInvoice'));
     }
 
 }

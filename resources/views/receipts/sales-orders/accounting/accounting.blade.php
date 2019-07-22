@@ -16,7 +16,9 @@ fontSize: 100% / (totalFiddle * 7)  <= 14 && 100% / (totalFiddle * 7) >= 10
     <div class="text-center receipt-small-heading ">
         Accounting Receipt
     </div>
-    <div class="receipt-heading text-center">{{\Carbon\Carbon::parse($delivery->delivery_date)->format('d, M Y')}}</div>
+    <div class="receipt-heading text-center">{{\Carbon\Carbon::parse($delivery->delivery_date)->format('d, M Y')}}
+        ({{$delivery->delivery_no}})
+    </div>
     <br/>
     <table>
         <tbody>
@@ -75,7 +77,8 @@ fontSize: 100% / (totalFiddle * 7)  <= 14 && 100% / (totalFiddle * 7) >= 10
                 <table>
                     <tbody>
                     <tr>
-                        <td class="text-left label"><b>DELIVERY NO</b>: {{$delivery->delivery_no}}</td>
+                        {{--                        <td class="text-left label"><b>DELIVERY NO</b>: {{$delivery->delivery_no}}</td>--}}
+                        <td class="text-left label"><b>DESIGN NAME</b>: {{$salesOrder->design->quality_name}}</td>
                         <td class="text-left label"><b>ORDER NO</b>: {{$salesOrder->order_no}}</td>
                         <td class="text-left label"><b>ORDER
                                 DATE</b>: {{\Carbon\Carbon::parse($salesOrder->order_date)->format('d M Y')}}</td>
@@ -239,7 +242,8 @@ fontSize: 100% / (totalFiddle * 7)  <= 14 && 100% / (totalFiddle * 7) >= 10
     ">
                                 GRAND TOTAL :
                             </td>
-                            <td class="text-right" style="border-bottom: 0;    float: right;">{{$price = $price + (($price / 100) * 5) }}</td>
+                            <td class="text-right"
+                                style="border-bottom: 0;    float: right;">{{$price = $price + (($price / 100) * 5) }}</td>
                         </tr>
                         <tr></tr>
                         <tr></tr>
@@ -259,7 +263,7 @@ fontSize: 100% / (totalFiddle * 7)  <= 14 && 100% / (totalFiddle * 7) >= 10
     <table class="auto-layout receipt-footer">
         <tbody>
         <tr>
-            <td class="declaration" style=  "border-left: 0">
+            <td class="declaration" style="border-left: 0">
                 <p>
                     Certified that the perticulars given above are true amd correct and
                     the amount indicated represents tje price actually charged and that
