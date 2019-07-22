@@ -20,5 +20,6 @@ class DatabaseSeeder extends Seeder
 //        $this->call(StateSeeder::class);
         // TODO: Remove this file
         $this->call(PurchaseOrderIssueSeeder::class);
+        $this->call(ManufacturingCompanySeeder::class);
     }
 }

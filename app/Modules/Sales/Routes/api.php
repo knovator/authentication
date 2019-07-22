@@ -33,6 +33,9 @@ Route::group([
         Route::get('sales-thread-analysis', 'SalesController@threadAnalysis')
              ->name('sales.thread.analysis');
 
+        Route::get('manufacturing/companies', 'SalesController@manufacturingCompanies')
+             ->name('sales.manufacturing.companies');
+
     });
 
 Route::group([

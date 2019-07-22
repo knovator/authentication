@@ -36,6 +36,7 @@ class CreateRequest extends FormRequest
             'customer_id'                                        => 'required|exists:customers,id',
             'design_id'                                          => 'required|exists:designs,id',
             'design_beam_id'                                     => 'required|exists:design_beams,id',
+            'manufacturing_company_id'                           => 'required',
             'order_recipes'                                      => 'required|array',
             'order_recipes.*.recipe_id'                          => 'required|integer',
             'order_recipes.*.pcs'                                => 'required|integer',

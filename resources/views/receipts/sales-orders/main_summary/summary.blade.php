@@ -40,7 +40,9 @@
                     <tbody>
                     <tr>
                         <td>
-                            <div><b>SIDDHI/JENNY TEXO FAB</b></div>
+                            <div>
+                                <b>{{ (!is_null($salesOrder->manufacturingCompany)) ? $salesOrder->manufacturingCompany->name:'JENNY TEXO FAB'}}</b>
+                            </div>
                             <small>
                                 PLOT NO: M-3/6-7-8, ROAD NO: 23, VIBHAG-2, HOJIWALA IND,
                                 ESTATE, SACHIN, SURAT.
