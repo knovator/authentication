@@ -18,8 +18,10 @@ class DatabaseSeeder extends Seeder
 //        $this->call(MasterSeeder::class);
 //        $this->call(UniqueIdSeeder::class);
 //        $this->call(StateSeeder::class);
+        $this->call(ManufacturingCompanySeeder::class);
+
+
         // TODO: Remove this file
         $this->call(PurchaseOrderIssueSeeder::class);
-        $this->call(ManufacturingCompanySeeder::class);
     }
 }
