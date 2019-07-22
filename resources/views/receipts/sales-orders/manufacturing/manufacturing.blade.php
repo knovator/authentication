@@ -30,7 +30,7 @@
                         <tr>
                             <td class="text-left label">Order No.</td>
                             <td>: {{$salesOrder->order_no}}</td>
-                            <td class="text-left label">Date</td>
+                            <td class="text-left label">Order Date</td>
                             <td>: {{\Carbon\Carbon::parse($salesOrder->order_date)->format('d, M Y')}}</td>
                         </tr>
                         <tr>
@@ -45,11 +45,11 @@
                                 {{$machine->threadColor->thread->name}} ({{$machine->threadColor->color->name}})
                             </td>
                             <td class="text-left label">Reed</td>
-                            <td>: 98</td>
+                            <td>: {{$salesOrder->design->detail->reed}}</td>
                         </tr>
                         <tr>
-                            <td class="text-left label">Designer No</td>
-                            <td>: {{$salesOrder->design->detail->designer_no}}</td>
+                            <td class="text-left label">Delivery Date</td>
+                            <td>: {{\Carbon\Carbon::parse($delivery->delivery_date)->format('d, M Y')}}</td>
                             <td class="text-left label">
                                 Pick
                                 <small>(on loom)</small>
@@ -58,10 +58,12 @@
                                 : {{$salesOrder->design->detail->pick_on_loom}} {{($salesOrder->design->detail->creming)?' - Creming':''}}</td>
                         </tr>
                         <tr>
-                            <td class="text-left label">Delivery Date</td>
-                            <td>: {{\Carbon\Carbon::parse($delivery->delivery_date)->format('d, M Y')}}</td>
-                            {{--<td class="text-left label">Bill No.</td>
-                            <td>: B124</td>--}}
+                            <td class="text-left label">Design Name</td>
+                            <td>: {{$salesOrder->design->quality_name}}</td>
+
+
+                            <td class="text-left label">Designer No</td>
+                            <td>: {{$salesOrder->design->detail->designer_no}}</td>
                         </tr>
                         </tbody>
                     </table>
