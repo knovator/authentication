@@ -66,11 +66,9 @@ class ThreadColorRepository extends BaseRepository
     }
 
     /**
-     * @param $poPending
-     * @param $poCancel
+     * @param $statusIds
      * @return mixed
      * @throws RepositoryException
-     * @throws \Exception
      */
     public function getStockOverview($statusIds) {
         $this->applyCriteria();
