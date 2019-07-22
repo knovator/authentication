@@ -100,6 +100,7 @@ class DeliveryController extends Controller
             $delivery->partialOrders()->createMany($input['orders']);
             $this->storeStockDetails($salesOrder, $input['status_id']);
             DB::commit();
+
             return $this->sendResponse($delivery->load($this->deliveryRepository->commonRelations()),
                 __('messages.created', ['module' => 'Delivery']),
                 HTTPCode::CREATED);
@@ -549,6 +550,7 @@ class DeliveryController extends Controller
      */
     public function exportAccounting(SalesOrder $salesOrder, Delivery $delivery) {
         $salesOrder->load([
+            'manufacturingCompany',
             'design.mainImage.file',
             'customer.state'
         ]);
@@ -568,8 +570,8 @@ class DeliveryController extends Controller
 
         /** @var ImageWrapper $pdf */
         return $pdf->download($delivery->delivery_no . '-accounting' . ".pdf");
-        /*return view('receipts.sales-orders.accounting.accounting',
-            compact('salesOrder', 'delivery'));*/
+//        return view('receipts.sales-orders.accounting.accounting',
+//            compact('salesOrder', 'delivery'));
     }
 
 

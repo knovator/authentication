@@ -37,30 +37,38 @@ class ThreadColorRepository extends BaseRepository
 
     /**
      * @param $statusId
+     * @param $input
      * @return Model
      * @throws RepositoryException
      */
-    public function getColorsList($statusId) {
+    public function getColorsList($input) {
 
         $this->applyCriteria();
-        $threadColors = $this->model->whereHas('thread', function ($thread) use ($statusId) {
-            $thread->whereIsActive(true);
-            if (!is_null($statusId)) {
-                $thread->whereTypeId($statusId);
-            }
 
+        $threadColors = $this->model->whereHas('thread', function ($thread) use ($input) {
+            if (!isset($input['all'])) {
+                /** @var Builder $thread */
+                $thread->where('is_active', '=', true);
+            }
+            if (isset($input['type_id'])) {
+                $thread->where('type_id', '=', $input['type_id']);
+            }
+        })->whereHas('color', function ($color) use ($input) {
+            if (!isset($input['all'])) {
+                /** @var Builder $color */
+                $color->where('is_active', '=', true);
+            }
         })->with(['thread:id,name,denier,price', 'color:id,name,code'])->get();
+
         $this->resetModel();
 
         return $threadColors;
     }
 
     /**
-     * @param $poPending
-     * @param $poCancel
+     * @param $statusIds
      * @return mixed
      * @throws RepositoryException
-     * @throws \Exception
      */
     public function getStockOverview($statusIds) {
         $this->applyCriteria();

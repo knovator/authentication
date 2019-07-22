@@ -14,6 +14,7 @@ use App\Modules\Sales\Http\Requests\UpdateRequest;
 use App\Modules\Sales\Http\Resources\SalesOrder as SalesOrderResource;
 use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Sales\Models\SalesOrderRecipe;
+use App\Modules\Sales\Repositories\CompanyRepository;
 use App\Modules\Sales\Repositories\RecipePartialRepository;
 use App\Modules\Sales\Repositories\SalesOrderRepository;
 use App\Modules\Sales\Repositories\SalesRecipeRepository;
@@ -492,6 +493,7 @@ class SalesController extends Controller
                     $delivery->where('status_id', $statusId);
                 });
             },
+            'manufacturingCompany',
             'design.detail',
             'design.mainImage.file',
             'customer.state'
@@ -506,9 +508,24 @@ class SalesController extends Controller
             compact('salesOrder', 'isInvoice'));
 
         return $pdf->download($salesOrder->order_no . ".pdf");
+    }
 
-//        return view('receipts.sales-orders.main_summary.summary',
-//            compact('salesOrder', 'isInvoice'));
+
+    /**
+     * @return JsonResponse
+     */
+    public function manufacturingCompanies() {
+        try {
+            $companies = (new CompanyRepository(new Container()))->pluck('name', 'id');
+            return $this->sendResponse($companies,
+                __('messages.retrieved', ['module' => 'Companies']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
     }
 
 }

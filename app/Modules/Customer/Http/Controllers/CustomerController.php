@@ -182,6 +182,25 @@ class CustomerController extends Controller
         }
     }
 
+    /**
+     * @return JsonResponse
+     */
+    public function agents() {
+        try {
+            $agents = $this->agentRepository->pluck('name', 'id');
+
+            return $this->sendResponse($agents,
+                __('messages.retrieved', ['module' => 'Agents']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
+
+
 }
 
 
