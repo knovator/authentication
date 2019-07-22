@@ -30,7 +30,8 @@ class ThreadColorRequest extends FormRequest
      */
     public function rules() {
         return [
-            'code' => 'sometimes|required|string',
+            'code'      => 'sometimes|required|string',
+            'all'       => 'sometimes|required|accepted',
         ];
     }
 
