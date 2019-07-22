@@ -85,13 +85,21 @@ class ThreadController extends Controller
      */
     public function destroy(Thread $thread) {
         try {
-            $thread->load('threadColors.recipes');
+            $thread->load(
+                'threadColors', function ($threadColors) {
+                /** @var Builder $threadColors */
+                $threadColors->with('color')->withCount([
+                    'recipes as recipes_count',
+                    'designBeams as beams_count'
+                ]);
+            }
+            );
             foreach ($thread->threadColors as $threadColor) {
-                if ($threadColor->recipes->isNotEmpty()) {
+                if ($threadColor->recipes_count || $threadColor->beams_count) {
                     return $this->sendResponse(null,
                         __('messages.associated', [
                             'module'  => 'Thread',
-                            'related' => 'recipes'
+                            'related' => 'recipes or beams'
                         ]),
                         HTTPCode::UNPROCESSABLE_ENTITY);
                 }
@@ -168,7 +176,7 @@ class ThreadController extends Controller
                 /** @var Builder $threadColors */
                 $threadColors->with('color')->withCount([
                     'recipes as recipes_count',
-                    'designBeams as beam_count'
+                    'designBeams as beams_count'
                 ]);
             }
         ]);
@@ -176,7 +184,7 @@ class ThreadController extends Controller
         $thread->threadColors->map(function ($threadColor) {
             /** @var ThreadColor $threadColor */
             $threadColor->updatable = true;
-            if ($threadColor->recipes_count || $threadColor->beam_count) {
+            if ($threadColor->recipes_count || $threadColor->beams_count) {
                 $threadColor->updatable = false;
             }
         });
