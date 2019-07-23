@@ -18,7 +18,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Knovators\Masters\Repository\MasterRepository;
 use Knovators\Support\Helpers\HTTPCode;
-use Knovators\Support\Traits\DestroyObject;
+use App\Support\DestroyObject;
 use Log;
 use Maatwebsite\Excel\Facades\Excel;
 use Str;

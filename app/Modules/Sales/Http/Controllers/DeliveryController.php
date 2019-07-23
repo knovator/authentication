@@ -30,7 +30,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Knovators\Support\Helpers\HTTPCode;
-use Knovators\Support\Traits\DestroyObject;
+use App\Support\DestroyObject;
 use Knp\Snappy\Pdf;
 use Log;
 use Prettus\Repository\Exceptions\RepositoryException;

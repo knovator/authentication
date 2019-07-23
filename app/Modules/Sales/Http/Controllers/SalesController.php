@@ -33,7 +33,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Knovators\Support\Helpers\HTTPCode;
-use Knovators\Support\Traits\DestroyObject;
+use App\Support\DestroyObject;
 use Log;
 use Prettus\Repository\Exceptions\RepositoryException;
 use Str;

@@ -13,7 +13,7 @@ use App\Modules\Customer\Repositories\CustomerRepository;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Knovators\Support\Helpers\HTTPCode;
-use Knovators\Support\Traits\DestroyObject;
+use App\Support\DestroyObject;
 use Log;
 use Prettus\Validator\Exceptions\ValidatorException;
 use Str;
@@ -94,6 +94,7 @@ class CustomerController extends Controller
     public function update(Customer $customer, UpdateRequest $request) {
         $input = $request->all();
         try {
+            $this->firstOrCreateAgent($input);
             $customer->update($input);
             $customer->fresh();
 

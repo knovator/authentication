@@ -32,7 +32,11 @@ return [
 
     'delete_relations' => [
         'threadColors',
-        'childMasters'
+        'purchaseOrders',
+        'salesOrders',
+        'stocks',
+        'deliveries',
+        'threadType',
     ]
 
 ];
