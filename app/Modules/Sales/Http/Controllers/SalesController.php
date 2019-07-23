@@ -516,7 +516,8 @@ class SalesController extends Controller
      */
     public function manufacturingCompanies() {
         try {
-            $companies = (new CompanyRepository(new Container()))->pluck('name', 'id');
+            $companies = (new CompanyRepository(new Container()))->all(['name', 'id']);
+
             return $this->sendResponse($companies,
                 __('messages.retrieved', ['module' => 'Companies']),
                 HTTPCode::OK);
