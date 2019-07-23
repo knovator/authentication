@@ -131,7 +131,8 @@ class CustomerController extends Controller
         try {
             // Customer associated relations
             $relations = [
-                'salesOrders'
+                'salesOrders',
+                'purchaseOrders'
             ];
 
             return $this->destroyModelObject($relations, $customer, 'Customer');
@@ -187,7 +188,7 @@ class CustomerController extends Controller
      */
     public function agents() {
         try {
-            $agents = $this->agentRepository->pluck('name', 'id');
+            $agents = $this->agentRepository->all(['id', 'name', 'contact_number']);
 
             return $this->sendResponse($agents,
                 __('messages.retrieved', ['module' => 'Agents']),
