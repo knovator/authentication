@@ -3,6 +3,7 @@
 namespace App\Modules\Customer\Models;
 
 use App\Models\State;
+use App\Modules\Purchase\Models\PurchaseOrder;
 use App\Modules\Sales\Models\SalesOrder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -62,6 +63,13 @@ class Customer extends Model
      */
     public function salesOrders() {
         return $this->hasMany(SalesOrder::class, 'customer_id', 'id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function purchaseOrders() {
+        return $this->hasMany(PurchaseOrder::class, 'customer_id', 'id');
     }
 
 
