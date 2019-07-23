@@ -3,6 +3,9 @@
 namespace App\Modules\Thread\Models;
 
 
+use App\Modules\Design\Models\BeamRecipe;
+use App\Modules\Design\Models\DesignBeam;
+use App\Modules\Recipe\Models\RecipeFiddle;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
@@ -62,6 +65,26 @@ class Thread extends Model
     public function threadColors() {
         return $this->hasMany(ThreadColor::class, 'thread_id', 'id');
     }
+
+
+
+    /**
+     * @return mixed
+     */
+    public function fiddles() {
+        return $this->hasManyThrough(RecipeFiddle::class, ThreadColor::class, 'thread_id',
+            'thread_color_id', 'id', 'id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function beams() {
+        return $this->hasManyThrough(DesignBeam::class, ThreadColor::class, 'thread_id',
+            'thread_color_id', 'id', 'id');
+    }
+
+
 
 
     /**

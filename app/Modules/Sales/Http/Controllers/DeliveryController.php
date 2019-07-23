@@ -30,7 +30,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Knovators\Support\Helpers\HTTPCode;
-use Knovators\Support\Traits\DestroyObject;
+use App\Support\DestroyObject;
 use Knp\Snappy\Pdf;
 use Log;
 use Prettus\Repository\Exceptions\RepositoryException;
@@ -101,9 +101,7 @@ class DeliveryController extends Controller
             $this->storeStockDetails($salesOrder, $input['status_id']);
             DB::commit();
 
-            $delivery->load('status');
-
-            return $this->sendResponse($delivery,
+            return $this->sendResponse($delivery->load($this->deliveryRepository->commonRelations()),
                 __('messages.created', ['module' => 'Delivery']),
                 HTTPCode::CREATED);
         } catch (Exception $exception) {
@@ -137,10 +135,7 @@ class DeliveryController extends Controller
                 $this->masterRepository->findByCode(MasterConstant::SO_PENDING)->id);
             DB::commit();
 
-            $delivery->fresh();
-            $delivery->load('status');
-
-            return $this->sendResponse($delivery,
+            return $this->sendResponse($delivery->fresh($this->deliveryRepository->commonRelations()),
                 __('messages.updated', ['module' => 'Sales']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -514,7 +509,7 @@ class DeliveryController extends Controller
             $delivery->update($input);
             DB::commit();
 
-            return $this->sendResponse($status,
+            return $this->sendResponse($delivery->fresh(['status:id,name,code']),
                 __('messages.updated', ['module' => 'Status']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -555,6 +550,7 @@ class DeliveryController extends Controller
      */
     public function exportAccounting(SalesOrder $salesOrder, Delivery $delivery) {
         $salesOrder->load([
+            'manufacturingCompany',
             'design.mainImage.file',
             'customer.state'
         ]);
@@ -574,13 +570,9 @@ class DeliveryController extends Controller
 
         /** @var ImageWrapper $pdf */
         return $pdf->download($delivery->delivery_no . '-accounting' . ".pdf");
-        /*return view('receipts.sales-orders.accounting.accounting',
-            compact('salesOrder', 'delivery'));*/
+//        return view('receipts.sales-orders.accounting.accounting',
+//            compact('salesOrder', 'delivery'));
     }
 
-
-    private function downloadPdf() {
-
-    }
 
 }

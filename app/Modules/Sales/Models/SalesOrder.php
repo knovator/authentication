@@ -30,6 +30,7 @@ class SalesOrder extends Model
         'cost_per_meter',
         'design_id',
         'design_beam_id',
+        'manufacturing_company_id',
         'customer_id',
         'status_id',
         'created_by',
@@ -69,6 +70,16 @@ class SalesOrder extends Model
     /**
      * @return mixed
      */
+    public function recipeMeters() {
+        return $this->hasOne(SalesOrderRecipe::class, 'sales_order_id',
+            'id')->selectRaw('SUM(total_meters) as total,sales_order_id')
+                    ->groupBy('sales_order_id');
+    }
+
+
+    /**
+     * @return mixed
+     */
     public function deliveries() {
         return $this->hasMany(Delivery::class, 'sales_order_id', 'id');
     }
@@ -79,6 +90,14 @@ class SalesOrder extends Model
      */
     public function status() {
         return $this->belongsTo(Master::class, 'status_id',
+            'id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function manufacturingCompany() {
+        return $this->belongsTo(ManufacturingCompany::class, 'manufacturing_company_id',
             'id');
     }
 
@@ -113,7 +132,7 @@ class SalesOrder extends Model
      * @return mixed
      */
     public function orderStocks() {
-        return $this->morphMany(Stock::class, 'order','order_type','order_id');
+        return $this->morphMany(Stock::class, 'order', 'order_type', 'order_id');
     }
 
     /**

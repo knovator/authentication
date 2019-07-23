@@ -1,5 +1,32 @@
+stages:
+  - review
+  - staging
+  - production
+
+code_quality:
+  stage: review
+  image: docker:stable
+  allow_failure: true
+  services:
+    - docker:stable-dind
+  variables:
+    DOCKER_DRIVER: overlay2
+  script:
+    - export SP_VERSION=$(echo "$CI_SERVER_VERSION" | sed 's/^\([0-9]*\)\.\([0-9]*\).*/\1-\2-stable/')
+    - docker run
+      --env SOURCE_CODE="$PWD"
+      --volume "$PWD":/code
+      --volume /var/run/docker.sock:/var/run/docker.sock
+      "registry.gitlab.com/gitlab-org/security-products/codequality:$SP_VERSION" /code
+  artifacts:
+    reports:
+      codequality: gl-code-quality-report.json
+    expire_in: 1 week
+  only:
+    - merge_requests
+
 deploy_staging:
-  type: deploy
+  stage: staging
   variables:
       ID_RSA_NAME: $CI_PROJECT_PATH_SLUG"_dev"
   environment:
@@ -17,7 +44,7 @@ deploy_staging:
 
 
 deploy_production:
-  type: deploy
+  stage: production
   variables:
       ID_RSA_NAME: $CI_PROJECT_PATH_SLUG"_prod"
   environment:

@@ -3,7 +3,6 @@
 namespace App\Modules\Stock\Repositories;
 
 use App\Modules\Stock\Models\Stock;
-use Illuminate\Database\Eloquent\Builder;
 use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
 use Prettus\Repository\Exceptions\RepositoryException;
@@ -41,15 +40,18 @@ class StockRepository extends BaseRepository
 
     /**
      * @param $threadColor
+     * @param $statusIds
      * @return
      * @throws \Exception
      */
-    public function getThreadOrderReport($threadColor) {
+    public function getThreadOrderReport($threadColor, $statusIds) {
         $reports = $this->model->selectRaw('order_id,order_type,SUM(kg_qty) as stock')->where([
             'product_id'   => $threadColor->id,
-            'product_type' => 'thread_color'
-        ])->groupBy(['order_id', 'order_type'])->with('order.customer.state:id,name,code')
-                                               ->orderByDesc('order_id');
+            'product_type' => 'thread_color',
+        ])->whereNotIn('status_id', $statusIds)->groupBy(['order_id', 'order_type'])->with([
+            'order.customer.state:id,name,code',
+            'order.status:id,name,code'
+        ])->orderByDesc('order_id');
 
         $reports = datatables()->of($reports)->make(true);
 

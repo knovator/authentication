@@ -39,6 +39,7 @@ class CustomerRepository extends BaseRepository
         $this->applyCriteria();
         $designs = datatables()->of($this->model->with([
             'state',
+            'agent',
         ])->select('customers.*'))->make(true);
         $this->resetModel();
 

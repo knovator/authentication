@@ -4,6 +4,7 @@ namespace App\Modules\Sales\Http\Controllers;
 
 use App\Constants\GenerateNumber;
 use App\Constants\Master as MasterConstant;
+use App\Constants\Master;
 use App\Http\Controllers\Controller;
 use App\Modules\Design\Repositories\DesignDetailRepository;
 use App\Modules\Sales\Http\Requests\AnalysisRequest;
@@ -13,6 +14,7 @@ use App\Modules\Sales\Http\Requests\UpdateRequest;
 use App\Modules\Sales\Http\Resources\SalesOrder as SalesOrderResource;
 use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Sales\Models\SalesOrderRecipe;
+use App\Modules\Sales\Repositories\CompanyRepository;
 use App\Modules\Sales\Repositories\RecipePartialRepository;
 use App\Modules\Sales\Repositories\SalesOrderRepository;
 use App\Modules\Sales\Repositories\SalesRecipeRepository;
@@ -31,7 +33,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Knovators\Support\Helpers\HTTPCode;
-use Knovators\Support\Traits\DestroyObject;
+use App\Support\DestroyObject;
 use Log;
 use Prettus\Repository\Exceptions\RepositoryException;
 use Str;
@@ -211,8 +213,8 @@ class SalesController extends Controller
                 'product_id'      => $quantityDetails['thread_color_id'],
                 'product_type'    => 'thread_color',
                 'status_id'       => $items['status_id'],
-                'kg_qty'          => $formula->getTotalKgQty(ThreadType::WEFT,
-                    $quantityDetails, $designDetail, $items['total_meters']),
+                'kg_qty'          => '-' . $formula->getTotalKgQty(ThreadType::WEFT,
+                        $quantityDetails, $designDetail, $items['total_meters']),
             ];
         }
         $threadDetail['denier'] = $salesOrder->designBeam->threadColor->thread->denier;
@@ -222,8 +224,8 @@ class SalesController extends Controller
             'product_id'      => $salesOrder->designBeam->thread_color_id,
             'product_type'    => 'thread_color',
             'status_id'       => $items['status_id'],
-            'kg_qty'          => $formula->getTotalKgQty(ThreadType::WARP,
-                $threadDetail, $designDetail, $items['total_meters']),
+            'kg_qty'          => '-' . $formula->getTotalKgQty(ThreadType::WARP,
+                    $threadDetail, $designDetail, $items['total_meters']),
         ]);
 
         $salesOrder->orderStocks()->createMany($data);
@@ -273,6 +275,7 @@ class SalesController extends Controller
             'customer',
             'status',
             'design.detail',
+            'design.mainImage.file',
             'designBeam.threadColor.thread',
             'designBeam.threadColor.color',
             'orderRecipes',
@@ -300,7 +303,7 @@ class SalesController extends Controller
             Log::error($exception);
 
             return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY);
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
     }
 
@@ -417,7 +420,7 @@ class SalesController extends Controller
         try {
             $salesOrder->update(['status_id' => $status->id]);
 
-            return $this->sendResponse($status,
+            return $this->sendResponse($this->makeResource($salesOrder->load('status:id,name,code')),
                 __('messages.updated', ['module' => 'Status']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -435,11 +438,19 @@ class SalesController extends Controller
         $input = $request->all();
         $collection = collect($input['reports'])->keyBy('thread_color_id');
         try {
+
+            $statusIds = $this->masterRepository->findWhereIn('code',
+                [Master::PO_CANCELED, Master::PO_PENDING])->pluck('id')->toArray();
+
             $threadColors = $this->threadColorRepository->with([
-                'availableStock',
-                'thread' => function ($thread) {
+                'availableStock' => function ($availableStock) use ($statusIds) {
+                    /** @var Builder $availableStock */
+                    $availableStock->whereNotIn('status_id', $statusIds);
+                },
+                'thread'         => function ($thread) {
                     /** @var Builder $thread */
-                    $thread->select(['id', 'name', 'type_id'])->with('type:id,name');
+                    $thread->select(['id', 'name', 'type_id', 'denier', 'company_name'])
+                           ->with('type:id,name');
                 },
                 'color:id,name,code'
             ])->findWhereIn('id', $collection->pluck('thread_color_id')->toArray());
@@ -482,6 +493,7 @@ class SalesController extends Controller
                     $delivery->where('status_id', $statusId);
                 });
             },
+            'manufacturingCompany',
             'design.detail',
             'design.mainImage.file',
             'customer.state'
@@ -496,9 +508,24 @@ class SalesController extends Controller
             compact('salesOrder', 'isInvoice'));
 
         return $pdf->download($salesOrder->order_no . ".pdf");
+    }
 
-//        return view('receipts.sales-orders.main_summary.summary',
-//            compact('salesOrder', 'isInvoice'));
+
+    /**
+     * @return JsonResponse
+     */
+    public function manufacturingCompanies() {
+        try {
+            $companies = (new CompanyRepository(new Container()))->pluck('name', 'id');
+            return $this->sendResponse($companies,
+                __('messages.retrieved', ['module' => 'Companies']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
     }
 
 }

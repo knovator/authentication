@@ -10,6 +10,8 @@ Route::group([
         Route::resource('customers', 'CustomerController');
         Route::put('customers/partiallyUpdate/{customer}', 'CustomerController@partiallyUpdate')
              ->name('customers.partially-update');
+        Route::get('customer/agents', 'CustomerController@agents')
+             ->name('customers.agents.index');
     });
 
 Route::model('customer', Customer::class);

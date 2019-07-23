@@ -3,6 +3,7 @@
 namespace App\Modules\Thread\Models;
 
 
+use App\Modules\Design\Models\DesignBeam;
 use App\Modules\Purchase\Models\PurchaseOrderThread;
 use App\Modules\Recipe\Models\Recipe;
 use App\Modules\Stock\Models\Stock;
@@ -60,11 +61,21 @@ class ThreadColor extends Model
     /**
      * @return mixed
      */
-    public function inPurchaseQty() {
-        return $this->hasOne(PurchaseOrderThread::class, 'thread_color_id', 'id')
-                    ->selectRaw("thread_color_id,SUM(kg_qty) as total")
-                    ->groupBy('thread_color_id');
+    public function designBeams() {
+        return $this->hasMany(DesignBeam::class, 'thread_color_id', 'id');
     }
+
+
+    /**
+     * @return mixed
+     */
+    public function inPurchaseQty() {
+        return $this->stockQty()->whereHas('status', function ($status) {
+            /** @var Builder $status */
+            $status->where('code', MasterConstant::PO_PENDING);
+        });
+    }
+
 
     /**
      * @return mixed
@@ -122,6 +133,14 @@ class ThreadColor extends Model
         return $this->morphOne(Stock::class, 'product', 'product_type', 'product_id')
                     ->selectRaw('product_id,product_type,sum(kg_qty) as total')
                     ->groupBy(['product_id', 'product_type']);
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function stocks() {
+        return $this->morphMany(Stock::class, 'product', 'product_type', 'product_id');
     }
 
 

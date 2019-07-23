@@ -4,6 +4,7 @@ namespace App\Modules\Design\Models;
 
 
 use App\Modules\Sales\Models\SalesOrder;
+use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Knovators\Support\Traits\HasModelEvent;
@@ -101,10 +102,12 @@ class Design extends Model
     /**
      * @return mixed
      */
-    public function recipes() {
+    public function beamRecipes() {
         return $this->hasManyThrough(BeamRecipe::class, DesignBeam::class, 'design_id',
-            'design_beam_id', 'id');
+            'design_beam_id', 'id','id')
+                    ->join('recipes', 'recipes.id', '=', 'beams_recipes.recipe_id')
+                    ->selectRaw('recipes.name')
+                    ->groupBy(DB::raw('recipes.name'));
     }
-
 
 }

@@ -8,12 +8,15 @@ use App\Modules\Customer\Http\Requests\CreateRequest;
 use App\Modules\Customer\Http\Requests\UpdateRequest;
 use App\Modules\Customer\Http\Resources\Customer as CustomerResource;
 use App\Modules\Customer\Models\Customer;
+use App\Modules\Customer\Repositories\AgentRepository;
 use App\Modules\Customer\Repositories\CustomerRepository;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Knovators\Support\Helpers\HTTPCode;
-use Knovators\Support\Traits\DestroyObject;
+use App\Support\DestroyObject;
 use Log;
+use Prettus\Validator\Exceptions\ValidatorException;
+use Str;
 
 /**
  * Class CustomerController
@@ -26,14 +29,19 @@ class CustomerController extends Controller
 
     protected $customerRepository;
 
+    protected $agentRepository;
+
     /**
      * CustomerController constructor.
      * @param CustomerRepository $customerRepository
+     * @param AgentRepository    $agentRepository
      */
     public function __construct(
-        CustomerRepository $customerRepository
+        CustomerRepository $customerRepository,
+        AgentRepository $agentRepository
     ) {
         $this->customerRepository = $customerRepository;
+        $this->agentRepository = $agentRepository;
     }
 
     /**
@@ -44,9 +52,10 @@ class CustomerController extends Controller
     public function store(CreateRequest $request) {
         $input = $request->all();
         try {
+            $this->firstOrCreateAgent($input);
             $customer = $this->customerRepository->create($input);
 
-            return $this->sendResponse($this->makeResource($customer->load('state')),
+            return $this->sendResponse($this->makeResource($customer->load(['state', 'agent'])),
                 __('messages.created', ['module' => 'Customer']),
                 HTTPCode::CREATED);
         } catch (Exception $exception) {
@@ -59,6 +68,24 @@ class CustomerController extends Controller
 
 
     /**
+     * @param $input
+     * @throws ValidatorException
+     * @throws \Prettus\Repository\Exceptions\RepositoryException
+     */
+    private function firstOrCreateAgent(&$input) {
+        $slug = str_replace(' ', '-', Str::lower($input['agent_name']));
+        if (!($agent = $this->agentRepository->findBy('slug', $slug))) {
+            $agent = $this->agentRepository->create([
+                'name'           => $input['agent_name'],
+                'slug'           => $slug,
+                'contact_number' => $input['agent_number']
+            ]);
+
+        }
+        $input['agent_id'] = $agent->id;
+    }
+
+    /**
      * @param Customer      $customer
      * @param UpdateRequest $request
      * @return JsonResponse
@@ -67,10 +94,11 @@ class CustomerController extends Controller
     public function update(Customer $customer, UpdateRequest $request) {
         $input = $request->all();
         try {
+            $this->firstOrCreateAgent($input);
             $customer->update($input);
             $customer->fresh();
 
-            return $this->sendResponse($this->makeResource($customer->load('state')),
+            return $this->sendResponse($this->makeResource($customer->load(['state', 'agent'])),
                 __('messages.updated', ['module' => 'Customer']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -91,7 +119,7 @@ class CustomerController extends Controller
         $customer->update($request->all());
         $customer->fresh();
 
-        return $this->sendResponse($this->makeResource($customer->load('state')),
+        return $this->sendResponse($this->makeResource($customer->load(['state', 'agent'])),
             __('messages.updated', ['module' => 'Customer']),
             HTTPCode::OK);
     }
@@ -104,7 +132,8 @@ class CustomerController extends Controller
         try {
             // Customer associated relations
             $relations = [
-                'salesOrders'
+                'salesOrders',
+                'purchaseOrders'
             ];
 
             return $this->destroyModelObject($relations, $customer, 'Customer');
@@ -122,7 +151,7 @@ class CustomerController extends Controller
      * @return JsonResponse
      */
     public function show(Customer $customer) {
-        return $this->sendResponse($this->makeResource($customer->load('state')),
+        return $this->sendResponse($this->makeResource($customer->load(['state', 'agent'])),
             __('messages.retrieved', ['module' => 'Customer']),
             HTTPCode::OK);
     }
@@ -154,6 +183,25 @@ class CustomerController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
     }
+
+    /**
+     * @return JsonResponse
+     */
+    public function agents() {
+        try {
+            $agents = $this->agentRepository->all(['id', 'name', 'contact_number']);
+
+            return $this->sendResponse($agents,
+                __('messages.retrieved', ['module' => 'Agents']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
+
 
 }
 

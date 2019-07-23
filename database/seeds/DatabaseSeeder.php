@@ -14,9 +14,14 @@ class DatabaseSeeder extends Seeder
      * @return void
      */
     public function run() {
-        $this->call(RoleSeeder::class);
-        $this->call(MasterSeeder::class);
-        $this->call(UniqueIdSeeder::class);
-        $this->call(StateSeeder::class);
+//        $this->call(RoleSeeder::class);
+//        $this->call(MasterSeeder::class);
+//        $this->call(UniqueIdSeeder::class);
+//        $this->call(StateSeeder::class);
+        $this->call(ManufacturingCompanySeeder::class);
+
+
+        // TODO: Remove this file
+        $this->call(PurchaseOrderIssueSeeder::class);
     }
 }
