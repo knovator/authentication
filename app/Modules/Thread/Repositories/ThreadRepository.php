@@ -38,7 +38,7 @@ class ThreadRepository extends BaseRepository
         $threads = datatables()->of($this->model->with([
             'type:id,name,code',
             'threadColors.color:id,name,code'
-        ])->select('threads.*'))->make(true);
+        ])->select('threads.*')->withCount(['fiddles', 'beams']))->make(true);
         $this->resetModel();
 
         return $threads;

@@ -104,7 +104,7 @@ class Design extends Model
      */
     public function beamRecipes() {
         return $this->hasManyThrough(BeamRecipe::class, DesignBeam::class, 'design_id',
-            'design_beam_id', 'id')
+            'design_beam_id', 'id','id')
                     ->join('recipes', 'recipes.id', '=', 'beams_recipes.recipe_id')
                     ->selectRaw('recipes.name')
                     ->groupBy(DB::raw('recipes.name'));
