@@ -20,7 +20,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Knovators\Masters\Repository\MasterRepository;
 use Knovators\Support\Helpers\HTTPCode;
-use Knovators\Support\Traits\DestroyObject;
+use App\Support\DestroyObject;
 use Log;
 
 /**
@@ -85,19 +85,7 @@ class ThreadController extends Controller
      */
     public function destroy(Thread $thread) {
         try {
-            $thread->loadCount(['fiddles as total_fiddles', 'beams as total_beams']);
-
-            if ($thread->total_fiddles || $thread->total_beams) {
-                return $this->sendResponse(null,
-                    __('messages.associated', [
-                        'module'  => 'Thread',
-                        'related' => 'recipes or beams'
-                    ]),
-                    HTTPCode::UNPROCESSABLE_ENTITY);
-            }
-
-
-            return $this->destroyModelObject([], $thread, 'Thread');
+            return $this->destroyModelObject(['fiddles', 'beams'], $thread, 'Thread');
 
         } catch (Exception $exception) {
             Log::error($exception);
