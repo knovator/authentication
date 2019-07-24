@@ -3,9 +3,10 @@
 namespace App\Modules\Sales\Http\Controllers;
 
 use App\Constants\GenerateNumber;
-use App\Constants\Master as MasterConstant;
 use App\Constants\Master;
+use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
+use App\Jobs\OrderFormJob;
 use App\Modules\Design\Repositories\DesignDetailRepository;
 use App\Modules\Sales\Http\Requests\AnalysisRequest;
 use App\Modules\Sales\Http\Requests\CreateRequest;
@@ -18,22 +19,21 @@ use App\Modules\Sales\Repositories\CompanyRepository;
 use App\Modules\Sales\Repositories\RecipePartialRepository;
 use App\Modules\Sales\Repositories\SalesOrderRepository;
 use App\Modules\Sales\Repositories\SalesRecipeRepository;
+use App\Modules\Sales\Support\ExportSaleOrderSummary;
 use App\Modules\Stock\Repositories\StockRepository;
 use App\Modules\Thread\Constants\ThreadType;
 use App\Modules\Thread\Repositories\ThreadColorRepository;
 use App\Repositories\MasterRepository;
+use App\Support\DestroyObject;
 use App\Support\Formula;
 use App\Support\UniqueIdGenerator;
-use Barryvdh\Snappy\Facades\SnappyPdf;
 use DB;
 use Exception;
 use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Knovators\Support\Helpers\HTTPCode;
-use App\Support\DestroyObject;
 use Log;
 use Prettus\Repository\Exceptions\RepositoryException;
 use Str;
@@ -45,7 +45,7 @@ use Str;
 class SalesController extends Controller
 {
 
-    use DestroyObject, UniqueIdGenerator;
+    use DestroyObject, UniqueIdGenerator, ExportSaleOrderSummary;
 
     protected $salesOrderRepository;
 
@@ -92,6 +92,7 @@ class SalesController extends Controller
             $input['status_id'] = $this->getMasterByCode(MasterConstant::SO_PENDING);
             $salesOrder = $this->salesOrderRepository->create($input);
             $this->createOrUpdateSalesDetails($salesOrder, $input, false);
+            $this->sendMailToCustomer($salesOrder);
             DB::commit();
 
             return $this->sendResponse($this->makeResource($salesOrder),
@@ -104,6 +105,13 @@ class SalesController extends Controller
             return $this->sendResponse(null, __('messages.something_wrong'),
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
+    }
+
+    /**
+     * @param SalesOrder $salesOrder
+     */
+    public function sendMailToCustomer(SalesOrder $salesOrder) {
+        OrderFormJob::dispatch($salesOrder)->delay(now()->addSeconds(10));
     }
 
 
@@ -480,35 +488,8 @@ class SalesController extends Controller
      * @return Response
      */
     public function exportSummary(SalesOrder $salesOrder) {
-
-        $statusId = $this->masterRepository->findByCode(MasterConstant::SO_DELIVERED)->id;
-        $salesOrder->load([
-            'orderRecipes'               => function ($orderRecipes) {
-                /** @var Builder $orderRecipes */
-                $orderRecipes->orderBy('id')->with('recipe');
-            },
-            'orderRecipes.partialOrders' => function ($partialOrders) use ($statusId) {
-                /** @var Builder $partialOrders */
-                $partialOrders->whereHas('delivery', function ($delivery) use ($statusId) {
-                    /** @var Builder $delivery */
-                    $delivery->where('status_id', $statusId);
-                });
-            },
-            'manufacturingCompany',
-            'design.detail',
-            'design.mainImage.file',
-            'customer.state'
-        ]);
-
-        $isInvoice = false;
-        if ($salesOrder->deliveries()->where('status_id', $statusId)->exists()) {
-            $isInvoice = true;
-        }
-
-        $pdf = SnappyPdf::loadView('receipts.sales-orders.main_summary.summary',
-            compact('salesOrder', 'isInvoice'));
-
-        return $pdf->download($salesOrder->order_no . ".pdf");
+        return $this->renderSummary($salesOrder, $this->masterRepository)
+                    ->download($salesOrder->order_no . ".pdf");
     }
 
 
