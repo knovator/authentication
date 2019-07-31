@@ -280,7 +280,8 @@ class SalesController extends Controller
             'designBeam.threadColor.color',
             'orderRecipes',
             'orderRecipes.recipe.fiddles.thread',
-            'orderRecipes.recipe.fiddles.color'
+            'orderRecipes.recipe.fiddles.color',
+            'manufacturingCompany'
         ]);
 
         return $this->sendResponse($this->makeResource($salesOrder),

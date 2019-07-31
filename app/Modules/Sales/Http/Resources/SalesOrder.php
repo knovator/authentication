@@ -24,16 +24,17 @@ class SalesOrder extends JsonResource
      */
     public function toArray($request) {
         return [
-            'id'             => $this->id,
-            'order_no'       => $this->order_no,
-            'cost_per_meter' => $this->cost_per_meter,
-            'order_date'     => $this->order_date,
-            'delivery_date'  => $this->delivery_date,
-            'customer'       => new CustomerResource($this->whenLoaded('customer')),
-            'status'         => new MasterResource($this->whenLoaded('status')),
-            'design'         => new DesignResource($this->whenLoaded('design')),
-            'designBeam'     => new DesignBeamResource($this->whenLoaded('designBeam')),
-            'orderRecipes'   => SalesOrderRecipe::collection($this->whenLoaded('orderRecipes')),
+            'id'                   => $this->id,
+            'order_no'             => $this->order_no,
+            'cost_per_meter'       => $this->cost_per_meter,
+            'order_date'           => $this->order_date,
+            'delivery_date'        => $this->delivery_date,
+            'customer'             => new CustomerResource($this->whenLoaded('customer')),
+            'status'               => new MasterResource($this->whenLoaded('status')),
+            'design'               => new DesignResource($this->whenLoaded('design')),
+            'designBeam'           => new DesignBeamResource($this->whenLoaded('designBeam')),
+            'manufacturingCompany' => new ManufacturingCompany($this->whenLoaded('manufacturingCompany')),
+            'orderRecipes'         => SalesOrderRecipe::collection($this->whenLoaded('orderRecipes')),
         ];
     }
 }
