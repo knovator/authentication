@@ -13,6 +13,8 @@ use App\Support\DestroyObject;
 use App\Support\UniqueIdGenerator;
 use DB;
 use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Knovators\Masters\Repository\MasterRepository;
 use Knovators\Support\Helpers\HTTPCode;
 use Log;
@@ -117,7 +119,7 @@ class YarnController extends Controller
             ]);
 
             return $this->sendResponse($yarnOrder,
-                __('messages.updated', ['module' => 'Purchase']),
+                __('messages.updated', ['module' => 'Sales Order']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
             DB::rollBack();
@@ -153,6 +155,67 @@ class YarnController extends Controller
         $yarnOrder->orderStocks()->delete();
         $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::SO_PENDING)->id;
         $this->storeStockOrders($yarnOrder, $input);
+    }
+
+
+    /**
+     * @param YarnOrder $yarnOrder
+     * @return JsonResponse
+     */
+    public function destroy(YarnOrder $yarnOrder) {
+        try {
+            $yarnOrder->load('status');
+            if ($yarnOrder->status->code === MasterConstant::SO_DELIVERED) {
+                return $this->sendResponse(null,
+                    __('messages.can_not_delete_order'),
+                    HTTPCode::UNPROCESSABLE_ENTITY);
+            }
+
+            return $this->destroyModelObject([], $yarnOrder, 'Sales Order');
+
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
+
+
+    /**
+     * @param YarnOrder $yarnOrder
+     * @return JsonResponse
+     */
+    public function show(YarnOrder $yarnOrder) {
+        $yarnOrder->load([
+            'threads.threadColor.thread',
+            'threads.threadColor.color',
+            'customer',
+            'status'
+        ]);
+
+        return $this->sendResponse($yarnOrder,
+            __('messages.retrieved', ['module' => 'Sales Order']),
+            HTTPCode::OK);
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function index(Request $request) {
+        try {
+            $orders = $this->yarnOrderRepository->getYarnOrderList($request->all());
+
+            return $this->sendResponse($orders,
+                __('messages.retrieved', ['module' => 'Sales Orders']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
     }
 
 }
