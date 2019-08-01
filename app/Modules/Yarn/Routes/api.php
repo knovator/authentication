@@ -1,6 +1,8 @@
 <?php
 
 
+use App\Modules\Yarn\Models\YarnOrder;
+
 Route::group([
     'prefix'     => 'admin',
     'middleware' => 'auth_active'
@@ -10,3 +12,6 @@ Route::group([
         Route::put('yarns/order/change-status', 'YarnController@changeStatus')
              ->name('yarns.change-status');
     });
+
+
+Route::model('yarn', YarnOrder::class);

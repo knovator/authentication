@@ -2,6 +2,8 @@
 
 namespace App\Modules\Yarn\Models;
 
+use App\Models\Master;
+use App\Modules\Customer\Models\Customer;
 use App\Modules\Stock\Models\Stock;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -62,6 +64,21 @@ class YarnOrder extends Model
     public function orderStocks() {
         return $this->morphMany(Stock::class, 'order', 'order_type', 'order_id', 'id');
     }
+
+    /**
+     * @return mixed
+     */
+    public function customer() {
+        return $this->belongsTo(Customer::class, 'customer_id', 'id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function status() {
+        return $this->belongsTo(Master::class, 'status_id', 'id');
+    }
+
 
 
 }

@@ -188,10 +188,10 @@ class YarnController extends Controller
      */
     public function show(YarnOrder $yarnOrder) {
         $yarnOrder->load([
-            'threads.threadColor.thread',
-            'threads.threadColor.color',
-            'customer',
-            'status'
+            'threads.threadColor.thread:id,name,denier,company_name',
+            'threads.threadColor.color:id,name,code',
+            'customer:id,first_name,last_name',
+            'status:id,name,code'
         ]);
 
         return $this->sendResponse($yarnOrder,
