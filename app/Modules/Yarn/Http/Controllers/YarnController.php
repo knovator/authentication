@@ -6,6 +6,7 @@ use App\Constants\GenerateNumber;
 use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
 use App\Modules\Yarn\Http\Requests\CreateRequest;
+use App\Modules\Yarn\Http\Requests\UpdateRequest;
 use App\Modules\Yarn\Models\YarnOrder;
 use App\Modules\Yarn\Repositories\YarnOrderRepository;
 use App\Support\DestroyObject;
@@ -87,6 +88,71 @@ class YarnController extends Controller
             ];
         }
         $yarnOrder->orderStocks()->createMany($stockItems);
+    }
+
+    /**
+     * @param YarnOrder     $yarnOrder
+     * @param UpdateRequest $request
+     * @return mixed
+     * @throws Exception
+     */
+    public function update(YarnOrder $yarnOrder, UpdateRequest $request) {
+        $yarnOrder->load('status');
+        if ($yarnOrder->status->code === MasterConstant::SO_DELIVERED) {
+            return $this->sendResponse(null,
+                __('messages.can_not_edit_order'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+        $input = $request->all();
+        try {
+            DB::beginTransaction();
+            $yarnOrder->update($input);
+            $this->storeThreadDetails($yarnOrder = $yarnOrder->fresh(), $input);
+            DB::commit();
+            $yarnOrder->load([
+                'threads.threadColor.thread',
+                'threads.threadColor.color',
+                'customer',
+                'status'
+            ]);
+
+            return $this->sendResponse($yarnOrder,
+                __('messages.updated', ['module' => 'Purchase']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            DB::rollBack();
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
+
+
+    /**
+     * @param $yarnOrder
+     * @param $input
+     */
+    private function storeThreadDetails(YarnOrder $yarnOrder, $input) {
+        $newItems = [];
+        foreach ($input['threads'] as $threadDetail) {
+            if (isset($threadDetail['id'])) {
+                $yarnOrder->threads()->whereId($threadDetail['id'])->update($threadDetail);
+            } else {
+                $newItems[] = $threadDetail;
+            }
+
+        }
+        if (!empty($newItems)) {
+            $yarnOrder->threads()->createMany($newItems);
+        }
+        if (isset($input['removed_threads_id']) && !empty($input['removed_threads_id'])) {
+            $yarnOrder->threads()->whereIn('id', $input['removed_threads_id'])
+                      ->delete();
+        }
+        $yarnOrder->orderStocks()->delete();
+        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::SO_PENDING)->id;
+        $this->storeStockOrders($yarnOrder, $input);
     }
 
 }

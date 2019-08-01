@@ -97,7 +97,7 @@ class PurchaseController extends Controller
         $purchaseOrder->load('status');
         if ($purchaseOrder->status->code === MasterConstant::PO_DELIVERED) {
             return $this->sendResponse(null,
-                __('messages.can_not_edit_purchase_order'),
+                __('messages.can_not_edit_order'),
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
         $input = $request->all();

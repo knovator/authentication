@@ -28,7 +28,7 @@ class CreateYarnSalesOrdersTable extends Migration
             $table->softDeletes();
         });
         Schema::table('yarn_sales_orders', function (Blueprint $table) {
-            $table->foreign('customer_id')->references('id')->on('users');
+            $table->foreign('customer_id')->references('id')->on('customers');
             $table->foreign('status_id')->references('id')->on('masters');
             $table->foreign('created_by')->references('id')->on('users');
             $table->foreign('deleted_by')->references('id')->on('users');
