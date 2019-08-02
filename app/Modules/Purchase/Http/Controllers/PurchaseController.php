@@ -107,14 +107,13 @@ class PurchaseController extends Controller
             $purchaseOrder->update($input);
             $this->storeThreadDetails($purchaseOrder = $purchaseOrder->fresh(), $input);
             DB::commit();
-            $purchaseOrder->load([
+
+            return $this->sendResponse($this->makeResource($purchaseOrder->load([
                 'threads.threadColor.thread',
                 'threads.threadColor.color',
                 'customer',
                 'status'
-            ]);
-
-            return $this->sendResponse($this->makeResource($purchaseOrder),
+            ])),
                 __('messages.updated', ['module' => 'Purchase']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -183,7 +182,7 @@ class PurchaseController extends Controller
                           ->delete();
         }
         $purchaseOrder->orderStocks()->delete();
-        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::PO_PENDING)->id;
+        $input['status_id'] = $purchaseOrder->status_id;
         $this->storeStockOrders($purchaseOrder, $input);
     }
 
@@ -216,7 +215,7 @@ class PurchaseController extends Controller
      * @throws Exception
      */
     private function updatePOPENDINGStatus(PurchaseOrder $purchaseOrder, $input) {
-        return $this->updateStatus($purchaseOrder, $input, MasterConstant::PO_PENDING);
+        return $this->updateStatus($purchaseOrder, $input);
 
     }
 
@@ -227,8 +226,8 @@ class PurchaseController extends Controller
      * @return JsonResponse
      * @throws Exception
      */
-    private function updateStatus(PurchaseOrder $purchaseOrder, $input, $code) {
-        $input['status_id'] = $this->masterRepository->findByCode($code)->id;
+    private function updateStatus(PurchaseOrder $purchaseOrder, $input) {
+        $input['status_id'] = $this->masterRepository->findByCode($input['code'])->id;
         try {
             DB::beginTransaction();
             $purchaseOrder->update($input);
@@ -263,7 +262,7 @@ class PurchaseController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
         try {
-            return $this->updateStatus($purchaseOrder, $input, MasterConstant::PO_DELIVERED);
+            return $this->updateStatus($purchaseOrder, $input);
         } catch (Exception $exception) {
             Log::error($exception);
 
@@ -299,7 +298,7 @@ class PurchaseController extends Controller
      * @throws Exception
      */
     private function updatePOCANCELEDStatus(PurchaseOrder $purchaseOrder, $input) {
-        return $this->updateStatus($purchaseOrder, $input, MasterConstant::PO_CANCELED);
+        return $this->updateStatus($purchaseOrder, $input);
     }
 
     /**
