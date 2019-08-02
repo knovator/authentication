@@ -190,7 +190,7 @@ class YarnController extends Controller
         $yarnOrder->load([
             'threads.threadColor.thread:id,name,denier,company_name',
             'threads.threadColor.color:id,name,code',
-            'customer:id,first_name,last_name',
+            'customer.state:id,name,code,gst_code',
             'status:id,name,code'
         ]);
 

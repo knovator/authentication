@@ -40,8 +40,7 @@ class YarnOrderRepository extends BaseRepository
     public function getYarnOrderList($input, $export = false) {
         $this->applyCriteria();
         $orders = $this->model->with([
-            'threadQty',
-            'threads.threadColor.thread',
+            'threads.threadColor.thread:id,name,denier,company_name',
             'threads.threadColor.color:id,name,code',
             'customer.state:id,name,code,gst_code',
             'status:id,name,code'
