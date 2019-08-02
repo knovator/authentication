@@ -150,7 +150,7 @@ class YarnController extends Controller
                       ->delete();
         }
         $yarnOrder->orderStocks()->delete();
-        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::SO_PENDING)->id;
+        $input['status_id'] = $yarnOrder->status_id;
         $this->storeStockOrders($yarnOrder, $input);
     }
 
@@ -252,7 +252,7 @@ class YarnController extends Controller
      * @throws Exception
      */
     private function updateSOPENDINGStatus(YarnOrder $yarnOrder, $input) {
-        return $this->updateStatus($yarnOrder, $input, MasterConstant::SO_PENDING);
+        return $this->updateStatus($yarnOrder, $input);
 
     }
 
@@ -263,7 +263,7 @@ class YarnController extends Controller
      * @throws Exception
      */
     private function updateSOCANCELEDStatus(YarnOrder $yarnOrder, $input) {
-        return $this->updateStatus($yarnOrder, $input, MasterConstant::SO_CANCELED);
+        return $this->updateStatus($yarnOrder, $input);
     }
 
 
@@ -279,7 +279,7 @@ class YarnController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
         try {
-            return $this->updateStatus($yarnOrder, $input, MasterConstant::SO_DELIVERED);
+            return $this->updateStatus($yarnOrder, $input);
         } catch (Exception $exception) {
             Log::error($exception);
 
@@ -295,8 +295,8 @@ class YarnController extends Controller
      * @return JsonResponse
      * @throws Exception
      */
-    private function updateStatus(YarnOrder $yarnOrder, $input, $code) {
-        $input['status_id'] = $this->masterRepository->findByCode($code)->id;
+    private function updateStatus(YarnOrder $yarnOrder, $input) {
+        $input['status_id'] = $this->masterRepository->findByCode($input['code'])->id;
         try {
             DB::beginTransaction();
             $yarnOrder->update($input);
