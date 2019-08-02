@@ -36,6 +36,7 @@ class YarnOrderRepository extends BaseRepository
      * @param      $relations
      * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model|\Illuminate\Database\Query\Builder|mixed
      * @throws RepositoryException
+     * @throws \Exception
      */
     public function getYarnOrderList($input, $relations, $export = false) {
         $this->applyCriteria();
