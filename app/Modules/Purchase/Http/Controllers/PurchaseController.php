@@ -200,7 +200,7 @@ class PurchaseController extends Controller
 
             return $this->{$method}($purchaseOrder, $request->all());
         } catch (Exception $exception) {
-            Log::error('Unable to find status method: ' . $status);
+            Log::error($exception);
 
             return $this->sendResponse(null, __('messages.something_wrong'),
                 HTTPCode::UNPROCESSABLE_ENTITY);
@@ -216,10 +216,7 @@ class PurchaseController extends Controller
      * @throws Exception
      */
     private function updatePOPENDINGStatus(PurchaseOrder $purchaseOrder, $input) {
-        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::PO_PENDING)->id;
-        $this->storeStockOrders($purchaseOrder, $input);
-
-        return $this->updateStatus($purchaseOrder, $input);
+        return $this->updateStatus($purchaseOrder, $input, MasterConstant::PO_PENDING);
 
     }
 
@@ -230,23 +227,25 @@ class PurchaseController extends Controller
      * @return JsonResponse
      * @throws Exception
      */
-    private function updateStatus(PurchaseOrder $purchaseOrder, $input) {
+    private function updateStatus(PurchaseOrder $purchaseOrder, $input, $code) {
+        $input['status_id'] = $this->masterRepository->findByCode($code)->id;
         try {
+            DB::beginTransaction();
             $purchaseOrder->update($input);
-            $purchaseOrder->fresh();
-            $purchaseOrder->load([
+            $purchaseOrder->orderStocks()->update(['status_id' => $input['status_id']]);
+            DB::commit();
+
+            return $this->sendResponse($this->makeResource($purchaseOrder->fresh([
                 'threads.threadColor.thread',
                 'threads.threadColor.color',
                 'customer',
                 'status'
-            ]);
-
-            return $this->sendResponse($this->makeResource($purchaseOrder),
+            ])),
                 __('messages.updated', ['module' => 'Status']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
+            DB::rollBack();
             Log::error($exception);
-
             throw $exception;
         }
     }
@@ -263,17 +262,9 @@ class PurchaseController extends Controller
             return $this->sendResponse(null, 'Challan Number is must be required',
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
-        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::PO_DELIVERED)->id;
         try {
-            DB::beginTransaction();
-            $purchaseOrder->orderStocks()->delete();
-            $this->storeStockOrders($purchaseOrder, $input);
-            $response = $this->updateStatus($purchaseOrder, $input);
-            DB::commit();
-
-            return $response;
+            return $this->updateStatus($purchaseOrder, $input, MasterConstant::PO_DELIVERED);
         } catch (Exception $exception) {
-            DB::rollBack();
             Log::error($exception);
 
             return $this->sendResponse(null, __('messages.something_wrong'),
@@ -308,10 +299,7 @@ class PurchaseController extends Controller
      * @throws Exception
      */
     private function updatePOCANCELEDStatus(PurchaseOrder $purchaseOrder, $input) {
-        $purchaseOrder->orderStocks()->delete();
-        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::PO_CANCELED)->id;
-
-        return $this->updateStatus($purchaseOrder, $input);
+        return $this->updateStatus($purchaseOrder, $input, MasterConstant::PO_CANCELED);
     }
 
     /**

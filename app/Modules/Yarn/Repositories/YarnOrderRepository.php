@@ -33,18 +33,13 @@ class YarnOrderRepository extends BaseRepository
     /**
      * @param      $input
      * @param bool $export
+     * @param      $relations
      * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model|\Illuminate\Database\Query\Builder|mixed
      * @throws RepositoryException
-     * @throws \Exception
      */
-    public function getYarnOrderList($input, $export = false) {
+    public function getYarnOrderList($input, $relations, $export = false) {
         $this->applyCriteria();
-        $orders = $this->model->with([
-            'threads.threadColor.thread:id,name,denier,company_name',
-            'threads.threadColor.color:id,name,code',
-            'customer.state:id,name,code,gst_code',
-            'status:id,name,code'
-        ])->select('yarn_sales_orders.*');
+        $orders = $this->model->with($relations)->select('yarn_sales_orders.*');
 
 
         if (isset($input['start_date'])) {
