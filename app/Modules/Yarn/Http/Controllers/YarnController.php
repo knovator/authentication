@@ -19,7 +19,10 @@ use Illuminate\Http\Request;
 use Knovators\Masters\Repository\MasterRepository;
 use Knovators\Support\Helpers\HTTPCode;
 use Log;
+use Maatwebsite\Excel\Facades\Excel;
 use Str;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use App\Modules\Yarn\Exports\YarnOrder as ExportYarnOrder;
 
 /**
  * Class YarnController
@@ -316,6 +319,38 @@ class YarnController extends Controller
             Log::error($exception);
             throw $exception;
         }
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse|BinaryFileResponse
+     */
+    public function exportCsv(Request $request) {
+        try {
+            $purchases = $this->yarnOrderRepository->getYarnOrderList($request->all(),
+                $this->commonRelations(), true);
+            if (($purchases = collect($purchases->getData()->data))->isEmpty()) {
+                return $this->sendResponse(null,
+                    __('messages.can_not_export', ['module' => 'Sales orders']),
+                    HTTPCode::OK);
+            }
+
+            return $this->downloadCsv($purchases);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
+
+    /**
+     * @param $purchases
+     * @return BinaryFileResponse
+     */
+    private function downloadCsv($purchases) {
+        return Excel::download(new ExportYarnOrder($purchases),
+            'orders.xlsx');
     }
 
 

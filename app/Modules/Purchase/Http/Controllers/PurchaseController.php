@@ -22,7 +22,7 @@ use App\Support\DestroyObject;
 use Log;
 use Maatwebsite\Excel\Facades\Excel;
 use Str;
-use App\Modules\Requirement\Http\Exports\PurchaseOrder as ExportPurchaseOrder;
+use App\Modules\Purchase\Http\Exports\PurchaseOrder as ExportPurchaseOrder;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
