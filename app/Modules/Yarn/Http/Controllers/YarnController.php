@@ -5,6 +5,7 @@ namespace App\Modules\Yarn\Http\Controllers;
 use App\Constants\GenerateNumber;
 use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
+use App\Modules\Yarn\Exports\YarnOrder as ExportYarnOrder;
 use App\Modules\Yarn\Http\Requests\CreateRequest;
 use App\Modules\Yarn\Http\Requests\StatusRequest;
 use App\Modules\Yarn\Http\Requests\UpdateRequest;
@@ -22,7 +23,6 @@ use Log;
 use Maatwebsite\Excel\Facades\Excel;
 use Str;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use App\Modules\Yarn\Exports\YarnOrder as ExportYarnOrder;
 
 /**
  * Class YarnController
@@ -116,9 +116,8 @@ class YarnController extends Controller
             $yarnOrder->update($input);
             $this->storeThreadDetails($yarnOrder = $yarnOrder->fresh(), $input);
             DB::commit();
-            $yarnOrder->load($this->commonRelations());
 
-            return $this->sendResponse($yarnOrder,
+            return $this->sendResponse($yarnOrder->load($this->commonRelations()),
                 __('messages.updated', ['module' => 'Sales Order']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -187,9 +186,7 @@ class YarnController extends Controller
      * @return JsonResponse
      */
     public function show(YarnOrder $yarnOrder) {
-        $yarnOrder->load($this->commonRelations());
-
-        return $this->sendResponse($yarnOrder,
+        return $this->sendResponse($yarnOrder->load($this->commonRelations()),
             __('messages.retrieved', ['module' => 'Sales Order']),
             HTTPCode::OK);
     }
@@ -306,12 +303,7 @@ class YarnController extends Controller
             $yarnOrder->orderStocks()->update(['status_id' => $input['status_id']]);
             DB::commit();
 
-            return $this->sendResponse($yarnOrder->fresh([
-                'threads.threadColor.thread',
-                'threads.threadColor.color',
-                'customer',
-                'status'
-            ]),
+            return $this->sendResponse($yarnOrder->fresh($this->commonRelations()),
                 __('messages.updated', ['module' => 'Status']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
