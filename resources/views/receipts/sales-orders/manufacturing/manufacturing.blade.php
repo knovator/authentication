@@ -62,8 +62,8 @@
                             <td>: {{$salesOrder->design->quality_name}}</td>
 
 
-                            <td class="text-left label">Designer No</td>
-                            <td>: {{$salesOrder->design->detail->designer_no}}</td>
+                            {{--                            <td class="text-left label">Designer No</td>--}}
+                            {{--                            <td>: {{$salesOrder->design->detail->designer_no}}</td>--}}
                         </tr>
                         </tbody>
                     </table>
