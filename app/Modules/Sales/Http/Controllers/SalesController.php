@@ -3,8 +3,8 @@
 namespace App\Modules\Sales\Http\Controllers;
 
 use App\Constants\GenerateNumber;
-use App\Constants\Master as MasterConstant;
 use App\Constants\Master;
+use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
 use App\Modules\Design\Repositories\DesignDetailRepository;
 use App\Modules\Sales\Http\Requests\AnalysisRequest;
@@ -22,6 +22,7 @@ use App\Modules\Stock\Repositories\StockRepository;
 use App\Modules\Thread\Constants\ThreadType;
 use App\Modules\Thread\Repositories\ThreadColorRepository;
 use App\Repositories\MasterRepository;
+use App\Support\DestroyObject;
 use App\Support\Formula;
 use App\Support\UniqueIdGenerator;
 use Barryvdh\Snappy\Facades\SnappyPdf;
@@ -30,14 +31,11 @@ use Exception;
 use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Knovators\Support\Helpers\HTTPCode;
-use App\Support\DestroyObject;
 use Log;
 use Prettus\Repository\Exceptions\RepositoryException;
 use Str;
-use View;
 
 /**
  * Class SalesController
