@@ -1,33 +1,33 @@
 <?php
 
-namespace App\Modules\Purchase\Models;
+namespace App\Modules\Yarn\Models;
 
+use App\Models\Master;
 use App\Modules\Customer\Models\Customer;
 use App\Modules\Stock\Models\Stock;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Knovators\Masters\Models\Master;
 use Knovators\Support\Traits\HasModelEvent;
 
 /**
- * Class PurchaseOrder
- * @package App\Modules\Purchase\Models
+ * Class YarnOrder
+ * @package App\Modules\Yarn\Models
  */
-class PurchaseOrder extends Model
+class YarnOrder extends Model
 {
 
     use SoftDeletes, HasModelEvent;
 
-    protected $table = 'purchase_orders';
+    protected $table = 'yarn_sales_orders';
 
     protected $fillable = [
         'order_no',
         'order_date',
         'customer_id',
         'status_id',
+        'challan_no',
         'created_by',
-        'deleted_by',
-        'challan_no'
+        'deleted_by'
     ];
 
 
@@ -35,7 +35,7 @@ class PurchaseOrder extends Model
         'created_by',
         'deleted_by',
         'deleted_at',
-//        'created_at',
+        //        'created_at',
         'updated_at'
     ];
 
@@ -43,7 +43,7 @@ class PurchaseOrder extends Model
     public static function boot() {
         parent::boot();
         self::creatingEvent();
-        static::deleting(function (PurchaseOrder $model) {
+        static::deleting(function (YarnOrder $model) {
             $model->threads()->delete();
             $model->orderStocks()->delete();
         });
@@ -55,19 +55,15 @@ class PurchaseOrder extends Model
      * @return mixed
      */
     public function threads() {
-        return $this->hasMany(PurchaseOrderThread::class, 'purchase_order_id', 'id');
+        return $this->hasMany(YarnOrderThread::class, 'yarn_order_id', 'id');
     }
-
 
     /**
      * @return mixed
      */
-    public function threadQty() {
-        return $this->hasOne(PurchaseOrderThread::class, 'purchase_order_id', 'id')
-                    ->groupBy('purchase_order_id')
-                    ->selectRaw('sum(kg_qty) as total,purchase_order_id');
+    public function orderStocks() {
+        return $this->morphMany(Stock::class, 'order', 'order_type', 'order_id', 'id');
     }
-
 
     /**
      * @return mixed
@@ -83,11 +79,6 @@ class PurchaseOrder extends Model
         return $this->belongsTo(Master::class, 'status_id', 'id');
     }
 
-    /**
-     * @return mixed
-     */
-    public function orderStocks() {
-        return $this->morphMany(Stock::class, 'order', 'order_type', 'order_id', 'id');
-    }
+
 
 }

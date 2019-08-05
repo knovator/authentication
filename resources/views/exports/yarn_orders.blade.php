@@ -13,7 +13,9 @@
     </thead>
     <tbody>
     @foreach($orders as $orderKey => $order)
+
         @if($order->customer)
+
             <tr>
                 <td rowspan="4">{{$orderKey + 1}}</td>
                 <td rowspan="4">{{$order->order_no}}</td>
