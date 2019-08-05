@@ -557,7 +557,11 @@ class DeliveryController extends Controller
         $delivery->load([
             'partialOrders' => function ($partialOrders) {
                 /** @var Builder $partialOrders */
-                $partialOrders->with('orderRecipe.recipe')->orderByDesc('id');
+                $partialOrders->with([
+                    'orderRecipe.recipe.fiddles' => function ($fiddles) {
+                        $fiddles->where('recipes_fiddles.fiddle_no', '=', 1)->with('color');
+                    }
+                ])->orderByDesc('id');
             }
         ]);
         if ($delivery->partialOrders->isEmpty()) {
