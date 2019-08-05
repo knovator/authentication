@@ -8,9 +8,7 @@
 <main>
     <div class="receipt-heading text-center">{{($isInvoice) ? 'TAX INVOICE':'ORDER FORM'}}</div>
     <div class="text-center">
-        <small
-        >(Invoice For supply of goods u/s 31 of GST Act, 2017 read with Rule 1
-            of tax invoice rules 2017)
+        <small>(Invoice For supply of goods u/s 31 of GST Act, 2017 read with Rule 6 of tax invoice rules 2017)
         </small>
     </div>
 
@@ -183,7 +181,8 @@
             <td><b>TOTAL : </b></td>
             <td class="text-center"><b>{{$totalQuantity}}</b></td>
             <td class="text-center">{{$salesOrder->cost_per_meter}}</td>
-            <td class="text-right d-flex"><b>{{$price}}</b></td>
+            <td class="text-right d-flex"><img class="rupee-sign" src="{{asset('img/rupee.png')}}"><b>{{$price}}</b>
+            </td>
         </tr>
         </tfoot>
     </table>
@@ -204,59 +203,46 @@
                     <table class="no-border tnc-table low-space-table">
                         <tbody>
                         <tr>
-                            <td
-                                style="
-    padding: 0;
-"
-                            >
-                                1) Subject To SURAT Jurisdiction E. &amp; O.E.
+                            <td>1) Payment will be accepted only by A/C, Payee's Draft/ Cheque.
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                2) Payment Will be accepted only By A/c, Payer's Draft /
-                                Cheque.
+                                2) Goods sold will not be taken back.
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                3) Any Complaint regarding goods should be re[ported in
-                                writing within 24 ours of the receipt of goods.
+                                3) Any complaint regarding goods should be reported in writing within 24 hours of the
+                                receipt of goods.
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                4) No responsibility for ay defect in yarn after weaving
-                                &amp; Processing.
+                                4) Interest will be charged @24% p.a.
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                5) Goods Sold will not be taken back.
+                                5) The goods are dispatched on your account at your risk & responsibility.
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                6) The Goods are dispatched on your account and at about
-                                risk &amp; responsibility.
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                7) Use Yarn Batch Wise Only.
+                                6) Subject to Surat Jurisdiction E. & O.E.
                             </td>
                         </tr>
                         </tbody>
-                        <tfoot>
-                        <tr>
-                            <td>
-                                <b
-                                >Received the above goods in good condition and order
-                                    along with transpoter invoice copy.</b
-                                >
-                            </td>
-                        </tr>
-                        </tfoot>
+{{--                        <tfoot>--}}
+{{--                        <tr>--}}
+{{--                            <td>--}}
+{{--                                <b--}}
+{{--                                >Received the above goods in good condition and order--}}
+{{--                                    along with transpoter invoice copy.</b--}}
+{{--                                >--}}
+{{--                            </td>--}}
+{{--                        </tr>--}}
+{{--                        </tfoot>--}}
                     </table>
                 </div>
             </td>
@@ -300,7 +286,9 @@
                                 GRAND TOTAL :
                             </td>
                             <td class="text-right"
-                                style="border-bottom: 0;    float: right;">{{$price = $price + (($price / 100) * 5) }}</td>
+                                style="border-bottom: 0;    float: right;"><img class="rupee-sign"
+                                                                                src="{{asset('img/rupee.png')}}">{{$price = $price + (($price / 100) * 5) }}
+                            </td>
                         </tr>
                         <tr></tr>
                         <tr></tr>
@@ -322,10 +310,9 @@
         <tr>
             <td class="declaration" style="border-left: 0">
                 <p>
-                    Certified that the perticulars given above are true amd correct and
-                    the amount indicated represents tje price actually charged and that
-                    there is no flow of additional consideration directly or indirectly
-                    from the buyer.
+                    Certified that the particulars given above are true and the correct and the amount indicated
+                    represents the price actually charged and that there is no flow of additional consideration directly
+                    or indirectly from the buyer.
                 </p>
                 <br/>
                 <b>Prepared By:</b>
