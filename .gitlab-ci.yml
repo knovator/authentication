@@ -56,6 +56,6 @@ deploy_production:
       - chmod 600 ~/.ssh/$ID_RSA_NAME
       - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
   script:
-    - ssh -i "~/.ssh/$ID_RSA_NAME" "$PROD_USER_NAME"@"$PROD_SERVER_HOST" "cd $PROD_PATH && git checkout master && git pull origin master && composer install && composer dump-autoload && php artisan migrate && php artisan module:optimize && php artisan queue:restart && exit"
+    - ssh -i "~/.ssh/$ID_RSA_NAME" "$PROD_USER_NAME"@"$PROD_SERVER_HOST" "cd $PROD_PATH && git checkout master && git pull origin master && composer install && php artisan migrate && php artisan module:optimize && php artisan store:routes && php artisan db:seed && php artisan queue:restart && exit"
   only:
     - master
