@@ -39,22 +39,44 @@
                 <table class="auto-layout right-bordered">
                     <tbody>
                     <tr>
-                        <td>
-                            <div>
-                                <b>{{ (!is_null($salesOrder->manufacturingCompany)) ? $salesOrder->manufacturingCompany->name:'JENNY TEXO FAB'}}</b>
-                            </div>
-                            <small>
-                                PLOT NO: M-3/6-7-8, ROAD NO: 23, VIBHAG-2, HOJIWALA IND,
-                                ESTATE, SACHIN, SURAT.
-                            </small>
-                            <div>
-                                SURAT - 394230
-                            </div>
-                            <div>INDIA</div>
-                            <div><b>PHONE NO :</b> 98256 57870, 99099 11500</div>
-                            <div><b>State :</b> GUJARAT &amp; <b>Code :</b> 24</div>
-                            <div><b>GST NO :</b> 24AAPFMN352G13AZ8</div>
-                        </td>
+                        @if(!is_null($salesOrder->manufacturingCompany))
+                            <td>
+                                <div>
+                                    <b>{{$salesOrder->manufacturingCompany->name}}</b>
+                                </div>
+                                <small>
+                                    {{$salesOrder->manufacturingCompany->address}}
+                                    , {{$salesOrder->manufacturingCompany->city}}.
+                                </small>
+                                <div>
+                                    {{$salesOrder->manufacturingCompany->city.' - '.$salesOrder->manufacturingCompany->pin_code}}
+                                </div>
+                                <div>{{$salesOrder->manufacturingCompany->country}}</div>
+                                <div><b>PHONE NO :</b> {{$salesOrder->manufacturingCompany->phone}}</div>
+                                <div><b>State :</b> {{$salesOrder->manufacturingCompany->state}} &amp; <b>Code
+                                        :</b> {{$salesOrder->manufacturingCompany->state_code}}</div>
+                                <div><b>GST NO :</b> {{$salesOrder->manufacturingCompany->gst_no}}</div>
+                            </td>
+                        @else
+                            <td>
+                                <div>
+                                    <b>JENNY TEXO FAB</b>
+                                </div>
+                                <small>
+                                    PLOT NO: M-3/6-7-8, ROAD NO: 23, VIBHAG-2, HOJIWALA IND,
+                                    ESTATE, SACHIN, SURAT.
+                                </small>
+                                <div>
+                                    SURAT - 394230
+                                </div>
+                                <div>INDIA</div>
+                                <div><b>PHONE NO :</b> 98256 57870, 99099 11500</div>
+                                <div><b>State :</b> GUJARAT &amp; <b>Code :</b> 24</div>
+                                <div><b>GST NO :</b> 24AAPFMN352G13AZ8</div>
+                            </td>
+                        @endif
+
+
                         <td>
                             <!--                        <b class="underlined">Customers Details</b>-->
                             <div><b>{{strtoupper($salesOrder->customer->full_name)}}</b></div>
@@ -66,7 +88,7 @@
                             </div>
                             <div><b>PHONE NO :</b> {{$salesOrder->customer->phone}}</div>
                             <div><b>State :</b> {{strtoupper($salesOrder->customer->state->name)}} {{--&amp; <b>Code :</b>
-                                24--}}
+                                 24--}}
                             </div>
                             <div><b>GST NO :</b> {{strtoupper($salesOrder->customer->gst_no)}}</div>
                             {{--                            <div><b>PAN NO :</b> AAPFM7520G</div>--}}
@@ -138,7 +160,8 @@
                     <tr>
                         <td class="sr-no text-left"></td>
                         <td>
-                            {{$key.'.'.($partialOrderKey + 1).') '.\Carbon\Carbon::parse($partialOrder->delivery->delivery_date)->format('d, M Y')}}
+                            {{$key.'.'.($partialOrderKey + 1).')
+                           '.\Carbon\Carbon::parse($partialOrder->delivery->delivery_date)->format('d, M Y')}}
                             <small><em>({{$partialOrder->delivery->delivery_no}})</em></small>
                         </td>
                         <td class="text-center">{{$partialOrder->total_meters}}</td>
@@ -308,7 +331,8 @@
                 <b>Prepared By:</b>
             </td>
             <td class="signature" style="vertical-align: top">
-                <span class="text-center -agency"><b>For, JENNY/SIDDHI TEXO FAB</b></span>
+                <span
+                    class="text-center -agency"><b>For, {{ (!is_null($salesOrder->manufacturingCompany)) ? $salesOrder->manufacturingCompany->name:'JENNY TEXO FAB'}}</b></span>
                 <br/>
                 <br/>
                 <br/>

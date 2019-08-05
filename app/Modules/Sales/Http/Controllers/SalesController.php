@@ -63,6 +63,7 @@ class SalesController extends Controller
      * @param MasterRepository        $masterRepository
      * @param DesignDetailRepository  $designDetailRepository
      * @param RecipePartialRepository $recipePartialOrderRepository
+     * @param ThreadColorRepository   $threadColorRepository
      */
     public function __construct(
         SalesOrderRepository $salesOrderRepository,

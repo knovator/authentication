@@ -17,6 +17,15 @@ class ManufacturingCompany extends Model
     protected $fillable = [
         'id',
         'name',
+        'address',
+        'country',
+        'state',
+        'state_code',
+        'city',
+        'pin_code',
+        'phone',
+        'gst_no',
+
     ];
 
     public $timestamps = false;
