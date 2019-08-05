@@ -135,6 +135,10 @@ img.preview {
     display: block;
 }
 
+.rupee-sign{
+    margin-bottom: -4px;
+}
+
 .details-box {
     min-width: 50%;
     padding: 5px;

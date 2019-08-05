@@ -27,6 +27,7 @@ class SalesOrder extends JsonResource
             'id'                   => $this->id,
             'order_no'             => $this->order_no,
             'cost_per_meter'       => $this->cost_per_meter,
+            'customer_po_number'   => $this->customer_po_number,
             'order_date'           => $this->order_date,
             'delivery_date'        => $this->delivery_date,
             'customer'             => new CustomerResource($this->whenLoaded('customer')),

@@ -389,7 +389,7 @@ class DeliveryController extends Controller
         $method = 'update' . Str::studly($status) . 'Status';
         $delivery = $this->deliveryRepository->find($request->get('delivery_id'));
         if (method_exists($this, $method)) {
-            return $this->{$method}($delivery);
+            return $this->{$method}($delivery, $request->all());
         }
         Log::error('Unable to find status method: ' . $status);
 
@@ -401,11 +401,12 @@ class DeliveryController extends Controller
 
     /**
      * @param Delivery $delivery
+     * @param          $input
      * @return JsonResponse
      */
-    private function updateSOPENDINGStatus(Delivery $delivery) {
+    private function updateSOPENDINGStatus(Delivery $delivery, $input) {
         try {
-            return $this->updateStatus($delivery, MasterConstant::SO_PENDING);
+            return $this->updateStatus($delivery, MasterConstant::SO_PENDING, $input);
         } catch (Exception $exception) {
             Log::error($exception);
 
@@ -419,10 +420,11 @@ class DeliveryController extends Controller
 
     /**
      * @param Delivery $delivery
+     * @param          $input
      * @return JsonResponse
      * @throws Exception
      */
-    private function updateSOCANCELEDStatus(Delivery $delivery) {
+    private function updateSOCANCELEDStatus(Delivery $delivery, $input) {
         /** @var Master $status */
         $status = $this->findMasterIdByCode(MasterConstant::SO_CANCELED);
         try {
@@ -436,7 +438,7 @@ class DeliveryController extends Controller
 
             DB::commit();
 
-            return $this->sendResponse($status,
+            return $this->sendResponse($delivery->fresh(['status:id,name,code']),
                 __('messages.updated', ['module' => 'Status']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -462,11 +464,12 @@ class DeliveryController extends Controller
 
     /**
      * @param Delivery $delivery
+     * @param          $input
      * @return JsonResponse
      */
-    private function updateSODELIVEREDStatus(Delivery $delivery) {
+    private function updateSODELIVEREDStatus(Delivery $delivery, $input) {
         try {
-            return $this->updateStatus($delivery, MasterConstant::SO_DELIVERED);
+            return $this->updateStatus($delivery, MasterConstant::SO_DELIVERED, $input);
         } catch (Exception $exception) {
             Log::error($exception);
 
@@ -478,11 +481,12 @@ class DeliveryController extends Controller
 
     /**
      * @param Delivery $delivery
+     * @param          $input
      * @return JsonResponse
      */
-    private function updateSOMANUFACTURINGStatus(Delivery $delivery) {
+    private function updateSOMANUFACTURINGStatus(Delivery $delivery, $input) {
         try {
-            return $this->updateStatus($delivery, MasterConstant::SO_MANUFACTURING);
+            return $this->updateStatus($delivery, MasterConstant::SO_MANUFACTURING, $input);
         } catch (Exception $exception) {
             Log::error($exception);
 
@@ -496,10 +500,11 @@ class DeliveryController extends Controller
     /**
      * @param Delivery $delivery
      * @param          $code
+     * @param          $input
      * @return JsonResponse
      * @throws Exception
      */
-    private function updateStatus(Delivery $delivery, $code) {
+    private function updateStatus(Delivery $delivery, $code, $input) {
         $status = $this->findMasterIdByCode($code);
         try {
             /** @var Master $status */
@@ -557,7 +562,11 @@ class DeliveryController extends Controller
         $delivery->load([
             'partialOrders' => function ($partialOrders) {
                 /** @var Builder $partialOrders */
-                $partialOrders->with('orderRecipe.recipe')->orderByDesc('id');
+                $partialOrders->with([
+                    'orderRecipe.recipe.fiddles' => function ($fiddles) {
+                        $fiddles->where('recipes_fiddles.fiddle_no', '=', 1)->with('color');
+                    }
+                ])->orderByDesc('id');
             }
         ]);
         if ($delivery->partialOrders->isEmpty()) {
