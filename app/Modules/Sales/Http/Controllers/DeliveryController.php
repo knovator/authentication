@@ -436,7 +436,7 @@ class DeliveryController extends Controller
 
             DB::commit();
 
-            return $this->sendResponse($status,
+            return $this->sendResponse($delivery->fresh(['status:id,name,code']),
                 __('messages.updated', ['module' => 'Status']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
