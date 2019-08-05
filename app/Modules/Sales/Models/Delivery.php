@@ -25,7 +25,8 @@ class Delivery extends Model
         'sales_order_id',
         'delivery_no',
         'delivery_date',
-        'status_id'
+        'status_id',
+        'bill_no',
     ];
 
     protected $hidden = [
