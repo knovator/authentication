@@ -100,8 +100,8 @@
                 <table>
                     <tbody>
                     <tr>
-                        <td class="text-left label"><b>DESIGN NAME</b>: {{$salesOrder->design->quality_name}}</td>
                         <td class="text-left label"><b>ORDER NO</b>: {{$salesOrder->order_no}}</td>
+                        <td class="text-left label"><b>DESIGN NAME</b>: {{$salesOrder->design->quality_name}}</td>
                         <td class="text-left label"><b>ORDER
                                 DATE</b>: {{\Carbon\Carbon::parse($salesOrder->order_date)->format('d M Y')}}</td>
                     </tr>
@@ -117,7 +117,7 @@
         <thead>
         <tr>
             <th class="sr-no text-left">#</th>
-            <th class="text-left">Recipes</th>
+            <th class="text-left">Colors</th>
             <th>Quantity (Mtr.)</th>
             <th>Rate (INR)</th>
             <th class="text-right">Amount</th>
@@ -145,7 +145,7 @@
             @endphp
             <tr>
                 <td class="sr-no text-left"><b>{{$key}}</b></td>
-                <td><b>{{$orderRecipe->recipe->name}}</b></td>
+                <td><b>{{$orderRecipe->recipe->fiddles->first()->color->name}}</b></td>
                 <td class="text-center"><b>{{$orderRecipe->total_meters}}</b>
                     @if($isInvoice && $partialQuantity)
                         <span style="font-size: 12px">({{$partialQuantity}})</span>
@@ -183,7 +183,7 @@
             <td><b>TOTAL : </b></td>
             <td class="text-center"><b>{{$totalQuantity}}</b></td>
             <td class="text-center">{{$salesOrder->cost_per_meter}}</td>
-            <td class="text-right"><b>{{$price}}</b></td>
+            <td class="text-right d-flex"><b>{{$price}}</b></td>
         </tr>
         </tfoot>
     </table>

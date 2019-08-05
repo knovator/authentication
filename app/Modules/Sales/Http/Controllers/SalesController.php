@@ -37,6 +37,7 @@ use App\Support\DestroyObject;
 use Log;
 use Prettus\Repository\Exceptions\RepositoryException;
 use Str;
+use View;
 
 /**
  * Class SalesController
@@ -486,7 +487,12 @@ class SalesController extends Controller
         $salesOrder->load([
             'orderRecipes'               => function ($orderRecipes) {
                 /** @var Builder $orderRecipes */
-                $orderRecipes->orderBy('id')->with('recipe');
+                $orderRecipes->orderBy('id')->with([
+                    'recipe.fiddles' => function ($fiddles) {
+                        /** @var Builder $fiddles */
+                        $fiddles->where('recipes_fiddles.fiddle_no', '=', 1)->with('color');
+                    }
+                ]);
             },
             'orderRecipes.partialOrders' => function ($partialOrders) use ($statusId) {
                 /** @var Builder $partialOrders */
@@ -510,6 +516,10 @@ class SalesController extends Controller
             compact('salesOrder', 'isInvoice'));
 
         return $pdf->download($salesOrder->order_no . ".pdf");
+
+//        return view('receipts.sales-orders.main_summary.summary',
+//            compact('salesOrder', 'isInvoice'));
+
     }
 
 
