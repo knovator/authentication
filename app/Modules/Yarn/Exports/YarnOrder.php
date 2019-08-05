@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Purchase\Http\Exports;
+namespace App\Modules\Yarn\Exports;
 
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
@@ -11,10 +11,10 @@ use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Exception;
 
 /**
- * Class App\Modules\Purchase\Http\Exports
- * @package App\Exports
+ * Class YarnOrder
+ * @package App\Modules\Yarn\Exports
  */
-class PurchaseOrder implements FromView, ShouldAutoSize, WithEvents
+class YarnOrder implements FromView, ShouldAutoSize, WithEvents
 {
 
     protected $orders;
@@ -31,7 +31,7 @@ class PurchaseOrder implements FromView, ShouldAutoSize, WithEvents
      * @return View
      */
     public function view() : View {
-        return view('exports.purchase_orders', [
+        return view('exports.yarn_orders', [
             'orders' => $this->orders,
         ]);
     }

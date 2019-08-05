@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Modules\Purchase\Models\PurchaseOrder;
 use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Thread\Models\ThreadColor;
+use App\Modules\Yarn\Models\YarnOrder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
@@ -23,9 +24,10 @@ class AppServiceProvider extends ServiceProvider
 
 
         Relation::morphMap([
+            'yarn'         => YarnOrder::class,
             'purchase'     => PurchaseOrder::class,
             'sales'        => SalesOrder::class,
-            'thread_color' => ThreadColor::class
+            'thread_color' => ThreadColor::class,
         ]);
     }
 

@@ -132,7 +132,7 @@ class SalesOrder extends Model
      * @return mixed
      */
     public function orderStocks() {
-        return $this->morphMany(Stock::class, 'order', 'order_type', 'order_id');
+        return $this->morphMany(Stock::class, 'order', 'order_type', 'order_id', 'id');
     }
 
     /**

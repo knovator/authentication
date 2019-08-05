@@ -54,6 +54,10 @@ class UniqueIdSeeder extends Seeder
                 'code'   => 'DELIVERY',
                 'prefix' => 'DN'
             ],
+            4 => [
+                'code'   => 'YARN_SALES',
+                'prefix' => 'YNSO'
+            ],
         ];
     }
 }
