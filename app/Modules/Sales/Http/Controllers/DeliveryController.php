@@ -510,7 +510,7 @@ class DeliveryController extends Controller
             /** @var Master $status */
             $input['status_id'] = $status->id;
             DB::beginTransaction();
-            $delivery->orderStocks()->update($input);
+            $delivery->orderStocks()->update(['status_id' => $status->id]);
             $delivery->update($input);
             DB::commit();
 
