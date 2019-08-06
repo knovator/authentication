@@ -81,6 +81,16 @@ class SalesOrder extends Model
     /**
      * @return mixed
      */
+    public function manufacturingMeters() {
+        return $this->morphMany(Stock::class, 'order', 'order_type', 'order_id', 'id')
+                    ->selectRaw('SUM(total) as total,order_type,order_id')
+                    ->groupBy('order_id', 'order_type');
+    }
+
+
+    /**
+     * @return mixed
+     */
     public function deliveries() {
         return $this->hasMany(Delivery::class, 'sales_order_id', 'id');
     }

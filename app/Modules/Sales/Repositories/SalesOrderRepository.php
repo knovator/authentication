@@ -42,8 +42,9 @@ class SalesOrderRepository extends BaseRepository
             'design:id,design_no,quality_name',
             'deliveries:id,delivery_no,delivery_date,sales_order_id',
             'recipeMeters',
-        ])->select('sales_orders.*'))->make(true);
+        ])->with('manufacturingMeters')->select('sales_orders.*'))->make(true);
         $this->resetModel();
+
         return $orders;
     }
 
