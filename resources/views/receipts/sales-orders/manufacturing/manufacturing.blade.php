@@ -44,8 +44,8 @@
                                 >
                                 {{$machine->threadColor->thread->name}} ({{$machine->threadColor->color->name}})
                             </td>
-                            <td class="text-left label">Reed</td>
-                            <td>: {{$salesOrder->design->detail->reed}}</td>
+                            <td class="text-left label">Design Name</td>
+                            <td>: {{$salesOrder->design->quality_name}}</td>
                         </tr>
                         <tr>
                             <td class="text-left label">Delivery Date</td>
@@ -58,12 +58,8 @@
                                 : {{$salesOrder->design->detail->pick_on_loom}} {{($salesOrder->design->detail->creming)?' - Creming':''}}</td>
                         </tr>
                         <tr>
-                            <td class="text-left label">Design Name</td>
-                            <td>: {{$salesOrder->design->quality_name}}</td>
-
-
-                            {{--                            <td class="text-left label">Designer No</td>--}}
-                            {{--                            <td>: {{$salesOrder->design->detail->designer_no}}</td>--}}
+                            <td class="text-left label">Worker Name</td>
+                            <td>:</td>
                         </tr>
                         </tbody>
                     </table>
