@@ -261,6 +261,7 @@ class DesignController extends Controller
         try {
             $designs = $this->designRepository->getDesignList();
 
+
             return $this->sendResponse($designs,
                 __('messages.retrieved', ['module' => 'Designs']),
                 HTTPCode::OK);
@@ -268,7 +269,7 @@ class DesignController extends Controller
             Log::error($exception);
 
             return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY);
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
     }
 
@@ -308,6 +309,7 @@ class DesignController extends Controller
             'mainImage.file'
         ]);
         $image = SnappyPdf::loadView('receipts.design.design', compact('design'));
+
         return $image->download($design->design_no . ".pdf");
 //        return view('receipts.design.design',compact('design'));
 

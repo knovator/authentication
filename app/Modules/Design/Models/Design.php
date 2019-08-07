@@ -116,7 +116,7 @@ class Design extends Model
             'design_beam_id', 'id', 'id')
                     ->join('recipes', 'recipes.id', '=', 'beams_recipes.recipe_id')
                     ->selectRaw('recipes.name')
-                    ->groupBy(DB::raw('recipes.name'));
+                    ->groupBy(DB::raw('recipes.name,design_id'));
     }
 
 }
