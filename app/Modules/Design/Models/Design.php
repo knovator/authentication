@@ -65,6 +65,15 @@ class Design extends Model
     /**
      * @return mixed
      */
+    public function recipes() {
+        return $this->hasManyThrough(BeamRecipe::class, DesignBeam::class, 'design_id',
+            'design_beam_id', 'id', 'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
     public function images() {
         return $this->hasMany(DesignImage::class, 'design_id', 'id');
     }
@@ -104,7 +113,7 @@ class Design extends Model
      */
     public function beamRecipes() {
         return $this->hasManyThrough(BeamRecipe::class, DesignBeam::class, 'design_id',
-            'design_beam_id', 'id','id')
+            'design_beam_id', 'id', 'id')
                     ->join('recipes', 'recipes.id', '=', 'beams_recipes.recipe_id')
                     ->selectRaw('recipes.name')
                     ->groupBy(DB::raw('recipes.name'));
