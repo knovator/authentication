@@ -30,7 +30,6 @@ class DesignRepository extends BaseRepository
         return Design::class;
     }
 
-
     /**
      * @return mixed
      * @throws RepositoryException
