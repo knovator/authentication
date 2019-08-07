@@ -261,6 +261,8 @@ class DesignController extends Controller
         try {
             $designs = $this->designRepository->getDesignList();
 
+
+
             return $this->sendResponse($designs,
                 __('messages.retrieved', ['module' => 'Designs']),
                 HTTPCode::OK);
