@@ -13,6 +13,7 @@ use App\Modules\Design\Models\Design;
 use App\Modules\Design\Models\DesignBeam;
 use App\Modules\Design\Repositories\DesignDetailRepository;
 use App\Modules\Design\Repositories\DesignRepository;
+use App\Support\DestroyObject;
 use App\Support\UniqueIdGenerator;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use DB;
@@ -20,7 +21,6 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Knovators\Support\Helpers\HTTPCode;
-use App\Support\DestroyObject;
 use Log;
 use Symfony\Component\HttpFoundation\Response;
 

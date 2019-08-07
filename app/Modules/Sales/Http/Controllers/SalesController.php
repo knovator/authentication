@@ -294,8 +294,13 @@ class SalesController extends Controller
      * @return JsonResponse
      */
     public function index() {
+        $statuses = $this->masterRepository->findWhereIn('code',
+            [Master::SO_DELIVERED, Master::SO_MANUFACTURING], ['id', 'code'])
+                                           ->keyBy('code')
+                                           ->all();
         try {
-            $orders = $this->salesOrderRepository->getSalesOrderList();
+            $orders = $this->salesOrderRepository->getSalesOrderList($statuses[Master::SO_DELIVERED]['id'],
+                $statuses[Master::SO_MANUFACTURING]['id']);
 
             return $this->sendResponse($orders,
                 __('messages.retrieved', ['module' => 'Sales Orders']),
