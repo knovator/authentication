@@ -2,6 +2,7 @@
 
 namespace App\Modules\Sales\Models;
 
+use App\Exceptions\UnloadedRelationException;
 use App\Models\Master;
 use App\Modules\Customer\Models\Customer;
 use App\Modules\Design\Models\Design;
@@ -11,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Knovators\Support\Traits\HasModelEvent;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * Class SalesOrder
@@ -81,6 +83,32 @@ class SalesOrder extends Model
     /**
      * @return mixed
      */
+    public function totalMeters() {
+        return $this->hasOneThrough(RecipePartialOrder::class, Delivery::class, 'sales_order_id',
+            'delivery_id', 'id', 'id')
+                    ->selectRaw('SUM(total_meters) as total,delivery_id')
+                    ->groupBy('delivery_id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function manufacturingTotalMeters() {
+        return $this->totalMeters();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function deliveredTotalMeters() {
+        return $this->totalMeters();
+    }
+
+
+    /**
+     * @return mixed
+     */
     public function deliveries() {
         return $this->hasMany(Delivery::class, 'sales_order_id', 'id');
     }
@@ -143,5 +171,37 @@ class SalesOrder extends Model
         return $this->hasManyThrough(RecipePartialOrder::class, SalesOrderRecipe::class,
             'sales_order_id', 'sales_order_recipe_id', 'id', 'id');
     }
+
+
+    /**
+     * @return UnloadedRelationException
+     */
+    public function getPendingMetersAttribute() {
+
+        if (!$this->relationLoaded('recipeMeters')) {
+            return UnloadedRelationException::make($this, 'recipeMeters');
+        }
+
+        if (!$this->relationLoaded('manufacturingTotalMeters')) {
+            return UnloadedRelationException::make($this, 'manufacturingTotalMeters');
+        }
+
+        if (!$this->relationLoaded('deliveredTotalMeters')) {
+            return UnloadedRelationException::make($this, 'deliveredTotalMeters');
+        }
+
+        $total = $this->recipeMeters->total;
+
+        if (!is_null($this->manufacturingTotalMeters)) {
+            $total = $total - $this->manufacturingTotalMeters->total;
+        }
+
+        if (!is_null($this->deliveredTotalMeters)) {
+            $total = $total - $this->deliveredTotalMeters->total;
+        }
+
+        return $total;
+    }
+
 
 }
