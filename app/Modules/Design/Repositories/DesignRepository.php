@@ -40,7 +40,8 @@ class DesignRepository extends BaseRepository
         $designs = datatables()->of($this->model->select('designs.*')->with([
             'detail',
             'mainImage.file:id,uri'
-        ])->with('beamRecipes')->withCount(['beams', 'recipes as fiddles_count']))->make(true);
+        ])->with('beamRecipes')->withCount(['beams as total_beams', 'recipes as total_recipes']))
+                               ->make(true);
         $this->resetModel();
 
         return $designs;
