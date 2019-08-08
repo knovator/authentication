@@ -3,6 +3,7 @@
 namespace App\Modules\Recipe\Repositories;
 
 use App\Modules\Recipe\Models\Recipe;
+use Illuminate\Database\Eloquent\Builder;
 use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
 use Knovators\Support\Traits\StoreWithTrashedRecord;
@@ -37,6 +38,7 @@ class RecipeRepository extends BaseRepository
      * @param $input
      * @return mixed
      * @throws RepositoryException
+     * @throws \Exception
      */
     public function getRecipeList($input) {
         $this->applyCriteria();
@@ -58,6 +60,41 @@ class RecipeRepository extends BaseRepository
         $this->resetModel();
 
         return $recipes;
+    }
+
+
+    /**
+     * @param $input
+     * @return Recipe
+     * @throws RepositoryException
+     */
+    public function findUniqueNesRecipe($input) {
+        $this->applyCriteria();
+
+        $recipe = $this->model->where(['total_fiddles' => $input['total_fiddles']]);
+
+        if (isset($input['unchecked_id'])) {
+            /** @var Builder $recipe */
+            $recipe = $recipe->whereKeyNot($input['unchecked_id']);
+        }
+        foreach ($input['thread_color_ids'] as $fiddle) {
+            /** @var Builder $recipe */
+            $recipe = $recipe->whereExists(function ($query) use ($fiddle) {
+                /** @var Builder $query */
+                $query->from('recipes_fiddles')
+                      ->whereRaw('recipes.id = recipes_fiddles.recipe_id')
+                      ->where('fiddle_no', '=', $fiddle['fiddle_no'])
+                      ->where('thread_color_id', '=', $fiddle['thread_color_id']);
+
+            });
+        }
+
+        $recipe = $recipe->first();
+
+        $this->resetModel();
+
+        return $recipe;
+
     }
 
 
