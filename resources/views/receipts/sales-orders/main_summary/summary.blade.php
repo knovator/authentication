@@ -89,7 +89,7 @@
                                  24--}}
                             </div>
                             <div><b>GST NO :</b> {{strtoupper($salesOrder->customer->gst_no)}}</div>
-                            {{--                            <div><b>PAN NO :</b> AAPFM7520G</div>--}}
+                            <div><b>PO NO :</b> {{strtoupper($salesOrder->customer_po_number)}}</div>
                         </td>
                     </tr>
                     <tr></tr>
@@ -233,16 +233,16 @@
                             </td>
                         </tr>
                         </tbody>
-{{--                        <tfoot>--}}
-{{--                        <tr>--}}
-{{--                            <td>--}}
-{{--                                <b--}}
-{{--                                >Received the above goods in good condition and order--}}
-{{--                                    along with transpoter invoice copy.</b--}}
-{{--                                >--}}
-{{--                            </td>--}}
-{{--                        </tr>--}}
-{{--                        </tfoot>--}}
+                        {{--                        <tfoot>--}}
+                        {{--                        <tr>--}}
+                        {{--                            <td>--}}
+                        {{--                                <b--}}
+                        {{--                                >Received the above goods in good condition and order--}}
+                        {{--                                    along with transpoter invoice copy.</b--}}
+                        {{--                                >--}}
+                        {{--                            </td>--}}
+                        {{--                        </tr>--}}
+                        {{--                        </tfoot>--}}
                     </table>
                 </div>
             </td>
