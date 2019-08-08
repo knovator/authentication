@@ -378,9 +378,13 @@ class SalesController extends Controller
      * @throws Exception
      */
     private function updateSODELIVEREDStatus(SalesOrder $salesOrder, $input) {
-
+        if (!$salesOrder->deliveries()->exist()) {
+            return $this->sendResponse(null, __('messages.must_partial_delivery'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
         $statusIds = $this->masterRepository->getIdsByCode
         ([MasterConstant::SO_DELIVERED, MasterConstant::SO_CANCELED]);
+
 
         $salesOrder->load([
             'deliveries' => function ($deliveries) use ($statusIds) {

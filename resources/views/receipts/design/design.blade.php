@@ -32,8 +32,8 @@
                    <tr>
                        <td class="text-left label">Type</td>
                        <td>: {{ucfirst($design->type)}}</td>
-                       <td class="text-left label">Creming</td>
-                       <td>: {{ ($design->detail->creming) ? 'Yes':'No' }}</td>
+                       <td class="text-left label">Pick</td>
+                       <td>: {{$design->detail->pick_on_loom}} {{ ($design->detail->creming) ? ' - Creming':'' }}</td>
                    </tr>
                    </tbody>
                </table>
