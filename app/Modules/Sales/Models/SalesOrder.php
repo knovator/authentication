@@ -87,7 +87,7 @@ class SalesOrder extends Model
         return $this->hasOneThrough(RecipePartialOrder::class, Delivery::class, 'sales_order_id',
             'delivery_id', 'id', 'id')
                     ->selectRaw('SUM(total_meters) as total,delivery_id')
-                    ->groupBy('delivery_id');
+                    ->groupBy('laravel_through_key');
     }
 
 
