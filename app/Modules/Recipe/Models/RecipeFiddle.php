@@ -4,7 +4,6 @@ namespace App\Modules\Recipe\Models;
 
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class RecipeFiddle
@@ -12,6 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class RecipeFiddle extends Model
 {
+
     protected $table = 'recipes_fiddles';
 
     protected $fillable = [
@@ -19,5 +19,12 @@ class RecipeFiddle extends Model
         'thread_color_id',
         'fiddle_no'
     ];
+
+    /**
+     * @return mixed
+     */
+    public function recipe() {
+        return $this->belongsTo(Recipe::class, 'recipe_id', 'id');
+    }
 
 }

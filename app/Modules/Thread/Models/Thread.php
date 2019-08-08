@@ -3,7 +3,6 @@
 namespace App\Modules\Thread\Models;
 
 
-use App\Modules\Design\Models\BeamRecipe;
 use App\Modules\Design\Models\DesignBeam;
 use App\Modules\Recipe\Models\RecipeFiddle;
 use Illuminate\Database\Eloquent\Model;
@@ -73,7 +72,7 @@ class Thread extends Model
      */
     public function fiddles() {
         return $this->hasManyThrough(RecipeFiddle::class, ThreadColor::class, 'thread_id',
-            'thread_color_id', 'id', 'id');
+            'thread_color_id', 'id', 'id')->has('recipe');
     }
 
     /**
