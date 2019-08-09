@@ -11,6 +11,10 @@ Route::group([
         Route::resource('yarns', 'YarnController');
         Route::put('yarns/order/change-status', 'YarnController@changeStatus')
              ->name('yarns.change-status');
+
+
+        Route::get('yarns-statuses', 'YarnController@statuses')
+             ->name('yarns.statuses');
     });
 Route::group([
     'prefix' => 'admin',

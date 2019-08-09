@@ -4,6 +4,7 @@ namespace App\Modules\Yarn\Http\Controllers;
 
 use App\Constants\GenerateNumber;
 use App\Constants\Master as MasterConstant;
+use App\Constants\Master;
 use App\Http\Controllers\Controller;
 use App\Modules\Yarn\Exports\YarnOrder as ExportYarnOrder;
 use App\Modules\Yarn\Http\Requests\CreateRequest;
@@ -15,6 +16,7 @@ use App\Support\DestroyObject;
 use App\Support\UniqueIdGenerator;
 use DB;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Knovators\Masters\Repository\MasterRepository;
@@ -287,6 +289,28 @@ class YarnController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
 
+    }
+
+
+    /**
+     * @return JsonResponse
+     */
+    public function statuses() {
+        $statuses = $this->masterRepository->with([
+            'childMasters' => function ($childMasters) {
+                /** @var Builder $childMasters */
+                $childMasters->where('code', '<>', MasterConstant::SO_MANUFACTURING)->select([
+                    'id',
+                    'name',
+                    'code',
+                    'parent_id'
+                ]);
+            }
+        ])->findByCode(MasterConstant::SALES_STATUS);
+
+        return $this->sendResponse($statuses->childMasters,
+            __('messages.retrieved', ['module' => 'Statuses']),
+            HTTPCode::OK);
     }
 
     /**
