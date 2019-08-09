@@ -3,7 +3,7 @@
     <tr>
         <th>Sr No</th>
         <th>Order No</th>
-        <th>Customer Name</th>
+        <th>Customer</th>
         <th>Order Date</th>
         <th>Design</th>
         <th>Total Qty</th>
