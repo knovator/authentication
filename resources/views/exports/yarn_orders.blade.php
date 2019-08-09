@@ -23,7 +23,7 @@
                 <td rowspan="{{$rowSpan}}">{{$order->customer->full_name}}</td>
                 <td rowspan="{{$rowSpan}}">{{\Carbon\Carbon::parse($order->order_date)->format('D m Y')}}</td>
                 <td>{{$order->threads[0]->thread_color->thread->name.' ('.$order->threads[0]->thread_color->color->name.')'}}
-                    : {{$order->threads[0]->kg_qty}}</td>
+                    : {{$order->threads[0]->kg_qty. ' KG'}}</td>
                 <td rowspan="{{$rowSpan}}">{{$order->status->name}}</td>
                 <td rowspan="{{$rowSpan}}">{{$order->challan_no}}</td>
             </tr>
@@ -34,7 +34,7 @@
             @foreach($order->threads as $thread)
                 <tr>
                     <td>{{$thread->thread_color->thread->name.' ('.$thread->thread_color->color->name.')'}}
-                        : {{$thread->kg_qty}}</td>
+                        : {{$thread->kg_qty. ' KG'}}</td>
                 </tr>
             @endforeach
         @endif
