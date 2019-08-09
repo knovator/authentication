@@ -43,6 +43,9 @@ class YarnOrderRepository extends BaseRepository
 
         $orders = $this->model->with($relations)->with('threadQty')->select('yarn_sales_orders.*');
 
+        if ($input['ids']){
+            $orders = $orders->whereIn('id',$input['ids']);
+        }
         if (isset($input['start_date'])) {
             $orders = $orders->whereDate('created_at', '>=', $input['start_date']);
         }
