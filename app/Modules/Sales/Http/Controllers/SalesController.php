@@ -3,6 +3,7 @@
 namespace App\Modules\Sales\Http\Controllers;
 
 use App\Constants\GenerateNumber;
+use App\Modules\Sales\Http\Exports\SalesOrder as ExportSalesOrder;
 use App\Constants\Master;
 use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
@@ -31,11 +32,14 @@ use Exception;
 use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Knovators\Support\Helpers\HTTPCode;
 use Log;
+use Maatwebsite\Excel\Facades\Excel;
 use Prettus\Repository\Exceptions\RepositoryException;
 use Str;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Class SalesController
@@ -291,16 +295,14 @@ class SalesController extends Controller
 
 
     /**
+     * @param Request $request
      * @return JsonResponse
      */
-    public function index() {
-        $statuses = $this->masterRepository->findWhereIn('code',
-            [Master::SO_DELIVERED, Master::SO_MANUFACTURING], ['id', 'code'])
-                                           ->keyBy('code')
-                                           ->all();
+    public function index(Request $request) {
+        $statuses = $this->totalMeterStatuses();
         try {
             $orders = $this->salesOrderRepository->getSalesOrderList($statuses[Master::SO_DELIVERED]['id'],
-                $statuses[Master::SO_MANUFACTURING]['id']);
+                $statuses[Master::SO_MANUFACTURING]['id'],$request->all());
 
             return $this->sendResponse($orders,
                 __('messages.retrieved', ['module' => 'Sales Orders']),
@@ -311,6 +313,14 @@ class SalesController extends Controller
             return $this->sendResponse(null, __('messages.something_wrong'),
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
+    }
+
+
+    private function totalMeterStatuses() {
+        $this->masterRepository->findWhereIn('code',
+            [Master::SO_DELIVERED, Master::SO_MANUFACTURING], ['id', 'code'])
+                               ->keyBy('code')
+                               ->all();
     }
 
     /**
@@ -378,7 +388,7 @@ class SalesController extends Controller
      * @throws Exception
      */
     private function updateSODELIVEREDStatus(SalesOrder $salesOrder, $input) {
-        if (!$salesOrder->deliveries()->exist()) {
+        if (!$salesOrder->deliveries()->exists()) {
             return $this->sendResponse(null, __('messages.must_partial_delivery'),
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
@@ -547,5 +557,31 @@ class SalesController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
     }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse|BinaryFileResponse
+     */
+    public function exportCsv(Request $request) {
+        $statuses = $this->totalMeterStatuses();
+        try {
+            $sales = $this->salesOrderRepository->getSalesOrderList($statuses[Master::SO_DELIVERED]['id'],
+                $statuses[Master::SO_MANUFACTURING]['id'], $request->all(),true);
+
+            if (($sales = collect($sales->getData()->data))->isEmpty()) {
+                return $this->sendResponse(null,
+                    __('messages.can_not_export', ['module' => 'Sales orders']),
+                    HTTPCode::OK);
+            }
+
+            return Excel::download(new ExportSalesOrder($sales), 'sales-orders.xlsx');
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
+
 
 }

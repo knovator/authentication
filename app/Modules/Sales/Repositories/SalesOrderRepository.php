@@ -31,15 +31,17 @@ class SalesOrderRepository extends BaseRepository
     }
 
     /**
-     * @param $deliveredId
-     * @param $manufacturingId
-     * @param $pendingId
+     * @param      $deliveredId
+     * @param      $manufacturingId
+     * @param      $input
+     * @param bool $export
      * @return mixed
      * @throws RepositoryException
      */
-    public function getSalesOrderList($deliveredId, $manufacturingId) {
+    public function getSalesOrderList($deliveredId, $manufacturingId, $input, $export = false) {
         $this->applyCriteria();
-        $orders = datatables()->of($this->model->with([
+
+        $orders = $this->model->with([
             'customer.state:id,name,code,gst_code',
             'status:id,name,code',
             'design:id,design_no,quality_name',
@@ -54,10 +56,28 @@ class SalesOrderRepository extends BaseRepository
                 /** @var Builder $delivered */
                 $delivered->where('deliveries.status_id', $deliveredId);
             }
-        ])->select('sales_orders.*'))
+        ])->select('sales_orders.*');
+
+
+        if (isset($input['start_date'])) {
+            $orders = $orders->whereDate('created_at', '>=', $input['start_date']);
+        }
+
+        if (isset($input['end_date'])) {
+            $orders = $orders->whereDate('created_at', '<=', $input['end_date']);
+        }
+
+
+        $orders = datatables()->of($orders)
                               ->addColumn('pending_meters', function (SalesOrder $salesOrder) {
                                   return $salesOrder->pending_meters;
-                              })->make(true);
+                              });
+
+        if ($export) {
+            $orders = $orders->skipPaging();
+        }
+
+        $orders = $orders->make(true);
         $this->resetModel();
 
         return $orders;
