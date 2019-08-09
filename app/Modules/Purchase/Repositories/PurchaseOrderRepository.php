@@ -48,6 +48,9 @@ class PurchaseOrderRepository extends BaseRepository
             'status:id,name,code'
         ])->select('purchase_orders.*');
 
+        if (isset($input['ids']) && (!empty($input['ids']))){
+            $orders = $orders->whereIn('id',$input['ids']);
+        }
 
         if (isset($input['start_date'])) {
             $orders = $orders->whereDate('created_at', '>=', $input['start_date']);
