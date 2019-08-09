@@ -42,9 +42,9 @@ class PurchaseOrder implements FromView, ShouldAutoSize, WithEvents
     public function registerEvents() : array {
         return [
             AfterSheet::class => function (AfterSheet $event) {
-                $this->createStyle($event, 'A1:E1', 11);
+                $this->createStyle($event, 'A1:G1', 11);
                 $event->sheet->styleCells(
-                    'A1:E1',
+                    'A1:G1',
                     [
                         'font' => [
                             'bold' => true,

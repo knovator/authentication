@@ -54,6 +54,15 @@ class YarnOrder extends Model
     /**
      * @return mixed
      */
+    public function threadQty() {
+        return $this->hasOne(YarnOrderThread::class, 'yarn_order_id', 'id')
+                    ->groupBy('yarn_order_id')
+                    ->selectRaw('sum(kg_qty) as total,yarn_order_id');
+    }
+
+    /**
+     * @return mixed
+     */
     public function threads() {
         return $this->hasMany(YarnOrderThread::class, 'yarn_order_id', 'id');
     }

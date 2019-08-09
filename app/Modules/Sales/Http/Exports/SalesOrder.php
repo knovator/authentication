@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Yarn\Exports;
+namespace App\Modules\Sales\Http\Exports;
 
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
@@ -11,10 +11,10 @@ use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Exception;
 
 /**
- * Class YarnOrder
- * @package App\Modules\Yarn\Exports
+ * Class App\Modules\Sales\Http\Exports
+ * @package App\Exports
  */
-class YarnOrder implements FromView, ShouldAutoSize, WithEvents
+class SalesOrder implements FromView, ShouldAutoSize, WithEvents
 {
 
     protected $orders;
@@ -31,7 +31,7 @@ class YarnOrder implements FromView, ShouldAutoSize, WithEvents
      * @return View
      */
     public function view() : View {
-        return view('exports.yarn_orders', [
+        return view('exports.sales_orders', [
             'orders' => $this->orders,
         ]);
     }
@@ -42,7 +42,7 @@ class YarnOrder implements FromView, ShouldAutoSize, WithEvents
     public function registerEvents() : array {
         return [
             AfterSheet::class => function (AfterSheet $event) {
-                $this->createStyle($event, 'A1:G1', 11);
+                $this->createStyle($event, 'A1:G1', 12);
                 $event->sheet->styleCells(
                     'A1:G1',
                     [

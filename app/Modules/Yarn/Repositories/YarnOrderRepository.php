@@ -40,9 +40,12 @@ class YarnOrderRepository extends BaseRepository
      */
     public function getYarnOrderList($input, $relations, $export = false) {
         $this->applyCriteria();
-        $orders = $this->model->with($relations)->select('yarn_sales_orders.*');
 
+        $orders = $this->model->with($relations)->with('threadQty')->select('yarn_sales_orders.*');
 
+        if (isset($input['ids']) && (!empty($input['ids']))){
+            $orders = $orders->whereIn('id',$input['ids']);
+        }
         if (isset($input['start_date'])) {
             $orders = $orders->whereDate('created_at', '>=', $input['start_date']);
         }
