@@ -52,6 +52,9 @@ Route::group([
 
         Route::get('sales/{sale}/export-summary', 'SalesController@exportSummary')
              ->name('sales.export.summary');
+
+        Route::get('sales/orders/export', 'SalesController@exportCsv')
+             ->name('sales.export');
     });
 
 Route::model('sale', SalesOrder::class);
