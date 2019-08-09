@@ -5,8 +5,10 @@ namespace App\Modules\Customer\Models;
 use App\Models\State;
 use App\Modules\Purchase\Models\PurchaseOrder;
 use App\Modules\Sales\Models\SalesOrder;
+use App\Notifications\OrderFormNotification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Notifications\Notifiable;
 use Knovators\Support\Traits\HasModelEvent;
 use Knovators\Support\Traits\HasSlug;
 
@@ -17,7 +19,7 @@ use Knovators\Support\Traits\HasSlug;
 class Customer extends Model
 {
 
-    use SoftDeletes, HasModelEvent, HasSlug;
+    use SoftDeletes, HasModelEvent, HasSlug, Notifiable;
 
     protected $table = 'customers';
 
@@ -57,6 +59,17 @@ class Customer extends Model
     public function getFullNameAttribute() {
         return ucfirst($this->first_name . ' ' . $this->last_name);
     }
+
+
+    /**
+     * @param $salesOrder
+     * @param $attachment
+     */
+    public function sendOrderNotifyMail($companyName,$attachment) {
+        $this->notify((new OrderFormNotification($companyName,$attachment))->delay(now()
+            ->addSeconds(10)));
+    }
+
 
     /**
      * @return mixed
