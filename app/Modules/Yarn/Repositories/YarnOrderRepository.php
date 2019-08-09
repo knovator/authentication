@@ -43,7 +43,7 @@ class YarnOrderRepository extends BaseRepository
 
         $orders = $this->model->with($relations)->with('threadQty')->select('yarn_sales_orders.*');
 
-        if ($input['ids']){
+        if (isset($input['ids']) && (!empty($input['ids']))){
             $orders = $orders->whereIn('id',$input['ids']);
         }
         if (isset($input['start_date'])) {

@@ -59,7 +59,7 @@ class SalesOrderRepository extends BaseRepository
         ])->select('sales_orders.*');
 
 
-        if ($input['ids']){
+        if (isset($input['ids']) && (!empty($input['ids']))){
             $orders = $orders->whereIn('id',$input['ids']);
         }
 

@@ -48,7 +48,7 @@ class PurchaseOrderRepository extends BaseRepository
             'status:id,name,code'
         ])->select('purchase_orders.*');
 
-        if ($input['ids']){
+        if (isset($input['ids']) && (!empty($input['ids']))){
             $orders = $orders->whereIn('id',$input['ids']);
         }
 
