@@ -12,34 +12,11 @@
     </thead>
     <tbody>
     @foreach($orders as $orderKey => $order)
-
+        
         @if($order->customer)
             @php
                 $rowSpan = count($order->threads);
             @endphp
-            <tr>
-                <td rowspan="{{$rowSpan}}">{{$orderKey + 1}}</td>
-                <td rowspan="{{$rowSpan}}">{{$order->order_no}}</td>
-                <td rowspan="{{$rowSpan}}">{{$order->customer->full_name}}</td>
-                <td rowspan="{{$rowSpan}}">{{\Carbon\Carbon::parse($order->order_date)->format('D m Y')}}</td>
-                <td>{{$order->threads[0]->thread_color->thread->name.' ('.$order->threads[0]->thread_color->color->name.')'}}
-                    : {{$order->threads[0]->kg_qty}}</td>
-                <td rowspan="{{$rowSpan}}">{{$order->status->name}}</td>
-                <td rowspan="{{$rowSpan}}">{{$order->challan_no}}</td>
-            </tr>
-            <tr>
-                <td>Phone: {{$order->customer->phone}}</td>
-            </tr>
-            <tr>
-                <td>GST No: {{$order->customer->gst_no}}</td>
-            </tr>
-            <tr>
-                <td>{{$order->customer->address.','.$order->customer->city_name}}</td>
-            </tr>
-        @endif
-
-        @if($order->customer)
-
             <tr>
                 <td rowspan="{{$rowSpan}}">{{$orderKey + 1}}</td>
                 <td rowspan="{{$rowSpan}}">{{$order->order_no}}</td>
