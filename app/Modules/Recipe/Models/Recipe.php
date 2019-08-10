@@ -4,6 +4,7 @@ namespace App\Modules\Recipe\Models;
 
 
 use App\Modules\Design\Models\DesignBeam;
+use App\Modules\Sales\Models\SalesOrderRecipe;
 use App\Modules\Thread\Models\ThreadColor;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -50,6 +51,14 @@ class Recipe extends Model
      */
     public function feeders() {
         return $this->hasMany(RecipeFiddle::class, 'recipe_id', 'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function salesOrders() {
+        return $this->hasMany(SalesOrderRecipe::class, 'recipe_id', 'id');
     }
 
 
