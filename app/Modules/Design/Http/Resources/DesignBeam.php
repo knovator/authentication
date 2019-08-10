@@ -24,7 +24,11 @@ class DesignBeam extends JsonResource
         return [
             'id'          => $this->id,
             'threadColor' => new ThreadColor($this->whenLoaded('threadColor')),
-            'recipes'     => Recipe::collection($this->whenLoaded('recipes'))
+            'recipes'     => Recipe::collection($this->whenLoaded('recipes')),
+            $this->mergeWhen(isset($this->used_count), [
+                'used_count' => $this->used_count
+            ]),
+
         ];
     }
 }

@@ -4,6 +4,7 @@ namespace App\Modules\Design\Models;
 
 
 use App\Modules\Recipe\Models\Recipe;
+use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Thread\Models\ThreadColor;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -47,6 +48,14 @@ class DesignBeam extends Model
     public function threadColor() {
         return $this->belongsTo(ThreadColor::class, 'thread_color_id',
             'id');
+    }
+
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function sales() {
+        return $this->hasMany(SalesOrder::class, 'design_beam_id', 'id');
     }
 
 

@@ -26,6 +26,9 @@ class Recipe extends JsonResource
             'total_fiddles' => $this->total_fiddles,
             'is_active'     => $this->is_active,
             'fiddles'       => ThreadColor::collection($this->whenLoaded('fiddles')),
+            $this->mergeWhen(isset($this->used_count), [
+                'used_count' => $this->used_count
+            ]),
         ];
     }
 }
