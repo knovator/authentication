@@ -36,6 +36,8 @@ Route::group([
         Route::get('manufacturing/companies', 'SalesController@manufacturingCompanies')
              ->name('sales.manufacturing.companies');
 
+        Route::post('send-mail-to-customer/{sale}', 'SalesController@sendMailToCustomer');
+
     });
 
 Route::group([

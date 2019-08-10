@@ -7,6 +7,7 @@ use App\Modules\Sales\Http\Exports\SalesOrder as ExportSalesOrder;
 use App\Constants\Master;
 use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
+use App\Jobs\OrderFormJob;
 use App\Modules\Design\Repositories\DesignDetailRepository;
 use App\Modules\Sales\Http\Requests\AnalysisRequest;
 use App\Modules\Sales\Http\Requests\CreateRequest;
@@ -19,6 +20,7 @@ use App\Modules\Sales\Repositories\CompanyRepository;
 use App\Modules\Sales\Repositories\RecipePartialRepository;
 use App\Modules\Sales\Repositories\SalesOrderRepository;
 use App\Modules\Sales\Repositories\SalesRecipeRepository;
+use App\Modules\Sales\Support\ExportSaleOrderSummary;
 use App\Modules\Stock\Repositories\StockRepository;
 use App\Modules\Thread\Constants\ThreadType;
 use App\Modules\Thread\Repositories\ThreadColorRepository;
@@ -48,7 +50,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 class SalesController extends Controller
 {
 
-    use DestroyObject, UniqueIdGenerator;
+    use DestroyObject, UniqueIdGenerator, ExportSaleOrderSummary;
 
     protected $salesOrderRepository;
 
@@ -96,6 +98,7 @@ class SalesController extends Controller
             $input['status_id'] = $this->getMasterByCode(MasterConstant::SO_PENDING);
             $salesOrder = $this->salesOrderRepository->create($input);
             $this->createOrUpdateSalesDetails($salesOrder, $input, false);
+            $this->sendMailToCustomer($salesOrder);
             DB::commit();
 
             return $this->sendResponse($this->makeResource($salesOrder),
@@ -107,6 +110,16 @@ class SalesController extends Controller
 
             return $this->sendResponse(null, __('messages.something_wrong'),
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
+
+    /**
+     * @param SalesOrder $salesOrder
+     */
+    public function sendMailToCustomer(SalesOrder $salesOrder) {
+        $salesOrder->load('customer');
+        if (!is_null($salesOrder->customer->email)) {
+            OrderFormJob::dispatch($salesOrder)->delay(now()->addSeconds(10));
         }
     }
 
@@ -302,7 +315,7 @@ class SalesController extends Controller
         $statuses = $this->totalMeterStatuses();
         try {
             $orders = $this->salesOrderRepository->getSalesOrderList($statuses[Master::SO_DELIVERED]['id'],
-                $statuses[Master::SO_MANUFACTURING]['id'],$request->all());
+                $statuses[Master::SO_MANUFACTURING]['id'], $request->all());
 
             return $this->sendResponse($orders,
                 __('messages.retrieved', ['module' => 'Sales Orders']),
@@ -499,44 +512,8 @@ class SalesController extends Controller
      * @return Response
      */
     public function exportSummary(SalesOrder $salesOrder) {
-
-        $statusId = $this->masterRepository->findByCode(MasterConstant::SO_DELIVERED)->id;
-        $salesOrder->load([
-            'orderRecipes'               => function ($orderRecipes) {
-                /** @var Builder $orderRecipes */
-                $orderRecipes->orderBy('id')->with([
-                    'recipe.fiddles' => function ($fiddles) {
-                        /** @var Builder $fiddles */
-                        $fiddles->where('recipes_fiddles.fiddle_no', '=', 1)->with('color');
-                    }
-                ]);
-            },
-            'orderRecipes.partialOrders' => function ($partialOrders) use ($statusId) {
-                /** @var Builder $partialOrders */
-                $partialOrders->whereHas('delivery', function ($delivery) use ($statusId) {
-                    /** @var Builder $delivery */
-                    $delivery->where('status_id', $statusId);
-                });
-            },
-            'manufacturingCompany',
-            'design.detail',
-            'design.mainImage.file',
-            'customer.state'
-        ]);
-
-        $isInvoice = false;
-        if ($salesOrder->deliveries()->where('status_id', $statusId)->exists()) {
-            $isInvoice = true;
-        }
-
-        $pdf = SnappyPdf::loadView('receipts.sales-orders.main_summary.summary',
-            compact('salesOrder', 'isInvoice'));
-
-        return $pdf->download($salesOrder->order_no . ".pdf");
-
-//        return view('receipts.sales-orders.main_summary.summary',
-//            compact('salesOrder', 'isInvoice'));
-
+        return $this->renderSummary($salesOrder, $this->masterRepository)
+                    ->download($salesOrder->order_no . ".pdf");
     }
 
 
@@ -566,7 +543,7 @@ class SalesController extends Controller
         $statuses = $this->totalMeterStatuses();
         try {
             $sales = $this->salesOrderRepository->getSalesOrderList($statuses[Master::SO_DELIVERED]['id'],
-                $statuses[Master::SO_MANUFACTURING]['id'], $request->all(),true);
+                $statuses[Master::SO_MANUFACTURING]['id'], $request->all(), true);
 
             if (($sales = collect($sales->getData()->data))->isEmpty()) {
                 return $this->sendResponse(null,
