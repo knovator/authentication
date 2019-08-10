@@ -18,6 +18,7 @@ use App\Support\UniqueIdGenerator;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use DB;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Knovators\Support\Helpers\HTTPCode;
@@ -104,9 +105,8 @@ class DesignController extends Controller
             $design->update($input);
             $this->storeDesignDetails($design, $input);
             DB::commit();
-            $design->fresh();
 
-            return $this->sendResponse($this->makeResource($design->load('detail')),
+            return $this->sendResponse($this->makeResource($design->fresh('detail')),
                 __('messages.updated', ['module' => 'Design']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -174,9 +174,8 @@ class DesignController extends Controller
 
     public function partiallyUpdate(Design $design, PartiallyUpdateRequest $request) {
         $design->update($request->all());
-        $design->fresh();
 
-        return $this->sendResponse($this->makeResource($design->load('detail')),
+        return $this->sendResponse($this->makeResource($design->fresh('detail')),
             __('messages.updated', ['module' => 'Design']),
             HTTPCode::OK);
     }
@@ -195,9 +194,7 @@ class DesignController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
         $design->update($input);
-        $design->fresh();
-
-        return $this->sendResponse($this->makeResource($design->load('detail')),
+        return $this->sendResponse($this->makeResource($design->fresh('detail')),
             __('messages.updated', ['module' => 'Design']),
             HTTPCode::OK);
     }
@@ -231,10 +228,20 @@ class DesignController extends Controller
         $design->load([
             'detail',
             'fiddlePicks',
-            'beams.threadColor.thread',
-            'beams.threadColor.color',
-            'beams.recipes.fiddles.thread',
-            'beams.recipes.fiddles.color',
+            'beams' => function ($beams) {
+                /** @var Builder $beams */
+                $beams->withCount('sales as used_count')->with([
+                    'threadColor.thread',
+                    'threadColor.color',
+                    'recipes' => function ($recipes) {
+                        /** @var Builder $recipes */
+                        $recipes->withCount('salesOrders as used_count')->with([
+                            'fiddles.thread',
+                            'fiddles.color'
+                        ]);
+                    }
+                ]);
+            },
             'images.file',
         ]);
 
@@ -260,7 +267,6 @@ class DesignController extends Controller
     public function index() {
         try {
             $designs = $this->designRepository->getDesignList();
-
 
             return $this->sendResponse($designs,
                 __('messages.retrieved', ['module' => 'Designs']),
