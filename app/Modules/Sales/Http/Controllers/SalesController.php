@@ -330,7 +330,7 @@ class SalesController extends Controller
 
 
     private function totalMeterStatuses() {
-        $this->masterRepository->findWhereIn('code',
+        return $this->masterRepository->findWhereIn('code',
             [Master::SO_DELIVERED, Master::SO_MANUFACTURING], ['id', 'code'])
                                ->keyBy('code')
                                ->all();
