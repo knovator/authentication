@@ -160,7 +160,9 @@
                         <td>
                             {{$key.'.'.($partialOrderKey + 1).')
                            '.\Carbon\Carbon::parse($partialOrder->delivery->delivery_date)->format('d, M Y')}}
-                            <small><em>({{$partialOrder->delivery->delivery_no}})</em></small>
+                            @if(!is_null($partialOrder->delivery->bill_no))
+                                <small><em>({{$partialOrder->delivery->bill_no}})</em></small>
+                            @endif
                         </td>
                         <td class="text-center">{{$partialOrder->total_meters}}</td>
                         <td class="text-center"></td>
