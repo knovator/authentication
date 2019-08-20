@@ -11,6 +11,7 @@ use App\Jobs\OrderFormJob;
 use App\Modules\Design\Repositories\DesignDetailRepository;
 use App\Modules\Sales\Http\Requests\AnalysisRequest;
 use App\Modules\Sales\Http\Requests\CreateRequest;
+use App\Modules\Sales\Http\Requests\MailRequest;
 use App\Modules\Sales\Http\Requests\StatusRequest;
 use App\Modules\Sales\Http\Requests\UpdateRequest;
 use App\Modules\Sales\Http\Resources\SalesOrder as SalesOrderResource;
@@ -98,7 +99,6 @@ class SalesController extends Controller
             $input['status_id'] = $this->getMasterByCode(MasterConstant::SO_PENDING);
             $salesOrder = $this->salesOrderRepository->create($input);
             $this->createOrUpdateSalesDetails($salesOrder, $input, false);
-            $this->sendMailToCustomer($salesOrder);
             DB::commit();
 
             return $this->sendResponse($this->makeResource($salesOrder),
@@ -114,15 +114,12 @@ class SalesController extends Controller
     }
 
     /**
-     * @param SalesOrder $salesOrder
+     * @param $code
+     * @return integer
      */
-    public function sendMailToCustomer(SalesOrder $salesOrder) {
-        $salesOrder->load('customer');
-        if (!is_null($salesOrder->customer->email)) {
-            OrderFormJob::dispatch($salesOrder)->delay(now()->addSeconds(10));
-        }
+    private function getMasterByCode($code) {
+        return $this->masterRepository->findByCode($code)->id;
     }
-
 
     /**
      * @param SalesOrder $salesOrder
@@ -136,35 +133,6 @@ class SalesController extends Controller
         $salesOrder->load('designBeam.threadColor.thread');
         $this->storeSalesOrderRecipes($salesOrder, $input, $designDetail, $update);
     }
-
-
-    /**
-     * @param SalesOrder    $salesOrder
-     * @param UpdateRequest $request
-     * @return mixed
-     * @throws Exception
-     */
-    public function update(SalesOrder $salesOrder, UpdateRequest $request) {
-        $input = $request->all();
-        try {
-            DB::beginTransaction();
-            $salesOrder->update($input);
-            $salesOrder->fresh();
-            $this->createOrUpdateSalesDetails($salesOrder, $input, true);
-            DB::commit();
-
-            return $this->sendResponse($this->makeResource($salesOrder),
-                __('messages.updated', ['module' => 'Sales']),
-                HTTPCode::OK);
-        } catch (Exception $exception) {
-            DB::rollBack();
-            Log::error($exception);
-
-            return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
-        }
-    }
-
 
     /**
      * @param SalesOrder $salesOrder
@@ -194,18 +162,6 @@ class SalesController extends Controller
         if ($update && isset($input['removed_order_recipes_id']) && !empty($input['removed_order_recipes_id'])) {
             $this->destroyOrderRecipes($input['removed_order_recipes_id']);
         }
-    }
-
-
-    /**
-     * @param $orderRecipeIds
-     */
-    private function destroyOrderRecipes($orderRecipeIds) {
-        // remove sales partial order stocks
-        (new StockRepository(new Container()))->removeByPartialOrderId($orderRecipeIds);
-        // remove sales partial orders
-        (new SalesRecipeRepository(new Container()))->removeById($orderRecipeIds);
-
     }
 
     /**
@@ -248,15 +204,78 @@ class SalesController extends Controller
         $salesOrder->orderStocks()->createMany($data);
     }
 
-
     /**
-     * @param $code
-     * @return integer
+     * @param $orderRecipeIds
      */
-    private function getMasterByCode($code) {
-        return $this->masterRepository->findByCode($code)->id;
+    private function destroyOrderRecipes($orderRecipeIds) {
+        // remove sales partial order stocks
+        (new StockRepository(new Container()))->removeByPartialOrderId($orderRecipeIds);
+        // remove sales partial orders
+        (new SalesRecipeRepository(new Container()))->removeById($orderRecipeIds);
+
     }
 
+    /**
+     * @param $salesOrder
+     * @return SalesOrderResource
+     */
+    private function makeResource($salesOrder) {
+        return new SalesOrderResource($salesOrder);
+    }
+
+    /**
+     * @param SalesOrder  $salesOrder
+     * @param MailRequest $request
+     * @return JsonResponse
+     */
+    public function sendMailToCustomer(SalesOrder $salesOrder, MailRequest $request) {
+        $input = $request->all();
+        $salesOrder->load('customer');
+        try {
+            if (is_null($salesOrder->customer->email)) {
+                $salesOrder->customer()->update(['email' => $input['email']]);
+                $salesOrder = $salesOrder->fresh();
+            }
+            OrderFormJob::dispatch($salesOrder)->delay(now()->addSeconds(10));
+
+            return $this->sendResponse($this->makeResource($salesOrder),
+                __('messages.created', ['module' => 'Mail']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+
+    }
+
+    /**
+     * @param SalesOrder    $salesOrder
+     * @param UpdateRequest $request
+     * @return mixed
+     * @throws Exception
+     */
+    public function update(SalesOrder $salesOrder, UpdateRequest $request) {
+        $input = $request->all();
+        try {
+            DB::beginTransaction();
+            $salesOrder->update($input);
+            $salesOrder->fresh();
+            $this->createOrUpdateSalesDetails($salesOrder, $input, true);
+            DB::commit();
+
+            return $this->sendResponse($this->makeResource($salesOrder),
+                __('messages.updated', ['module' => 'Sales']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            DB::rollBack();
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
 
     /**
      * @param SalesOrder $salesOrder
@@ -282,7 +301,6 @@ class SalesController extends Controller
         }
     }
 
-
     /**
      * @param SalesOrder $salesOrder
      * @return JsonResponse
@@ -306,7 +324,6 @@ class SalesController extends Controller
             HTTPCode::OK);
     }
 
-
     /**
      * @param Request $request
      * @return JsonResponse
@@ -328,20 +345,11 @@ class SalesController extends Controller
         }
     }
 
-
     private function totalMeterStatuses() {
         return $this->masterRepository->findWhereIn('code',
             [Master::SO_DELIVERED, Master::SO_MANUFACTURING], ['id', 'code'])
-                               ->keyBy('code')
-                               ->all();
-    }
-
-    /**
-     * @param $salesOrder
-     * @return SalesOrderResource
-     */
-    private function makeResource($salesOrder) {
-        return new SalesOrderResource($salesOrder);
+                                      ->keyBy('code')
+                                      ->all();
     }
 
     /**
@@ -364,6 +372,100 @@ class SalesController extends Controller
 
     }
 
+    /**
+     * @param AnalysisRequest $request
+     * @return JsonResponse
+     */
+    public function threadAnalysis(AnalysisRequest $request) {
+        $input = $request->all();
+        $collection = collect($input['reports'])->keyBy('thread_color_id');
+        try {
+
+            $statusIds = $this->masterRepository->findWhereIn('code',
+                [Master::PO_CANCELED, Master::PO_PENDING])->pluck('id')->toArray();
+
+            $threadColors = $this->threadColorRepository->with([
+                'availableStock' => function ($availableStock) use ($statusIds) {
+                    /** @var Builder $availableStock */
+                    $availableStock->whereNotIn('status_id', $statusIds);
+                },
+                'thread'         => function ($thread) {
+                    /** @var Builder $thread */
+                    $thread->select(['id', 'name', 'type_id', 'denier', 'company_name'])
+                           ->with('type:id,name');
+                },
+                'color:id,name,code'
+            ])->findWhereIn('id', $collection->pluck('thread_color_id')->toArray());
+
+            foreach ($threadColors as &$threadColor) {
+                $threadColor['available'] = ($threadColor->availableStock) ?
+                    $threadColor->availableStock->available_qty : 0;
+                $threadColor['used_in_design'] = $collection[$threadColor->id]['total_kg'];
+                unset($threadColor->availableStock);
+            }
+
+            return $this->sendResponse($threadColors,
+                __('messages.retrieved', ['module' => 'Stocks']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
+
+    /**
+     * @param SalesOrder $salesOrder
+     * @return Response
+     */
+    public function exportSummary(SalesOrder $salesOrder) {
+        return $this->renderSummary($salesOrder, $this->masterRepository)
+                    ->download($salesOrder->order_no . ".pdf");
+    }
+
+    /**
+     * @return JsonResponse
+     */
+    public function manufacturingCompanies() {
+        try {
+            $companies = (new CompanyRepository(new Container()))->all(['name', 'id']);
+
+            return $this->sendResponse($companies,
+                __('messages.retrieved', ['module' => 'Companies']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse|BinaryFileResponse
+     */
+    public function exportCsv(Request $request) {
+        $statuses = $this->totalMeterStatuses();
+        try {
+            $sales = $this->salesOrderRepository->getSalesOrderList($statuses[Master::SO_DELIVERED]['id'],
+                $statuses[Master::SO_MANUFACTURING]['id'], $request->all(), true);
+
+            if (($sales = collect($sales->getData()->data))->isEmpty()) {
+                return $this->sendResponse(null,
+                    __('messages.can_not_export', ['module' => 'Sales orders']),
+                    HTTPCode::OK);
+            }
+
+            return Excel::download(new ExportSalesOrder($sales), 'sales-orders.xlsx');
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
 
     /**
      * @param SalesOrder    $salesOrder
@@ -380,6 +482,25 @@ class SalesController extends Controller
 
     }
 
+    /**
+     * @param SalesOrder $salesOrder
+     * @param            $status
+     * @return JsonResponse
+     * @throws Exception
+     */
+    private function updateStatus(SalesOrder $salesOrder, $status) {
+        try {
+            $salesOrder->update(['status_id' => $status->id]);
+
+            return $this->sendResponse($this->makeResource($salesOrder->load('status:id,name,code')),
+                __('messages.updated', ['module' => 'Status']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            throw $exception;
+        }
+    }
 
     /**
      * @param SalesOrder    $salesOrder
@@ -441,123 +562,6 @@ class SalesController extends Controller
 
         return $this->updateStatus($salesOrder, $status);
 
-    }
-
-    /**
-     * @param SalesOrder $salesOrder
-     * @param            $status
-     * @return JsonResponse
-     * @throws Exception
-     */
-    private function updateStatus(SalesOrder $salesOrder, $status) {
-        try {
-            $salesOrder->update(['status_id' => $status->id]);
-
-            return $this->sendResponse($this->makeResource($salesOrder->load('status:id,name,code')),
-                __('messages.updated', ['module' => 'Status']),
-                HTTPCode::OK);
-        } catch (Exception $exception) {
-            Log::error($exception);
-
-            throw $exception;
-        }
-    }
-
-    /**
-     * @param AnalysisRequest $request
-     * @return JsonResponse
-     */
-    public function threadAnalysis(AnalysisRequest $request) {
-        $input = $request->all();
-        $collection = collect($input['reports'])->keyBy('thread_color_id');
-        try {
-
-            $statusIds = $this->masterRepository->findWhereIn('code',
-                [Master::PO_CANCELED, Master::PO_PENDING])->pluck('id')->toArray();
-
-            $threadColors = $this->threadColorRepository->with([
-                'availableStock' => function ($availableStock) use ($statusIds) {
-                    /** @var Builder $availableStock */
-                    $availableStock->whereNotIn('status_id', $statusIds);
-                },
-                'thread'         => function ($thread) {
-                    /** @var Builder $thread */
-                    $thread->select(['id', 'name', 'type_id', 'denier', 'company_name'])
-                           ->with('type:id,name');
-                },
-                'color:id,name,code'
-            ])->findWhereIn('id', $collection->pluck('thread_color_id')->toArray());
-
-            foreach ($threadColors as &$threadColor) {
-                $threadColor['available'] = ($threadColor->availableStock) ?
-                    $threadColor->availableStock->available_qty : 0;
-                $threadColor['used_in_design'] = $collection[$threadColor->id]['total_kg'];
-                unset($threadColor->availableStock);
-            }
-
-            return $this->sendResponse($threadColors,
-                __('messages.retrieved', ['module' => 'Stocks']),
-                HTTPCode::OK);
-        } catch (Exception $exception) {
-            Log::error($exception);
-
-            return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
-        }
-    }
-
-
-    /**
-     * @param SalesOrder $salesOrder
-     * @return Response
-     */
-    public function exportSummary(SalesOrder $salesOrder) {
-        return $this->renderSummary($salesOrder, $this->masterRepository)
-                    ->download($salesOrder->order_no . ".pdf");
-    }
-
-
-    /**
-     * @return JsonResponse
-     */
-    public function manufacturingCompanies() {
-        try {
-            $companies = (new CompanyRepository(new Container()))->all(['name', 'id']);
-
-            return $this->sendResponse($companies,
-                __('messages.retrieved', ['module' => 'Companies']),
-                HTTPCode::OK);
-        } catch (Exception $exception) {
-            Log::error($exception);
-
-            return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
-        }
-    }
-
-    /**
-     * @param Request $request
-     * @return JsonResponse|BinaryFileResponse
-     */
-    public function exportCsv(Request $request) {
-        $statuses = $this->totalMeterStatuses();
-        try {
-            $sales = $this->salesOrderRepository->getSalesOrderList($statuses[Master::SO_DELIVERED]['id'],
-                $statuses[Master::SO_MANUFACTURING]['id'], $request->all(), true);
-
-            if (($sales = collect($sales->getData()->data))->isEmpty()) {
-                return $this->sendResponse(null,
-                    __('messages.can_not_export', ['module' => 'Sales orders']),
-                    HTTPCode::OK);
-            }
-
-            return Excel::download(new ExportSalesOrder($sales), 'sales-orders.xlsx');
-        } catch (Exception $exception) {
-            Log::error($exception);
-
-            return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
-        }
     }
 
 
