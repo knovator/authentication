@@ -40,7 +40,7 @@ class OrderFormJob implements ShouldQueue
      */
     public function handle(MasterRepository $masterRepository) {
         $pdf = $this->renderSummary($this->salesOrder, $masterRepository);
-        $fileUri = '/uploads/order-forms/' . time() . '-' . $this->salesOrder->order_no . '.pdf';
+        $fileUri = $this->getFileUri();
         /** @var PdfWrapper $pdf */
         $pdf->save(public_path() . $fileUri);
 
@@ -52,5 +52,12 @@ class OrderFormJob implements ShouldQueue
 
         $this->salesOrder->customer->sendOrderNotifyMail($companyName,
             config('app.url') . $fileUri);
+    }
+
+    /**
+     * @return string
+     */
+    private function getFileUri() {
+        return '/uploads/order-forms/' . time() . '-' . $this->salesOrder->order_no . '.pdf';
     }
 }
