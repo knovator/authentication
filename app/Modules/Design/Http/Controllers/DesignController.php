@@ -23,6 +23,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Knovators\Support\Helpers\HTTPCode;
 use Log;
+use Prettus\Validator\Exceptions\ValidatorException;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -82,7 +83,7 @@ class DesignController extends Controller
     /**
      * @param $design
      * @param $input
-     * @throws \Prettus\Validator\Exceptions\ValidatorException
+     * @throws ValidatorException
      */
     private function storeDesignDetails(Design $design, $input) {
         $this->designDetailRepository->updateOrCreate(['design_id' => $design->id], $input);
@@ -90,34 +91,6 @@ class DesignController extends Controller
         $this->storeDesignAttributes($design, $input, 'fiddle_picks', 'fiddlePicks');
         $this->storeDesignBeams($design, $input);
     }
-
-
-    /**
-     * @param Design        $design
-     * @param UpdateRequest $request
-     * @return JsonResponse
-     * @throws Exception
-     */
-    public function update(Design $design, UpdateRequest $request) {
-        $input = $request->all();
-        try {
-            DB::beginTransaction();
-            $design->update($input);
-            $this->storeDesignDetails($design, $input);
-            DB::commit();
-
-            return $this->sendResponse($this->makeResource($design->fresh('detail')),
-                __('messages.updated', ['module' => 'Design']),
-                HTTPCode::OK);
-        } catch (Exception $exception) {
-            DB::rollBack();
-            Log::error($exception);
-
-            return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
-        }
-    }
-
 
     /**
      * @param Design $design
@@ -165,6 +138,39 @@ class DesignController extends Controller
 
     }
 
+    /**
+     * @param Design $design
+     * @return DesignResource
+     */
+    private function makeResource($design) {
+        return new DesignResource($design);
+    }
+
+    /**
+     * @param Design        $design
+     * @param UpdateRequest $request
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function update(Design $design, UpdateRequest $request) {
+        $input = $request->all();
+        try {
+            DB::beginTransaction();
+            $design->update($input);
+            $this->storeDesignDetails($design, $input);
+            DB::commit();
+
+            return $this->sendResponse($this->makeResource($design->fresh('detail')),
+                __('messages.updated', ['module' => 'Design']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            DB::rollBack();
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
 
     /**
      * @param Design                 $design
@@ -194,6 +200,7 @@ class DesignController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
         $design->update($input);
+
         return $this->sendResponse($this->makeResource($design->fresh('detail')),
             __('messages.updated', ['module' => 'Design']),
             HTTPCode::OK);
@@ -235,7 +242,7 @@ class DesignController extends Controller
                     'threadColor.color',
                     'recipes' => function ($recipes) {
                         /** @var Builder $recipes */
-                        $recipes->withCount('salesOrders as used_count')->with([
+                        $recipes->with([
                             'fiddles.thread',
                             'fiddles.color'
                         ]);
@@ -246,20 +253,26 @@ class DesignController extends Controller
         ]);
 
 
+        foreach ($design->beams as $beam) {
+            /** @var DesignBeam $beam */
+            $beam->recipes->loadCount([
+                'salesOrders as used_count' => function ($salesOrderRecipes) use ($beam) {
+                    /** @var Builder $salesOrderRecipes */
+                    $salesOrderRecipes->whereHas('salesOrder', function ($salesOrder) use ($beam) {
+                        /** @var Builder $salesOrder */
+                        $salesOrder->where('design_beam_id','=', $beam->id);
+
+                    });
+
+                }
+            ]);
+
+        }
+
         return $this->sendResponse($this->makeResource($design),
             __('messages.retrieved', ['module' => 'Design']),
             HTTPCode::OK);
     }
-
-
-    /**
-     * @param Design $design
-     * @return DesignResource
-     */
-    private function makeResource($design) {
-        return new DesignResource($design);
-    }
-
 
     /**
      * @return JsonResponse
