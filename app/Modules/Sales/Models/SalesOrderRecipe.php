@@ -5,7 +5,9 @@ namespace App\Modules\Sales\Models;
 
 use App\Modules\Recipe\Models\Recipe;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -17,11 +19,8 @@ class SalesOrderRecipe extends Model
 
     use SoftDeletes;
 
-    protected $table = 'sales_orders_recipes';
-
-
     public $timestamps = false;
-
+    protected $table = 'sales_orders_recipes';
     protected $fillable = [
         'sales_order_id',
         'pcs',
@@ -39,9 +38,16 @@ class SalesOrderRecipe extends Model
         return $this->hasMany(RecipePartialOrder::class, 'sales_order_recipe_id', 'id');
     }
 
+    /**
+     * @return mixed
+     */
+    public function salesOrder() {
+        return $this->belongsTo(SalesOrder::class, 'sales_order_id', 'id');
+    }
+
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * @return HasOne
      */
     public function remainingQuantity() {
         return $this->hasOne(RecipePartialOrder::class, 'sales_order_recipe_id', 'id')
@@ -66,7 +72,7 @@ class SalesOrderRecipe extends Model
 
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function recipe() {
         return $this->belongsTo(Recipe::class, 'recipe_id', 'id');
