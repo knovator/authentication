@@ -3,6 +3,7 @@
 namespace App\Modules\Purchase\Models;
 
 use App\Modules\Customer\Models\Customer;
+use App\Modules\Sales\Models\PurchaseDelivery;
 use App\Modules\Stock\Models\Stock;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -35,7 +36,7 @@ class PurchaseOrder extends Model
         'created_by',
         'deleted_by',
         'deleted_at',
-//        'created_at',
+        //        'created_at',
         'updated_at'
     ];
 
@@ -58,6 +59,12 @@ class PurchaseOrder extends Model
         return $this->hasMany(PurchaseOrderThread::class, 'purchase_order_id', 'id');
     }
 
+    /**
+     * @return mixed
+     */
+    public function orderStocks() {
+        return $this->morphMany(Stock::class, 'order', 'order_type', 'order_id', 'id');
+    }
 
     /**
      * @return mixed
@@ -67,7 +74,6 @@ class PurchaseOrder extends Model
                     ->groupBy('purchase_order_id')
                     ->selectRaw('sum(kg_qty) as total,purchase_order_id');
     }
-
 
     /**
      * @return mixed
@@ -86,8 +92,7 @@ class PurchaseOrder extends Model
     /**
      * @return mixed
      */
-    public function orderStocks() {
-        return $this->morphMany(Stock::class, 'order', 'order_type', 'order_id', 'id');
+    public function deliveries() {
+        return $this->hasMany(PurchaseDelivery::class, 'purchase_order_id', 'id');
     }
-
 }
