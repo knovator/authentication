@@ -7,6 +7,7 @@ use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
 use App\Modules\Purchase\Http\Requests\Delivery\CreateRequest;
 use App\Modules\Purchase\Models\PurchaseOrder;
+use App\Modules\Purchase\Models\PurchasePartialOrder;
 use App\Modules\Purchase\Repositories\DeliveryRepository;
 use App\Modules\Purchase\Repositories\PurchasedThreadRepository;
 use App\Modules\Sales\Models\PurchaseDelivery;
@@ -231,7 +232,7 @@ class DeliveryController extends Controller
         ];
 
         if ($partialOrder) {
-            /** @var RecipePartialOrder $partialOrder */
+            /** @var PurchasePartialOrder $partialOrder */
             $stock['partial_order_id'] = $partialOrder->id;
         }
 
