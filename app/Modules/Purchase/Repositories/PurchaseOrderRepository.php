@@ -3,6 +3,7 @@
 namespace App\Modules\Purchase\Repositories;
 
 use App\Modules\Purchase\Models\PurchaseOrder;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
@@ -36,7 +37,7 @@ class PurchaseOrderRepository extends BaseRepository
      * @param       $export
      * @return mixed
      * @throws RepositoryException
-     * @throws \Exception
+     * @throws Exception
      */
     public function getPurchaseOrderList($input, $export = false) {
         $this->applyCriteria();
@@ -46,10 +47,10 @@ class PurchaseOrderRepository extends BaseRepository
             'threads.threadColor.color:id,name,code',
             'customer.state:id,name,code,gst_code',
             'status:id,name,code'
-        ])->select('purchase_orders.*');
+        ])->select('purchase_orders.*')->withCount('deliveries');
 
-        if (isset($input['ids']) && (!empty($input['ids']))){
-            $orders = $orders->whereIn('id',$input['ids']);
+        if (isset($input['ids']) && (!empty($input['ids']))) {
+            $orders = $orders->whereIn('id', $input['ids']);
         }
 
         if (isset($input['start_date'])) {

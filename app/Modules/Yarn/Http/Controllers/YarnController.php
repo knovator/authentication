@@ -168,7 +168,7 @@ class YarnController extends Controller
             $yarnOrder->load('status');
             if ($yarnOrder->status->code === MasterConstant::SO_DELIVERED) {
                 return $this->sendResponse(null,
-                    __('messages.can_not_delete_order'),
+                    __('messages.can_not_delete_complete_order'),
                     HTTPCode::UNPROCESSABLE_ENTITY);
             }
 

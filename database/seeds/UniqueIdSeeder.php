@@ -2,6 +2,7 @@
 
 use App\Repositories\GenerateIdRepository;
 use Illuminate\Database\Seeder;
+use Prettus\Validator\Exceptions\ValidatorException;
 
 /**
  * Class UniqueIdSeeder
@@ -23,7 +24,7 @@ class UniqueIdSeeder extends Seeder
      * Run the database seeds.
      *
      * @return void
-     * @throws \Prettus\Validator\Exceptions\ValidatorException
+     * @throws ValidatorException
      */
     public function run() {
 
@@ -57,6 +58,10 @@ class UniqueIdSeeder extends Seeder
             4 => [
                 'code'   => 'YARN_SALES',
                 'prefix' => 'YNSO'
+            ],
+            5 => [
+                'code'   => 'PO_DELIVERY',
+                'prefix' => 'PDN'
             ],
         ];
     }

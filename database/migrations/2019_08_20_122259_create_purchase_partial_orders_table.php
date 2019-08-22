@@ -1,9 +1,11 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
+/**
+ * Class CreatePurchasePartialOrdersTable
+ */
 class CreatePurchasePartialOrdersTable extends Migration
 {
 
@@ -24,7 +26,6 @@ class CreatePurchasePartialOrdersTable extends Migration
             $table->foreign('purchase_order_thread_id')->references('id')
                   ->on('purchase_order_threads');
         });
-
         Schema::table('purchase_deliveries', function (Blueprint $table) {
             $table->decimal('total_kg')->after('bill_no');
             $table->dropSoftDeletes();
