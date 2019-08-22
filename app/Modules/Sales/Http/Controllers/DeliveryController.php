@@ -113,62 +113,26 @@ class DeliveryController extends Controller
         }
     }
 
-
     /**
-     * @param SalesOrder    $salesOrder
-     * @param Delivery      $delivery
-     * @param UpdateRequest $request
-     * @return mixed
-     * @throws Exception
+     * @param      $salesOrder
+     * @param      $orders
+     * @param null $deliveryId
+     * @return bool
      */
-    public function update(SalesOrder $salesOrder, Delivery $delivery, UpdateRequest $request) {
-        $input = $request->all();
-        if ($this->checkQuantityNotExists($salesOrder, $input['orders'], $delivery->id)) {
-            return $this->sendResponse(null, __('messages.quantity_not_exists'),
-                HTTPCode::UNPROCESSABLE_ENTITY);
-        }
-        try {
-            DB::beginTransaction();
-            $delivery->update($input);
-            $this->partialOrderUpdateOrCreate($delivery, $input);
-            $this->storeStockDetails($salesOrder,
-                $this->masterRepository->findByCode(MasterConstant::SO_PENDING)->id);
-            DB::commit();
-
-            return $this->sendResponse($delivery->fresh($this->deliveryRepository->commonRelations()),
-                __('messages.updated', ['module' => 'Sales']),
-                HTTPCode::OK);
-        } catch (Exception $exception) {
-            DB::rollBack();
-            Log::error($exception);
-
-            return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
-        }
-    }
-
-
-    /**
-     * @param Delivery $delivery
-     * @param array    $input
-     */
-    private function partialOrderUpdateOrCreate(Delivery $delivery, $input) {
-        $partialOrders = [];
-        foreach ($input['orders'] as $order) {
-            if (isset($order['id'])) {
-                $delivery->partialOrders()->whereId($order['id'])->update($order);
-            } else {
-                $partialOrders[] = $order;
+    private function checkQuantityNotExists($salesOrder, $orders, $deliveryId = null) {
+        $orders = collect($orders)->groupBy('sales_order_recipe_id');
+        $orderRecipes = $this->orderRecipeRepository->getOrderRecipeList($salesOrder->id,
+            $deliveryId);
+        foreach ($orders as $key => $order) {
+            $totalMeters = $order->sum('total_meters');
+            $orderRecipe = $orderRecipes->find($key);
+            if ($orderRecipe->remaining_meters < $totalMeters) {
+                return true;
             }
         }
-        if (!empty($partialOrders)) {
-            $delivery->partialOrders()->createMany($partialOrders);
-        }
-        if (isset($input['removed_partial_orders'])) {
-            $delivery->partialOrders()->whereIn('id', $input['removed_partial_orders'])->delete();
-        }
-    }
 
+        return false;
+    }
 
     /**
      * @param SalesOrder $salesOrder
@@ -189,7 +153,6 @@ class DeliveryController extends Controller
         $salesOrder->orderStocks()->createMany($this->getStockQuantity($salesOrder,
             $pendingStatusId));
     }
-
 
     /**
      * @param $salesOrder
@@ -243,7 +206,6 @@ class DeliveryController extends Controller
         return $stockQty;
     }
 
-
     /**
      * @param         $orderRecipe
      * @param         $statusId
@@ -274,7 +236,6 @@ class DeliveryController extends Controller
         }
     }
 
-
     /**
      * @param      $orderRecipeId
      * @param      $threadColorId
@@ -301,33 +262,65 @@ class DeliveryController extends Controller
         if ($partialOrder) {
             /** @var RecipePartialOrder $partialOrder */
             $stock['partial_order_id'] = $partialOrder->id;
+            $stock['partial_order_type'] = 'sales_partial';
         }
 
         return $stock;
     }
 
-
     /**
-     * @param      $salesOrder
-     * @param      $orders
-     * @param null $deliveryId
-     * @return bool
+     * @param SalesOrder    $salesOrder
+     * @param Delivery      $delivery
+     * @param UpdateRequest $request
+     * @return mixed
+     * @throws Exception
      */
-    private function checkQuantityNotExists($salesOrder, $orders, $deliveryId = null) {
-        $orders = collect($orders)->groupBy('sales_order_recipe_id');
-        $orderRecipes = $this->orderRecipeRepository->getOrderRecipeList($salesOrder->id,
-            $deliveryId);
-        foreach ($orders as $key => $order) {
-            $totalMeters = $order->sum('total_meters');
-            $orderRecipe = $orderRecipes->find($key);
-            if ($orderRecipe->remaining_meters < $totalMeters) {
-                return true;
-            }
+    public function update(SalesOrder $salesOrder, Delivery $delivery, UpdateRequest $request) {
+        $input = $request->all();
+        if ($this->checkQuantityNotExists($salesOrder, $input['orders'], $delivery->id)) {
+            return $this->sendResponse(null, __('messages.quantity_not_exists'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
         }
+        try {
+            DB::beginTransaction();
+            $delivery->update($input);
+            $this->partialOrderUpdateOrCreate($delivery, $input);
+            $this->storeStockDetails($salesOrder,
+                $this->masterRepository->findByCode(MasterConstant::SO_PENDING)->id);
+            DB::commit();
 
-        return false;
+            return $this->sendResponse($delivery->fresh($this->deliveryRepository->commonRelations()),
+                __('messages.updated', ['module' => 'Sales']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            DB::rollBack();
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
     }
 
+    /**
+     * @param Delivery $delivery
+     * @param array    $input
+     */
+    private function partialOrderUpdateOrCreate(Delivery $delivery, $input) {
+        $partialOrders = [];
+        foreach ($input['orders'] as $order) {
+            if (isset($order['id'])) {
+                $delivery->partialOrders()->whereId($order['id'])->update($order);
+            } else {
+                $partialOrders[] = $order;
+            }
+        }
+        if (!empty($partialOrders)) {
+            $delivery->partialOrders()->createMany($partialOrders);
+        }
+        if (isset($input['removed_partial_orders'])) {
+            $delivery->partialOrders()->whereIn('id', $input['removed_partial_orders'])->delete();
+        }
+    }
 
     /**
      * @param SalesOrder $salesOrder
@@ -398,132 +391,6 @@ class DeliveryController extends Controller
 
     }
 
-
-    /**
-     * @param Delivery $delivery
-     * @param          $input
-     * @return JsonResponse
-     */
-    private function updateSOPENDINGStatus(Delivery $delivery, $input) {
-        try {
-            return $this->updateStatus($delivery, MasterConstant::SO_PENDING, $input);
-        } catch (Exception $exception) {
-            Log::error($exception);
-
-            return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
-        }
-
-
-    }
-
-
-    /**
-     * @param Delivery $delivery
-     * @param          $input
-     * @return JsonResponse
-     * @throws Exception
-     */
-    private function updateSOCANCELEDStatus(Delivery $delivery, $input) {
-        /** @var Master $status */
-        $status = $this->findMasterIdByCode(MasterConstant::SO_CANCELED);
-        try {
-
-            DB::beginTransaction();
-            $delivery->partialOrders()->delete();
-            $delivery->update(['status_id' => $status->id]);
-            $delivery->load('salesOrder');
-            $this->storeStockDetails($delivery->salesOrder,
-                $this->findMasterIdByCode(MasterConstant::SO_PENDING)->id);
-
-            DB::commit();
-
-            return $this->sendResponse($delivery->fresh(['status:id,name,code']),
-                __('messages.updated', ['module' => 'Status']),
-                HTTPCode::OK);
-        } catch (Exception $exception) {
-            DB::rollBack();
-            Log::error($exception);
-
-            return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
-        }
-
-
-    }
-
-
-    /**
-     * @param $code
-     * @return integer
-     */
-    private function findMasterIdByCode($code) {
-        return $this->masterRepository->findByCode($code);
-    }
-
-
-    /**
-     * @param Delivery $delivery
-     * @param          $input
-     * @return JsonResponse
-     */
-    private function updateSODELIVEREDStatus(Delivery $delivery, $input) {
-        try {
-            return $this->updateStatus($delivery, MasterConstant::SO_DELIVERED, $input);
-        } catch (Exception $exception) {
-            Log::error($exception);
-
-            return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
-        }
-
-    }
-
-    /**
-     * @param Delivery $delivery
-     * @param          $input
-     * @return JsonResponse
-     */
-    private function updateSOMANUFACTURINGStatus(Delivery $delivery, $input) {
-        try {
-            return $this->updateStatus($delivery, MasterConstant::SO_MANUFACTURING, $input);
-        } catch (Exception $exception) {
-            Log::error($exception);
-
-            return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
-        }
-
-    }
-
-
-    /**
-     * @param Delivery $delivery
-     * @param          $code
-     * @param          $input
-     * @return JsonResponse
-     * @throws Exception
-     */
-    private function updateStatus(Delivery $delivery, $code, $input) {
-        $status = $this->findMasterIdByCode($code);
-        try {
-            /** @var Master $status */
-            $input['status_id'] = $status->id;
-            DB::beginTransaction();
-            $delivery->orderStocks()->update(['status_id' => $status->id]);
-            $delivery->update($input);
-            DB::commit();
-
-            return $this->sendResponse($delivery->fresh(['status:id,name,code']),
-                __('messages.updated', ['module' => 'Status']),
-                HTTPCode::OK);
-        } catch (Exception $exception) {
-            DB::rollBack();
-            Log::error($exception);
-            throw $exception;
-        }
-    }
-
     /**
      * @param SalesOrder $salesOrder
      * @param Delivery   $delivery
@@ -581,6 +448,127 @@ class DeliveryController extends Controller
         return $pdf->download($delivery->delivery_no . '-accounting' . ".pdf");
 //        return view('receipts.sales-orders.accounting.accounting',
 //            compact('salesOrder', 'delivery'));
+    }
+
+    /**
+     * @param Delivery $delivery
+     * @param          $input
+     * @return JsonResponse
+     */
+    private function updateSOPENDINGStatus(Delivery $delivery, $input) {
+        try {
+            return $this->updateStatus($delivery, MasterConstant::SO_PENDING, $input);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+
+
+    }
+
+    /**
+     * @param Delivery $delivery
+     * @param          $code
+     * @param          $input
+     * @return JsonResponse
+     * @throws Exception
+     */
+    private function updateStatus(Delivery $delivery, $code, $input) {
+        $status = $this->findMasterIdByCode($code);
+        try {
+            /** @var Master $status */
+            $input['status_id'] = $status->id;
+            DB::beginTransaction();
+            $delivery->orderStocks()->update(['status_id' => $status->id]);
+            $delivery->update($input);
+            DB::commit();
+
+            return $this->sendResponse($delivery->fresh(['status:id,name,code']),
+                __('messages.updated', ['module' => 'Status']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            DB::rollBack();
+            Log::error($exception);
+            throw $exception;
+        }
+    }
+
+    /**
+     * @param $code
+     * @return integer
+     */
+    private function findMasterIdByCode($code) {
+        return $this->masterRepository->findByCode($code);
+    }
+
+    /**
+     * @param Delivery $delivery
+     * @param          $input
+     * @return JsonResponse
+     * @throws Exception
+     */
+    private function updateSOCANCELEDStatus(Delivery $delivery, $input) {
+        /** @var Master $status */
+        $status = $this->findMasterIdByCode(MasterConstant::SO_CANCELED);
+        try {
+
+            DB::beginTransaction();
+            $delivery->partialOrders()->delete();
+            $delivery->update(['status_id' => $status->id]);
+            $delivery->load('salesOrder');
+            $this->storeStockDetails($delivery->salesOrder,
+                $this->findMasterIdByCode(MasterConstant::SO_PENDING)->id);
+
+            DB::commit();
+
+            return $this->sendResponse($delivery->fresh(['status:id,name,code']),
+                __('messages.updated', ['module' => 'Status']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            DB::rollBack();
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+
+
+    }
+
+    /**
+     * @param Delivery $delivery
+     * @param          $input
+     * @return JsonResponse
+     */
+    private function updateSODELIVEREDStatus(Delivery $delivery, $input) {
+        try {
+            return $this->updateStatus($delivery, MasterConstant::SO_DELIVERED, $input);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+
+    }
+
+    /**
+     * @param Delivery $delivery
+     * @param          $input
+     * @return JsonResponse
+     */
+    private function updateSOMANUFACTURINGStatus(Delivery $delivery, $input) {
+        try {
+            return $this->updateStatus($delivery, MasterConstant::SO_MANUFACTURING, $input);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+
     }
 
 

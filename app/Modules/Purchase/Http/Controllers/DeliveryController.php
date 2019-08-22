@@ -184,6 +184,7 @@ class DeliveryController extends Controller
         if ($partialOrder) {
             /** @var PurchasePartialOrder $partialOrder */
             $stock['partial_order_id'] = $partialOrder->id;
+            $stock['partial_order_type'] = 'purchase_partial';
         }
 
         return $stock;

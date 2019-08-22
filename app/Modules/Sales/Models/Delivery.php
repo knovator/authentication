@@ -46,6 +46,12 @@ class Delivery extends Model
         });
     }
 
+    /**
+     * @return mixed
+     */
+    public function partialOrders() {
+        return $this->hasMany(RecipePartialOrder::class, 'delivery_id', 'id');
+    }
 
     /**
      * @return mixed
@@ -66,17 +72,9 @@ class Delivery extends Model
     /**
      * @return mixed
      */
-    public function partialOrders() {
-        return $this->hasMany(RecipePartialOrder::class, 'delivery_id', 'id');
-    }
-
-
-    /**
-     * @return mixed
-     */
     public function orderStocks() {
         return $this->hasManyThrough(Stock::class, RecipePartialOrder::class, 'delivery_id',
-            'partial_order_id', 'id', 'id');
+            'partial_order_id', 'id', 'id')->where('partial_order_type', '=', 'sales_partial');
     }
 
 }
