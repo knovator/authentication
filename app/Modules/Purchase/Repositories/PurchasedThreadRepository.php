@@ -28,7 +28,7 @@ class PurchasedThreadRepository extends BaseRepository
      * @param       $loadRelation
      * @return Collection
      */
-    public function getOrderRecipeList(
+    public function getPurchaseOrderList(
         $purchaseOrderId,
         $skipDeliveryId = null,
         $loadRelation = false

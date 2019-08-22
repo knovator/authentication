@@ -9,6 +9,7 @@ use App\Modules\Purchase\Http\Requests\CreateRequest;
 use App\Modules\Purchase\Http\Requests\StatusRequest;
 use App\Modules\Purchase\Http\Requests\UpdateRequest;
 use App\Modules\Purchase\Models\PurchaseOrder;
+use App\Modules\Purchase\Repositories\PurchasedThreadRepository;
 use App\Modules\Purchase\Repositories\PurchaseOrderRepository;
 use App\Modules\Purchase\Http\Resources\PurchaseOrder as PurchaseOrderResource;
 use App\Support\UniqueIdGenerator;
@@ -38,17 +39,22 @@ class PurchaseController extends Controller
 
     protected $masterRepository;
 
+    protected $purchasedThreadRepository;
+
     /**
      * PurchaseController constructor
-     * @param PurchaseOrderRepository $purchaseOrderRepository
-     * @param MasterRepository        $masterRepository
+     * @param PurchaseOrderRepository   $purchaseOrderRepository
+     * @param MasterRepository          $masterRepository
+     * @param PurchasedThreadRepository $purchasedThreadRepository
      */
     public function __construct(
         PurchaseOrderRepository $purchaseOrderRepository,
-        MasterRepository $masterRepository
+        MasterRepository $masterRepository,
+        PurchasedThreadRepository $purchasedThreadRepository
     ) {
         $this->purchaseOrderRepository = $purchaseOrderRepository;
         $this->masterRepository = $masterRepository;
+        $this->purchasedThreadRepository = $purchasedThreadRepository;
     }
 
     /**
@@ -86,6 +92,32 @@ class PurchaseController extends Controller
         }
     }
 
+    /**
+     * @param $purchaseOrder
+     * @param $input
+     */
+    private function storeStockOrders(PurchaseOrder $purchaseOrder, $input) {
+        $stockItems = [];
+        $purchaseOrder->load('threads');
+        foreach ($purchaseOrder->threads as $key => $purchasedThread) {
+            $stockItems[$key] = [
+                'product_id'          => $purchasedThread->thread_color_id,
+                'product_type'        => 'thread_color',
+                'kg_qty'              => $purchasedThread->kg_qty,
+                'status_id'           => $input['status_id'],
+                'purchased_thread_id' => $purchasedThread->id,
+            ];
+        }
+        $purchaseOrder->orderStocks()->createMany($stockItems);
+    }
+
+    /**
+     * @param $purchaseOrder
+     * @return PurchaseOrderResource
+     */
+    private function makeResource($purchaseOrder) {
+        return new PurchaseOrderResource($purchaseOrder);
+    }
 
     /**
      * @param PurchaseOrder $purchaseOrder
@@ -125,41 +157,6 @@ class PurchaseController extends Controller
         }
     }
 
-
-    /**
-     * @param Request $request
-     * @return JsonResponse|BinaryFileResponse
-     */
-    public function exportCsv(Request $request) {
-        try {
-            $purchases = $this->purchaseOrderRepository->getPurchaseOrderList($request->all(),
-                true);
-            if (($purchases = collect($purchases->getData()->data))->isEmpty()) {
-                return $this->sendResponse(null,
-                    __('messages.can_not_export', ['module' => 'Purchase orders']),
-                    HTTPCode::OK);
-            }
-
-            return $this->downloadCsv($purchases);
-        } catch (Exception $exception) {
-            Log::error($exception);
-
-            return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
-        }
-    }
-
-
-    /**
-     * @param $purchases
-     * @return BinaryFileResponse
-     */
-    private function downloadCsv($purchases) {
-        return Excel::download(new ExportPurchaseOrder($purchases),
-            'orders.xlsx');
-    }
-
-
     /**
      * @param $purchaseOrder
      * @param $input
@@ -186,6 +183,37 @@ class PurchaseController extends Controller
         $this->storeStockOrders($purchaseOrder, $input);
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse|BinaryFileResponse
+     */
+    public function exportCsv(Request $request) {
+        try {
+            $purchases = $this->purchaseOrderRepository->getPurchaseOrderList($request->all(),
+                true);
+            if (($purchases = collect($purchases->getData()->data))->isEmpty()) {
+                return $this->sendResponse(null,
+                    __('messages.can_not_export', ['module' => 'Purchase orders']),
+                    HTTPCode::OK);
+            }
+
+            return $this->downloadCsv($purchases);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
+
+    /**
+     * @param $purchases
+     * @return BinaryFileResponse
+     */
+    private function downloadCsv($purchases) {
+        return Excel::download(new ExportPurchaseOrder($purchases),
+            'orders.xlsx');
+    }
 
     /**
      * @param StatusRequest $request
@@ -207,6 +235,70 @@ class PurchaseController extends Controller
 
     }
 
+    /**
+     * @param PurchaseOrder $purchaseOrder
+     * @return JsonResponse
+     */
+    public function show(PurchaseOrder $purchaseOrder) {
+        $purchaseOrder->load([
+            'threads.threadColor.thread',
+            'threads.threadColor.color',
+            'customer',
+            'status'
+        ]);
+
+        return $this->sendResponse($this->makeResource($purchaseOrder),
+            __('messages.retrieved', ['module' => 'Purchase Order']),
+            HTTPCode::OK);
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function index(Request $request) {
+        try {
+            $orders = $this->purchaseOrderRepository->getPurchaseOrderList($request->all());
+
+            return $this->sendResponse($orders,
+                __('messages.retrieved', ['module' => 'Orders']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+    }
+
+    /**
+     * @param PurchaseOrder $purchaseOrder
+     * @return JsonResponse
+     */
+    public function destroy(PurchaseOrder $purchaseOrder) {
+        try {
+            $purchaseOrder->load('status')->loadCount('deliveries');
+            if ($purchaseOrder->deliveries_count) {
+                return $this->sendResponse(null,
+                    __('messages.order_has_deliveries_not_delete'),
+                    HTTPCode::UNPROCESSABLE_ENTITY);
+            }
+
+            if ($purchaseOrder->status->code === MasterConstant::PO_DELIVERED) {
+                return $this->sendResponse(null,
+                    __('messages.can_not_delete_complete_order'),
+                    HTTPCode::UNPROCESSABLE_ENTITY);
+            }
+
+            return $this->destroyModelObject([], $purchaseOrder, 'Purchase Order');
+
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
 
     /**
      * @param PurchaseOrder $purchaseOrder
@@ -218,7 +310,6 @@ class PurchaseController extends Controller
         return $this->updateStatus($purchaseOrder, $input);
 
     }
-
 
     /**
      * @param $purchaseOrder
@@ -256,11 +347,13 @@ class PurchaseController extends Controller
      * @throws Exception
      */
     private function updatePODELIVEREDStatus(PurchaseOrder $purchaseOrder, $input) {
-
-        if (!isset($input['challan_no'])) {
-            return $this->sendResponse(null, 'Challan Number is must be required',
+        $purchasedThreads = $this->purchasedThreadRepository->getPurchaseOrderList($purchaseOrder->id);
+        if ((int) $purchasedThreads->sum('remaining_kg_qty')) {
+            return $this->sendResponse(null,
+                __('messages.purchase_deliveries_must_complete'),
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
+
         try {
             return $this->updateStatus($purchaseOrder, $input);
         } catch (Exception $exception) {
@@ -272,26 +365,6 @@ class PurchaseController extends Controller
 
     }
 
-
-    /**
-     * @param $purchaseOrder
-     * @param $input
-     */
-    private function storeStockOrders(PurchaseOrder $purchaseOrder, $input) {
-        $stockItems = [];
-        $purchaseOrder->load('threads');
-        foreach ($purchaseOrder->threads as $key => $purchasedThread) {
-            $stockItems[$key] = [
-                'product_id'   => $purchasedThread->thread_color_id,
-                'product_type' => 'thread_color',
-                'kg_qty'       => $purchasedThread->kg_qty,
-                'status_id'    => $input['status_id'],
-                'purchased_thread_id'    => $purchasedThread->id,
-            ];
-        }
-        $purchaseOrder->orderStocks()->createMany($stockItems);
-    }
-
     /**
      * @param PurchaseOrder $purchaseOrder
      * @param               $input
@@ -299,76 +372,14 @@ class PurchaseController extends Controller
      * @throws Exception
      */
     private function updatePOCANCELEDStatus(PurchaseOrder $purchaseOrder, $input) {
-        return $this->updateStatus($purchaseOrder, $input);
-    }
-
-    /**
-     * @param PurchaseOrder $purchaseOrder
-     * @return JsonResponse
-     */
-    public function show(PurchaseOrder $purchaseOrder) {
-        $purchaseOrder->load([
-            'threads.threadColor.thread',
-            'threads.threadColor.color',
-            'customer',
-            'status'
-        ]);
-
-        return $this->sendResponse($this->makeResource($purchaseOrder),
-            __('messages.retrieved', ['module' => 'Purchase Order']),
-            HTTPCode::OK);
-    }
-
-
-    /**
-     * @param $purchaseOrder
-     * @return PurchaseOrderResource
-     */
-    private function makeResource($purchaseOrder) {
-        return new PurchaseOrderResource($purchaseOrder);
-    }
-
-
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function index(Request $request) {
-        try {
-            $orders = $this->purchaseOrderRepository->getPurchaseOrderList($request->all());
-
-            return $this->sendResponse($orders,
-                __('messages.retrieved', ['module' => 'Orders']),
-                HTTPCode::OK);
-        } catch (Exception $exception) {
-            Log::error($exception);
-
-            return $this->sendResponse(null, __('messages.something_wrong'),
+        $purchaseOrder->loadCount('deliveries');
+        if ($purchaseOrder->deliveries_count) {
+            return $this->sendResponse(null,
+                __('messages.order_has_deliveries_not_cancel'),
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
-    }
 
-    /**
-     * @param PurchaseOrder $purchaseOrder
-     * @return JsonResponse
-     */
-    public function destroy(PurchaseOrder $purchaseOrder) {
-        try {
-            $purchaseOrder->load('status');
-            if ($purchaseOrder->status->code === MasterConstant::PO_DELIVERED) {
-                return $this->sendResponse(null,
-                    __('messages.can_not_delete_order'),
-                    HTTPCode::UNPROCESSABLE_ENTITY);
-            }
-
-            return $this->destroyModelObject([], $purchaseOrder, 'Purchase Order');
-
-        } catch (Exception $exception) {
-            Log::error($exception);
-
-            return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
-        }
+        return $this->updateStatus($purchaseOrder, $input);
     }
 
 }

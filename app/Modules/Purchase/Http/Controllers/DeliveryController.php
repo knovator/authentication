@@ -104,7 +104,7 @@ class DeliveryController extends Controller
      */
     private function checkQuantityNotExists($purchaseOrder, $orders, $deliveryId = null) {
         $orders = collect($orders)->groupBy('purchase_order_thread_id');
-        $purchasedThreads = $this->purchasedThreadRepository->getOrderRecipeList($purchaseOrder->id,
+        $purchasedThreads = $this->purchasedThreadRepository->getPurchaseOrderList($purchaseOrder->id,
             $deliveryId);
         foreach ($orders as $key => $order) {
             $orderThreads = $purchasedThreads->find($key);
