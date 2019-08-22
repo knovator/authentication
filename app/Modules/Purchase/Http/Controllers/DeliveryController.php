@@ -20,6 +20,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Knovators\Support\Helpers\HTTPCode;
 use Log;
+use Prettus\Repository\Exceptions\RepositoryException;
 
 /**
  * Class DeliveryController
@@ -117,16 +118,19 @@ class DeliveryController extends Controller
 
     /**
      * @param PurchaseOrder $purchaseOrder
-     * @param array         $orderIds
+     * @param array         $orderThreadIds
+     * @throws RepositoryException
      */
     private function storeStockDetails(
         PurchaseOrder $purchaseOrder,
-        array $orderIds
+        array $orderThreadIds
     ) {
+        $this->stockRepository->makeModel()->whereIn('purchased_thread_id',
+            $orderThreadIds)->delete();
         $purchaseOrder->load([
-            'threads' => function ($threads) use ($orderIds) {
+            'threads' => function ($threads) use ($orderThreadIds) {
                 /** @var Builder $threads */
-                $threads->whereKey($orderIds)->with(['partialOrders.delivery']);
+                $threads->whereKey($orderThreadIds)->with(['partialOrders.delivery']);
             },
         ]);
         $purchaseOrder->orderStocks()->createMany($this->getStockQuantity($purchaseOrder));
@@ -139,6 +143,8 @@ class DeliveryController extends Controller
     private function getStockQuantity($purchaseOrder) {
         $stockQty = [];
         $pendingStatusId = $this->masterRepository->findByCode(MasterConstant::PO_PENDING)->id;
+
+
         foreach ($purchaseOrder->threads as $orderThread) {
             // create partial order stocks
             foreach ($orderThread->partialOrders as $partialOrder) {

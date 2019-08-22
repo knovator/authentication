@@ -286,6 +286,7 @@ class PurchaseController extends Controller
                 'product_type' => 'thread_color',
                 'kg_qty'       => $purchasedThread->kg_qty,
                 'status_id'    => $input['status_id'],
+                'purchased_thread_id'    => $purchasedThread->id,
             ];
         }
         $purchaseOrder->orderStocks()->createMany($stockItems);

@@ -48,7 +48,8 @@ class   CreateRequest extends FormRequest
     public function messages() {
 
         return [
-            'delivery_date.after_or_equal' => 'Delivery date must be an after or equal to order date'
+            'delivery_date.after_or_equal' => 'Delivery date must be an after or equal to order date',
+            'bill_no.required'             => 'Challan number is required'
         ];
 
     }
