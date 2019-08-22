@@ -6,16 +6,14 @@ use App\Constants\GenerateNumber;
 use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
 use App\Modules\Purchase\Http\Requests\Delivery\CreateRequest;
+use App\Modules\Purchase\Models\PurchaseDelivery;
 use App\Modules\Purchase\Models\PurchaseOrder;
 use App\Modules\Purchase\Models\PurchaseOrderThread;
 use App\Modules\Purchase\Models\PurchasePartialOrder;
 use App\Modules\Purchase\Repositories\DeliveryRepository;
 use App\Modules\Purchase\Repositories\PurchasedThreadRepository;
-use App\Modules\Purchase\Models\PurchaseDelivery;
 use App\Modules\Stock\Repositories\StockRepository;
-use App\Modules\Thread\Constants\ThreadType;
 use App\Repositories\MasterRepository;
-use App\Support\Formula;
 use App\Support\UniqueIdGenerator;
 use DB;
 use Exception;
@@ -150,7 +148,7 @@ class DeliveryController extends Controller
             /** @var PurchaseOrderThread $orderThread */
             $remainingKgQty = ($orderThread->kg_qty - $orderThread->partialOrders->sum('kg_qty'));
             // create remaining order stocks
-            if ($remainingKgQty != 0) {
+            if ($remainingKgQty) {
                 $stockQty[] = $this->setStockArray($orderThread,
                     $pendingStatusId, $remainingKgQty);
 
