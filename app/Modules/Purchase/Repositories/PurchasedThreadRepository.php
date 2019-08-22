@@ -34,7 +34,7 @@ class PurchasedThreadRepository extends BaseRepository
         $loadRelation = false
     ) {
         $purchasedThreads = $this->model->with([
-            'remainingKg' => function ($remainingQuantity) use ($skipDeliveryId) {
+            'remainingQuantity' => function ($remainingQuantity) use ($skipDeliveryId) {
                 /** @var Builder $remainingQuantity */
                 if (isset($skipDeliveryId)) {
                     $remainingQuantity->where('delivery_id', '<>', $skipDeliveryId);

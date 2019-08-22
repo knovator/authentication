@@ -3,7 +3,6 @@
 namespace App\Modules\Purchase\Models;
 
 use App\Modules\Customer\Models\Customer;
-use App\Modules\Sales\Models\PurchaseDelivery;
 use App\Modules\Stock\Models\Stock;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;

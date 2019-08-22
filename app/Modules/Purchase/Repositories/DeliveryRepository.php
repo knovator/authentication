@@ -2,7 +2,7 @@
 
 namespace App\Modules\Purchase\Repositories;
 
-use App\Modules\Sales\Models\PurchaseDelivery;
+use App\Modules\Purchase\Models\PurchaseDelivery;
 use Knovators\Support\Traits\BaseRepository;
 
 /**

@@ -1,21 +1,18 @@
 <?php
 
-namespace App\Modules\Sales\Models;
+namespace App\Modules\Purchase\Models;
 
 
 use App\Models\Master;
-use App\Modules\Purchase\Models\PurchasePartialOrder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class PurchaseDelivery
- * @package App\Modules\Sales\Models
+ * @package App\Modules\Purchase\Models
  */
 class PurchaseDelivery extends Model
 {
-
-    use SoftDeletes;
 
     protected $table = 'purchase_deliveries';
 
@@ -32,19 +29,7 @@ class PurchaseDelivery extends Model
     protected $hidden = [
         'created_at',
         'updated_at',
-        'deleted_at'
     ];
-
-
-    public static function boot() {
-        parent::boot();
-        static::deleting(function (PurchaseDelivery $delivery) {
-            $delivery->partialOrders->each(function (RecipePartialOrder $recipePartialOrder) {
-                $recipePartialOrder->stocks()->delete();
-            });
-            $delivery->partialOrders()->delete();
-        });
-    }
 
     /**
      * @return mixed

@@ -9,7 +9,7 @@ use Knovators\Support\Traits\APIResponse;
  * Class CreateRequest
  * @package App\Modules\Purchase\Http\Requests
  */
-class CreateRequest extends FormRequest
+class   CreateRequest extends FormRequest
 {
 
     use APIResponse;
@@ -34,7 +34,7 @@ class CreateRequest extends FormRequest
                 . $this->purchase->order_date,
             'bill_no'                           => 'required|string',
             'orders'                            => 'required|array',
-            'orders.*.purchase_order_thread_id' => 'required|integer|exists:purchase_partial_orders,id',
+            'orders.*.purchase_order_thread_id' => 'required|integer|exists:purchase_order_threads,id,purchase_order_id,' . $this->purchase->id,
             'orders.*.kg_qty'                   => 'required|numeric',
         ];
     }

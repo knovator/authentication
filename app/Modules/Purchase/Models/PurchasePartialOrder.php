@@ -4,7 +4,6 @@ namespace App\Modules\Purchase\Models;
 
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class PurchasePartialOrder
@@ -12,8 +11,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class PurchasePartialOrder extends Model
 {
-
-    use SoftDeletes;
 
     public $timestamps = false;
 
@@ -26,8 +23,13 @@ class PurchasePartialOrder extends Model
         'delivery_id',
     ];
 
-    protected $hidden = [
-        'deleted_at'
-    ];
+
+    /**
+     * @return mixed
+     */
+    public function delivery() {
+        return $this->belongsTo(PurchaseDelivery::class, 'delivery_id',
+            'id');
+    }
 
 }

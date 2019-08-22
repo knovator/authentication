@@ -7,10 +7,11 @@ use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
 use App\Modules\Purchase\Http\Requests\Delivery\CreateRequest;
 use App\Modules\Purchase\Models\PurchaseOrder;
+use App\Modules\Purchase\Models\PurchaseOrderThread;
 use App\Modules\Purchase\Models\PurchasePartialOrder;
 use App\Modules\Purchase\Repositories\DeliveryRepository;
 use App\Modules\Purchase\Repositories\PurchasedThreadRepository;
-use App\Modules\Sales\Models\PurchaseDelivery;
+use App\Modules\Purchase\Models\PurchaseDelivery;
 use App\Modules\Stock\Repositories\StockRepository;
 use App\Modules\Thread\Constants\ThreadType;
 use App\Repositories\MasterRepository;
@@ -67,18 +68,21 @@ class DeliveryController extends Controller
      */
     public function store(PurchaseOrder $purchaseOrder, CreateRequest $request) {
         $input = $request->all();
-        if ($this->checkQuantityNotExists($purchaseOrder, $input['orders'])) {
+        $orders = collect($input['orders']);
+        if ($this->checkQuantityNotExists($purchaseOrder, $orders)) {
             return $this->sendResponse(null, __('messages.quantity_not_exists'),
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
-        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::SO_PENDING)->id;
+        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::PO_DELIVERED)->id;
         $input['delivery_no'] = $this->generateUniqueId(GenerateNumber::PO_DELIVERY);
+        $input['total_kg'] = $orders->sum('kg_qty');
         try {
             DB::beginTransaction();
             $delivery = $purchaseOrder->deliveries()->create($input);
             /** @var PurchaseDelivery $delivery */
             $delivery->partialOrders()->createMany($input['orders']);
-            $this->storeStockDetails($purchaseOrder, $input['status_id']);
+            $this->storeStockDetails($purchaseOrder,
+                $orders->pluck('purchase_order_thread_id')->toArray());
             DB::commit();
 
             return $this->sendResponse($delivery,
@@ -105,7 +109,7 @@ class DeliveryController extends Controller
             $deliveryId);
         foreach ($orders as $key => $order) {
             $orderThreads = $purchasedThreads->find($key);
-            if ($orderThreads->remaining_kg < $order->kg_qty) {
+            if ($orderThreads->remaining_kg_qty < $order->sum('kg_qty')) {
                 return true;
             }
         }
@@ -115,61 +119,41 @@ class DeliveryController extends Controller
 
     /**
      * @param PurchaseOrder $purchaseOrder
-     * @param               $pendingStatusId
+     * @param               $statusId
+     * @param array         $orderIds
      */
-    private function storeStockDetails(PurchaseOrder $purchaseOrder, $statusId) {
-        $purchaseOrder->orderStocks()->delete();
+    private function storeStockDetails(
+        PurchaseOrder $purchaseOrder,
+        array $orderIds
+    ) {
         $purchaseOrder->load([
-            'orderRecipes.partialOrders.delivery',
+            'threads' => function ($threads) use ($orderIds) {
+                /** @var Builder $threads */
+                $threads->whereKey($orderIds)->with(['partialOrders.delivery']);
+            },
         ]);
-        $purchaseOrder->orderStocks()->createMany($this->getStockQuantity($purchaseOrder,
-            $statusId));
+        $purchaseOrder->orderStocks()->createMany($this->getStockQuantity($purchaseOrder));
     }
 
     /**
      * @param $purchaseOrder
-     * @param $pendingStatusId
      * @return array
      */
-    private function getStockQuantity($purchaseOrder, $pendingStatusId) {
+    private function getStockQuantity($purchaseOrder) {
         $stockQty = [];
-        $formula = Formula::getInstance();
-        $designDetail = $purchaseOrder->design->detail;
-        $designPicks = $purchaseOrder->design->fiddlePicks;
-        $beam = $purchaseOrder->designBeam->threadColor;
-        foreach ($purchaseOrder->orderRecipes as $orderRecipe) {
-
+        $pendingStatusId = $this->masterRepository->findByCode(MasterConstant::PO_PENDING)->id;
+        foreach ($purchaseOrder->threads as $orderThread) {
             // create partial order stocks
-            if ($orderRecipe->partialOrders->isNotEmpty()) {
-                foreach ($orderRecipe->partialOrders as $partialOrder) {
-                    // weft partial order per recipe thread color stock
-                    $this->createStockQuantity($orderRecipe,
-                        $partialOrder->delivery->status_id, $formula, $designDetail,
-                        $partialOrder->total_meters, $designPicks, $stockQty, $partialOrder);
-
-                    // warp partial order per recipe thread color stock
-                    $stockQty[] = $this->setStockArray($orderRecipe->id, $beam->id,
-                        $partialOrder->delivery->status_id,
-                        $formula->getTotalKgQty(ThreadType::WARP,
-                            $beam->thread, $designDetail,
-                            $partialOrder->total_meters), $partialOrder);
-                }
+            foreach ($orderThread->partialOrders as $partialOrder) {
+                $stockQty[] = $this->setStockArray($orderThread->id, $orderThread->thread_color_id,
+                    $partialOrder->delivery->status_id, $partialOrder->kg_qty, $partialOrder);
             }
-
-            $remainingMeters = ($orderRecipe->total_meters - $orderRecipe->partialOrders->sum('total_meters'));
+            /** @var PurchaseOrderThread $orderThread */
+            $remainingKgQty = ($orderThread->kg_qty - $orderThread->partialOrders->sum('kg_qty'));
             // create remaining order stocks
-            if ($remainingMeters) {
-                // weft remaining meters thread color stock
-                $this->createStockQuantity($orderRecipe,
-                    $pendingStatusId, $formula, $designDetail,
-                    $remainingMeters, $designPicks, $stockQty);
-
-                // warp remaining meters thread color stock
-                $stockQty[] = $this->setStockArray($orderRecipe->id, $beam->id,
-                    $pendingStatusId,
-                    $formula->getTotalKgQty(ThreadType::WARP,
-                        $beam->thread, $designDetail,
-                        $remainingMeters));
+            if ($remainingKgQty) {
+                $stockQty[] = $this->setStockArray($orderThread->id, $orderThread->thread_color_id,
+                    $pendingStatusId, $remainingKgQty);
 
             }
 
@@ -179,41 +163,11 @@ class DeliveryController extends Controller
     }
 
     /**
-     * @param         $orderRecipe
-     * @param         $statusId
-     * @param Formula $formula
-     * @param         $designDetail
-     * @param         $totalMeters
-     * @param         $designPicks
-     * @param         $stockQty
-     * @param bool    $partialOrder
-     */
-    private function createStockQuantity(
-        $orderRecipe,
-        $statusId,
-        Formula $formula,
-        $designDetail,
-        $totalMeters,
-        $designPicks,
-        &$stockQty,
-        $partialOrder = false
-    ) {
-        foreach ($orderRecipe->recipe->fiddles as $threadColorKey => $threadColor) {
-            $threadColor->thread->pick = $designPicks[$threadColorKey]->pick;
-            $stockQty[] = $this->setStockArray($orderRecipe->id, $threadColor['id'],
-                $statusId,
-                $formula->getTotalKgQty(ThreadType::WEFT,
-                    $threadColor->thread, $designDetail,
-                    $totalMeters), $partialOrder);
-        }
-    }
-
-    /**
-     * @param      $orderRecipeId
-     * @param      $threadColorId
-     * @param      $statusId
-     * @param      $kgQty
-     * @param bool $partialOrder
+     * @param                      $orderRecipeId
+     * @param                      $threadColorId
+     * @param                      $statusId
+     * @param                      $kgQty
+     * @param bool                 $partialOrder
      * @return array
      */
     private function setStockArray(
@@ -230,7 +184,6 @@ class DeliveryController extends Controller
             'status_id'       => $statusId,
             'kg_qty'          => $kgQty,
         ];
-
         if ($partialOrder) {
             /** @var PurchasePartialOrder $partialOrder */
             $stock['partial_order_id'] = $partialOrder->id;
