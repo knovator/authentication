@@ -119,7 +119,6 @@ class DeliveryController extends Controller
 
     /**
      * @param PurchaseOrder $purchaseOrder
-     * @param               $statusId
      * @param array         $orderIds
      */
     private function storeStockDetails(
@@ -145,14 +144,14 @@ class DeliveryController extends Controller
         foreach ($purchaseOrder->threads as $orderThread) {
             // create partial order stocks
             foreach ($orderThread->partialOrders as $partialOrder) {
-                $stockQty[] = $this->setStockArray($orderThread->id, $orderThread->thread_color_id,
+                $stockQty[] = $this->setStockArray($orderThread,
                     $partialOrder->delivery->status_id, $partialOrder->kg_qty, $partialOrder);
             }
             /** @var PurchaseOrderThread $orderThread */
             $remainingKgQty = ($orderThread->kg_qty - $orderThread->partialOrders->sum('kg_qty'));
             // create remaining order stocks
-            if ($remainingKgQty) {
-                $stockQty[] = $this->setStockArray($orderThread->id, $orderThread->thread_color_id,
+            if ($remainingKgQty != 0) {
+                $stockQty[] = $this->setStockArray($orderThread,
                     $pendingStatusId, $remainingKgQty);
 
             }
@@ -163,26 +162,24 @@ class DeliveryController extends Controller
     }
 
     /**
-     * @param                      $orderRecipeId
-     * @param                      $threadColorId
+     * @param                      $orderThread
      * @param                      $statusId
      * @param                      $kgQty
      * @param bool                 $partialOrder
      * @return array
      */
     private function setStockArray(
-        $orderRecipeId,
-        $threadColorId,
+        $orderThread,
         $statusId,
         $kgQty,
         $partialOrder = false
     ) {
         $stock = [
-            'order_recipe_id' => $orderRecipeId,
-            'product_id'      => $threadColorId,
-            'product_type'    => 'thread_color',
-            'status_id'       => $statusId,
-            'kg_qty'          => $kgQty,
+            'purchased_thread_id' => $orderThread->id,
+            'product_id'          => $orderThread->thread_color_id,
+            'product_type'        => 'thread_color',
+            'status_id'           => $statusId,
+            'kg_qty'              => $kgQty,
         ];
         if ($partialOrder) {
             /** @var PurchasePartialOrder $partialOrder */
