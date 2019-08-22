@@ -46,12 +46,5 @@ class PurchaseDelivery extends Model
             'id');
     }
 
-    /**
-     * @return mixed
-     */
-//    public function orderStocks() {
-//        return $this->hasManyThrough(Stock::class, RecipePartialOrder::class, 'delivery_id',
-//            'partial_order_id', 'id', 'id');
-//    }
 
 }
