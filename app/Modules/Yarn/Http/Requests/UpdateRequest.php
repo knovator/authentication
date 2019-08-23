@@ -32,6 +32,7 @@ class UpdateRequest extends FormRequest
         return [
             'order_date'                => 'required|date_format:Y-m-d',
             'customer_id'               => 'required|exists:customers,id',
+            'manufacturing_company_id'  => 'sometimes|required',
             'threads'                   => 'required|array',
             'threads.*.thread_color_id' => 'required|integer',
             'threads.*.kg_qty'          => 'required|numeric',

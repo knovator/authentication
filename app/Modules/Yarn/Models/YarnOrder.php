@@ -27,7 +27,8 @@ class YarnOrder extends Model
         'status_id',
         'challan_no',
         'created_by',
-        'deleted_by'
+        'deleted_by' .
+        'manufacturing_company_id'
     ];
 
 
@@ -50,16 +51,6 @@ class YarnOrder extends Model
         self::deletedEvent();
     }
 
-
-    /**
-     * @return mixed
-     */
-    public function threadQty() {
-        return $this->hasOne(YarnOrderThread::class, 'yarn_order_id', 'id')
-                    ->groupBy('yarn_order_id')
-                    ->selectRaw('sum(kg_qty) as total,yarn_order_id');
-    }
-
     /**
      * @return mixed
      */
@@ -77,6 +68,15 @@ class YarnOrder extends Model
     /**
      * @return mixed
      */
+    public function threadQty() {
+        return $this->hasOne(YarnOrderThread::class, 'yarn_order_id', 'id')
+                    ->groupBy('yarn_order_id')
+                    ->selectRaw('sum(kg_qty) as total,yarn_order_id');
+    }
+
+    /**
+     * @return mixed
+     */
     public function customer() {
         return $this->belongsTo(Customer::class, 'customer_id', 'id');
     }
@@ -87,7 +87,6 @@ class YarnOrder extends Model
     public function status() {
         return $this->belongsTo(Master::class, 'status_id', 'id');
     }
-
 
 
 }

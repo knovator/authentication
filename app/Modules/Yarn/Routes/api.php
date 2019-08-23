@@ -15,6 +15,11 @@ Route::group([
 
         Route::get('yarns-statuses', 'YarnController@statuses')
              ->name('yarns.statuses');
+
+        Route::put('yarns/{yarn}/payment-approve', 'YarnController@updatePayment')
+             ->name('yarns.payment-approve');
+
+        Route::post('yarns/send-mail-to-customer/{yarn}', 'YarnController@sendMailToCustomer');
     });
 Route::group([
     'prefix' => 'admin',
@@ -22,6 +27,9 @@ Route::group([
     function () {
         Route::get('yarns/orders/export', 'YarnController@exportCsv')
              ->name('yarns.export');
+
+        Route::get('yarns/{yarn}/export-summary', 'YarnController@exportSummary')
+             ->name('yarns.export.summary');
     });
 
 
