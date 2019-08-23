@@ -29,6 +29,6 @@ trait ExportYarnOrderSummary
         ]);
 
         return SnappyPdf::loadView('receipts.yarn-orders.main_summary.summary',
-            compact('salesOrder', 'isInvoice'));
+            compact('yarnOrder'));
     }
 }

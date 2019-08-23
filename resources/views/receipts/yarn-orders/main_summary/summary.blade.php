@@ -67,16 +67,13 @@
                             <div><b>{{strtoupper($yarnOrder->customer->full_name)}}</b></div>
                             <div>
                                 <small>
-                                    {{strtoupper($yarnOrder->customer->address.', '.$yarnOrder->customer->city_name)}}
-                                    .
+                                    {{strtoupper($yarnOrder->customer->address)}}
                                 </small>
                             </div>
-                            <div><b>PHONE NO :</b> {{$yarnOrder->customer->phone}}</div>
-                            <div><b>State :</b> {{strtoupper($yarnOrder->customer->state->name)}} {{--&amp; <b>Code :</b>
-                                 24--}}
+                            <div><b>State :</b> {{strtoupper($yarnOrder->customer->state->name)}}
                             </div>
+                            <div><b>PHONE NO :</b> {{$yarnOrder->customer->phone}}</div>
                             <div><b>GST NO :</b> {{strtoupper($yarnOrder->customer->gst_no)}}</div>
-                            <div><b>PO NO :</b> {{strtoupper($yarnOrder->customer_po_number)}}</div>
                         </td>
                     </tr>
                     <tr></tr>
@@ -86,7 +83,6 @@
                     <tbody>
                     <tr>
                         <td class="text-left label"><b>ORDER NO</b>: {{$yarnOrder->order_no}}</td>
-                        <td class="text-left label"><b>DESIGN NAME</b>: {{$yarnOrder->design->quality_name}}</td>
                         <td class="text-left label"><b>ORDER
                                 DATE</b>: {{\Carbon\Carbon::parse($yarnOrder->order_date)->format('d M Y')}}</td>
                     </tr>
@@ -102,7 +98,7 @@
         <thead>
         <tr>
             <th class="sr-no text-left">#</th>
-            <th class="text-left">Colors</th>
+            <th class="text-left">Threads</th>
             <th>Quantity (Mtr.)</th>
             <th>Rate (INR)</th>
             <th class="text-right">Amount</th>
@@ -114,22 +110,22 @@
 
         @php
             $totalQuantity = 0;
-            $totalRate = 0;
+            $price = 0;
         @endphp
 
         @foreach($yarnOrder->threads as $orderThreadKey => $orderThread)
             @php
                 $totalQuantity = $totalQuantity +  $orderThread->kg_qty;
-                $totalRate = $totalRate +  $orderThread->rate;
+                $price = $price + ($orderThread->kg_qty * $orderThread->rate);
+
             @endphp
 
             <tr>
                 <td class="sr-no text-left"><b>{{$orderThreadKey + 1}}</b></td>
-                <td class="text-center">
-                    <span class="color-preview -block -no-color" style="background-color: aquamarine">({{$orderThread->thread->denier}})</span>{{$orderThread->thread->name}}
-                    ({{$orderThread->color->name}})
+                <td class="text-center">{{'('.$orderThread->threadColor->thread->denier.') '}}{{$orderThread->threadColor->thread->name}}
+                    {{'('.$orderThread->threadColor->color->name.')'}}
                 </td>
-                <td class="text-center"><b>{{$orderThread->kg_qty}}</b></td>
+                <td class="text-center">{{$orderThread->kg_qty}}</td>
                 <td class="text-center">{{$orderThread->rate}}</td>
                 <td class="text-right">{{$orderThread->kg_qty * $orderThread->rate}}</td>
             </tr>
@@ -137,10 +133,6 @@
 
 
         @endforeach
-
-        @php
-            $price = $totalQuantity * $totalRate;
-        @endphp
 
         </tbody>
         <tfoot>
@@ -238,7 +230,7 @@
                             </td>
                             <td class="text-right"
                                 style="border-bottom: 0;    float: right;"><img class="rupee-sign"
-                                                                                src="{{asset('img/rupee.png')}}">{{$price = $price + (($price / 100) * 5) }}
+                                                                                src="{{asset('img/rupee.png')}}">{{$price = $price + (($price / 100) * 12) }}
                             </td>
                         </tr>
                         <tr></tr>
