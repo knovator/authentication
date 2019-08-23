@@ -6,8 +6,10 @@ use App\Constants\GenerateNumber;
 use App\Constants\Master;
 use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
+use App\Jobs\YarnOrderFormJob;
 use App\Modules\Yarn\Exports\YarnOrder as ExportYarnOrder;
 use App\Modules\Yarn\Http\Requests\CreateRequest;
+use App\Modules\Yarn\Http\Requests\MailRequest;
 use App\Modules\Yarn\Http\Requests\PaymentRequest;
 use App\Modules\Yarn\Http\Requests\StatusRequest;
 use App\Modules\Yarn\Http\Requests\UpdateRequest;
@@ -319,6 +321,33 @@ class YarnController extends Controller
     public function exportSummary(YarnOrder $yarnOrder) {
         return $this->renderSummary($yarnOrder)
                     ->download($yarnOrder->order_no . ".pdf");
+    }
+
+    /**
+     * @param YarnOrder   $yarnOrder
+     * @param MailRequest $request
+     * @return JsonResponse
+     */
+    public function sendMailToCustomer(YarnOrder $yarnOrder, MailRequest $request) {
+        $input = $request->all();
+        $yarnOrder->load('customer');
+        try {
+            if (is_null($yarnOrder->customer->email)) {
+                $yarnOrder->customer()->update(['email' => $input['email']]);
+                $yarnOrder = $yarnOrder->fresh();
+            }
+            YarnOrderFormJob::dispatch($yarnOrder)->delay(now()->addSeconds(10));
+
+            return $this->sendResponse($yarnOrder,
+                __('messages.created', ['module' => 'Mail']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+
     }
 
     /**

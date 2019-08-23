@@ -18,6 +18,8 @@ Route::group([
 
         Route::put('yarns/{yarn}/payment-approve', 'YarnController@updatePayment')
              ->name('yarns.payment-approve');
+
+        Route::post('yarns/send-mail-to-customer/{yarn}', 'YarnController@sendMailToCustomer');
     });
 Route::group([
     'prefix' => 'admin',
