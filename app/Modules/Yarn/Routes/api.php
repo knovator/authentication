@@ -25,6 +25,9 @@ Route::group([
     function () {
         Route::get('yarns/orders/export', 'YarnController@exportCsv')
              ->name('yarns.export');
+
+        Route::get('yarns/{yarn}/export-summary', 'YarnController@exportSummary')
+             ->name('yarns.export.summary');
     });
 
 

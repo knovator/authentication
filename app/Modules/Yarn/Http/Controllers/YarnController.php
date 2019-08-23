@@ -3,8 +3,8 @@
 namespace App\Modules\Yarn\Http\Controllers;
 
 use App\Constants\GenerateNumber;
-use App\Constants\Master as MasterConstant;
 use App\Constants\Master;
+use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
 use App\Modules\Yarn\Exports\YarnOrder as ExportYarnOrder;
 use App\Modules\Yarn\Http\Requests\CreateRequest;
@@ -13,6 +13,7 @@ use App\Modules\Yarn\Http\Requests\StatusRequest;
 use App\Modules\Yarn\Http\Requests\UpdateRequest;
 use App\Modules\Yarn\Models\YarnOrder;
 use App\Modules\Yarn\Repositories\YarnOrderRepository;
+use App\Modules\Yarn\Support\ExportYarnOrderSummary;
 use App\Support\DestroyObject;
 use App\Support\UniqueIdGenerator;
 use DB;
@@ -20,6 +21,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Knovators\Masters\Repository\MasterRepository;
 use Knovators\Support\Helpers\HTTPCode;
 use Log;
@@ -34,7 +36,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 class YarnController extends Controller
 {
 
-    use DestroyObject, UniqueIdGenerator;
+    use DestroyObject, UniqueIdGenerator, ExportYarnOrderSummary;
 
     protected $yarnOrderRepository;
 
@@ -304,9 +306,19 @@ class YarnController extends Controller
      */
     public function updatePayment(YarnOrder $yarnOrder, PaymentRequest $request) {
         $yarnOrder->update($request->all());
+
         return $this->sendResponse($yarnOrder->fresh($this->commonRelations()),
             __('messages.updated', ['module' => 'Yarn']),
             HTTPCode::OK);
+    }
+
+    /**
+     * @param YarnOrder $yarnOrder
+     * @return Response
+     */
+    public function exportSummary(YarnOrder $yarnOrder) {
+        return $this->renderSummary($yarnOrder)
+                    ->download($yarnOrder->order_no . ".pdf");
     }
 
     /**
@@ -371,7 +383,6 @@ class YarnController extends Controller
         }
 
     }
-
 
 }
 
