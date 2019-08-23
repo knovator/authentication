@@ -189,6 +189,7 @@ class PurchaseController extends Controller
      */
     public function exportCsv(Request $request) {
         try {
+
             $purchases = $this->purchaseOrderRepository->getPurchaseOrderList($request->all(),
                 true);
             if (($purchases = collect($purchases->getData()->data))->isEmpty()) {
@@ -211,8 +212,11 @@ class PurchaseController extends Controller
      * @return BinaryFileResponse
      */
     private function downloadCsv($purchases) {
-        return Excel::download(new ExportPurchaseOrder($purchases),
+//        return (new ExportPurchaseOrder($purchases))->view();
+                return Excel::download(new ExportPurchaseOrder($purchases),
             'orders.xlsx');
+
+
     }
 
     /**

@@ -9,6 +9,7 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Exception;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 /**
  * Class App\Modules\Purchase\Http\Exports
@@ -51,6 +52,9 @@ class PurchaseOrder implements FromView, ShouldAutoSize, WithEvents
                         ]
                     ]
                 );
+                $event->sheet->getStyle('A1:G1')->getFill()
+                             ->setFillType(Fill::FILL_SOLID)
+                             ->getStartColor()->setARGB('FFFF00');
             },
         ];
     }
