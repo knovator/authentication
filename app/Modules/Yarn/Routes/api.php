@@ -15,6 +15,9 @@ Route::group([
 
         Route::get('yarns-statuses', 'YarnController@statuses')
              ->name('yarns.statuses');
+
+        Route::put('yarns/{yarn}/payment-approve', 'YarnController@updatePayment')
+             ->name('yarns.payment-approve');
     });
 Route::group([
     'prefix' => 'admin',

@@ -8,6 +8,7 @@ use App\Constants\Master;
 use App\Http\Controllers\Controller;
 use App\Modules\Yarn\Exports\YarnOrder as ExportYarnOrder;
 use App\Modules\Yarn\Http\Requests\CreateRequest;
+use App\Modules\Yarn\Http\Requests\PaymentRequest;
 use App\Modules\Yarn\Http\Requests\StatusRequest;
 use App\Modules\Yarn\Http\Requests\UpdateRequest;
 use App\Modules\Yarn\Models\YarnOrder;
@@ -92,7 +93,7 @@ class YarnController extends Controller
             $stockItems[$key] = [
                 'product_id'   => $purchasedThread->thread_color_id,
                 'product_type' => 'thread_color',
-                'kg_qty'       => '-' .$purchasedThread->kg_qty,
+                'kg_qty'       => '-' . $purchasedThread->kg_qty,
                 'status_id'    => $input['status_id'],
             ];
         }
@@ -158,6 +159,17 @@ class YarnController extends Controller
         $this->storeStockOrders($yarnOrder, $input);
     }
 
+    /**
+     * @return array
+     */
+    private function commonRelations() {
+        return [
+            'threads.threadColor.thread:id,name,denier,company_name',
+            'threads.threadColor.color:id,name,code',
+            'customer.state:id,name,code,gst_code',
+            'status:id,name,code'
+        ];
+    }
 
     /**
      * @param YarnOrder $yarnOrder
@@ -181,7 +193,6 @@ class YarnController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
     }
-
 
     /**
      * @param YarnOrder $yarnOrder
@@ -213,20 +224,6 @@ class YarnController extends Controller
         }
     }
 
-
-    /**
-     * @return array
-     */
-    private function commonRelations() {
-        return [
-            'threads.threadColor.thread:id,name,denier,company_name',
-            'threads.threadColor.color:id,name,code',
-            'customer.state:id,name,code,gst_code',
-            'status:id,name,code'
-        ];
-    }
-
-
     /**
      * @param StatusRequest $request
      * @return JsonResponse
@@ -248,51 +245,6 @@ class YarnController extends Controller
     }
 
     /**
-     * @param YarnOrder     $yarnOrder
-     * @param               $input
-     * @return JsonResponse
-     * @throws Exception
-     */
-    private function updateSOPENDINGStatus(YarnOrder $yarnOrder, $input) {
-        return $this->updateStatus($yarnOrder, $input);
-
-    }
-
-    /**
-     * @param YarnOrder     $yarnOrder
-     * @param               $input
-     * @return JsonResponse
-     * @throws Exception
-     */
-    private function updateSOCANCELEDStatus(YarnOrder $yarnOrder, $input) {
-        return $this->updateStatus($yarnOrder, $input);
-    }
-
-
-    /**
-     * @param YarnOrder     $yarnOrder
-     * @param               $input
-     * @return JsonResponse
-     * @throws Exception
-     */
-    private function updateSODELIVEREDStatus(YarnOrder $yarnOrder, $input) {
-        if (!isset($input['challan_no'])) {
-            return $this->sendResponse(null, 'Challan Number is must be required',
-                HTTPCode::UNPROCESSABLE_ENTITY);
-        }
-        try {
-            return $this->updateStatus($yarnOrder, $input);
-        } catch (Exception $exception) {
-            Log::error($exception);
-
-            return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY);
-        }
-
-    }
-
-
-    /**
      * @return JsonResponse
      */
     public function statuses() {
@@ -311,30 +263,6 @@ class YarnController extends Controller
         return $this->sendResponse($statuses->childMasters,
             __('messages.retrieved', ['module' => 'Statuses']),
             HTTPCode::OK);
-    }
-
-    /**
-     * @param $yarnOrder
-     * @param $input
-     * @return JsonResponse
-     * @throws Exception
-     */
-    private function updateStatus(YarnOrder $yarnOrder, $input) {
-        $input['status_id'] = $this->masterRepository->findByCode($input['code'])->id;
-        try {
-            DB::beginTransaction();
-            $yarnOrder->update($input);
-            $yarnOrder->orderStocks()->update(['status_id' => $input['status_id']]);
-            DB::commit();
-
-            return $this->sendResponse($yarnOrder->fresh($this->commonRelations()),
-                __('messages.updated', ['module' => 'Status']),
-                HTTPCode::OK);
-        } catch (Exception $exception) {
-            DB::rollBack();
-            Log::error($exception);
-            throw $exception;
-        }
     }
 
     /**
@@ -367,6 +295,81 @@ class YarnController extends Controller
     private function downloadCsv($purchases) {
         return Excel::download(new ExportYarnOrder($purchases),
             'orders.xlsx');
+    }
+
+    /**
+     * @param YarnOrder      $yarnOrder
+     * @param PaymentRequest $request
+     * @return JsonResponse
+     */
+    public function updatePayment(YarnOrder $yarnOrder, PaymentRequest $request) {
+        $yarnOrder->update($request->all());
+        return $this->sendResponse($yarnOrder->fresh($this->commonRelations()),
+            __('messages.updated', ['module' => 'Yarn']),
+            HTTPCode::OK);
+    }
+
+    /**
+     * @param YarnOrder     $yarnOrder
+     * @param               $input
+     * @return JsonResponse
+     * @throws Exception
+     */
+    private function updateSOPENDINGStatus(YarnOrder $yarnOrder, $input) {
+        return $this->updateStatus($yarnOrder, $input);
+
+    }
+
+    /**
+     * @param $yarnOrder
+     * @param $input
+     * @return JsonResponse
+     * @throws Exception
+     */
+    private function updateStatus(YarnOrder $yarnOrder, $input) {
+        $input['status_id'] = $this->masterRepository->findByCode($input['code'])->id;
+        try {
+            DB::beginTransaction();
+            $yarnOrder->update($input);
+            $yarnOrder->orderStocks()->update(['status_id' => $input['status_id']]);
+            DB::commit();
+
+            return $this->sendResponse($yarnOrder->fresh($this->commonRelations()),
+                __('messages.updated', ['module' => 'Status']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            DB::rollBack();
+            Log::error($exception);
+            throw $exception;
+        }
+    }
+
+    /**
+     * @param YarnOrder     $yarnOrder
+     * @param               $input
+     * @return JsonResponse
+     * @throws Exception
+     */
+    private function updateSOCANCELEDStatus(YarnOrder $yarnOrder, $input) {
+        return $this->updateStatus($yarnOrder, $input);
+    }
+
+    /**
+     * @param YarnOrder     $yarnOrder
+     * @param               $input
+     * @return JsonResponse
+     * @throws Exception
+     */
+    private function updateSODELIVEREDStatus(YarnOrder $yarnOrder, $input) {
+        try {
+            return $this->updateStatus($yarnOrder, $input);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+
     }
 
 
