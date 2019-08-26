@@ -24,6 +24,11 @@
                 <td>{{'('.$order->threads[0]->thread_color->thread->denier.') '.$order->threads[0]->thread_color->thread->name.' ('.$order->threads[0]->thread_color->color->name.')'}}
                     : {{$order->threads[0]->kg_qty. ' KG'}}</td>
 
+                @if(!isset($order->deliveries[0]))
+                    <td rowspan="{{$rowSpan}}"></td>
+                    <td rowspan="{{$rowSpan}}"></td>
+                @endif
+
             </tr>
             @php
                 unset($order->threads[0]);
@@ -65,8 +70,8 @@
                     @endforeach
                 @endforeach
             @endif
-
         @endif
+        <tr></tr>
     @endforeach
     </tbody>
 </table>
