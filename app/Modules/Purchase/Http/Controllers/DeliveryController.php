@@ -12,12 +12,14 @@ use App\Modules\Purchase\Models\PurchaseOrderThread;
 use App\Modules\Purchase\Models\PurchasePartialOrder;
 use App\Modules\Purchase\Repositories\DeliveryRepository;
 use App\Modules\Purchase\Repositories\PurchasedThreadRepository;
+use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Stock\Repositories\StockRepository;
 use App\Repositories\MasterRepository;
 use App\Support\UniqueIdGenerator;
 use DB;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Knovators\Support\Helpers\HTTPCode;
 use Log;
 use Prettus\Repository\Exceptions\RepositoryException;
@@ -192,6 +194,26 @@ class DeliveryController extends Controller
         }
 
         return $stock;
+    }
+
+
+    /**
+     * @param PurchaseOrder $purchaseOrder
+     * @return JsonResponse
+     */
+    public function index(PurchaseOrder $purchaseOrder) {
+        try {
+            $deliveries = $this->deliveryRepository->getDeliveryList($purchaseOrder->id);
+
+            return $this->sendResponse($deliveries,
+                __('messages.retrieved', ['module' => 'Delivery']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
     }
 
 
