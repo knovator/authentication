@@ -11,6 +11,12 @@ Route::group([
         Route::put('purchases/order/change-status', 'PurchaseController@changeStatus')
              ->name('purchases.change-status');
 
+        Route::get('purchases/{purchase}/deliveries', 'DeliveryController@index')
+             ->name('purchases.deliveries.index');
+
+        Route::get('purchases/{purchase}/threads', 'PurchaseController@threads')
+             ->name('purchases.threads.index');
+
         Route::post('purchases/{purchase}/deliveries', 'DeliveryController@store')
              ->name('purchases.deliveries.create');
 

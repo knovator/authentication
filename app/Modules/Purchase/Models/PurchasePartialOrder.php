@@ -32,4 +32,12 @@ class PurchasePartialOrder extends Model
             'id');
     }
 
+    /**
+     * @return mixed
+     */
+    public function purchasedThread() {
+        return $this->belongsTo(PurchaseOrderThread::class, 'purchase_order_thread_id',
+            'id');
+    }
+
 }

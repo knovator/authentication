@@ -9,6 +9,8 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Exception;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 /**
  * Class App\Modules\Purchase\Http\Exports
@@ -42,6 +44,34 @@ class PurchaseOrder implements FromView, ShouldAutoSize, WithEvents
     public function registerEvents() : array {
         return [
             AfterSheet::class => function (AfterSheet $event) {
+
+
+                $styleArray = [
+                    'borders' => [
+                        'outline' => [
+                            'borderStyle' => Border::BORDER_HAIR,
+                            'color'       => ['argb' => '#32CD32'],
+                        ],
+                    ],
+                ];
+
+                $event->sheet->getDelegate()->getStyle('A2:G6')->applyFromArray($styleArray);
+                $event->sheet->getDelegate()->getStyle('A8:G8')->applyFromArray($styleArray);
+                $event->sheet->getDelegate()->getStyle('A10:G12')->applyFromArray($styleArray);
+
+
+                $styleArray = [
+                    'borders' => [
+                        'outline' => [
+                            'borderStyle' => Border::BORDER_THIN,
+                            'color'       => ['argb' => '75,0,130'],
+                        ],
+                    ],
+                ];
+
+                $event->sheet->getDelegate()->getStyle('E3:G6')->applyFromArray($styleArray);
+
+
                 $this->createStyle($event, 'A1:G1', 11);
                 $event->sheet->styleCells(
                     'A1:G1',
@@ -51,6 +81,9 @@ class PurchaseOrder implements FromView, ShouldAutoSize, WithEvents
                         ]
                     ]
                 );
+                $event->sheet->getStyle('A1:G1')->getFill()
+                             ->setFillType(Fill::FILL_SOLID)
+                             ->getStartColor()->setARGB('FFFF00');
             },
         ];
     }
@@ -65,4 +98,6 @@ class PurchaseOrder implements FromView, ShouldAutoSize, WithEvents
         /** @var AfterSheet $event */
         $event->sheet->getDelegate()->getStyle($cell)->getFont()->setSize($size);
     }
+
+
 }

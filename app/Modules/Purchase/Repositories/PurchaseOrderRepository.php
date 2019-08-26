@@ -34,10 +34,10 @@ class PurchaseOrderRepository extends BaseRepository
 
     /**
      * @param array $input
-     * @param       $export
+     * @param bool  $export
+     * @param       $additionalRelations
      * @return mixed
      * @throws RepositoryException
-     * @throws Exception
      */
     public function getPurchaseOrderList($input, $export = false) {
         $this->applyCriteria();
@@ -48,6 +48,16 @@ class PurchaseOrderRepository extends BaseRepository
             'customer.state:id,name,code,gst_code',
             'status:id,name,code'
         ])->select('purchase_orders.*')->withCount('deliveries');
+
+        if ($export) {
+            $orders = $orders->with([
+                'deliveries.partialOrders.purchasedThread.threadColor' =>
+                    function ($threadColor) {
+                        /** @var Builder $threadColor */
+                        $threadColor->with(['thread:id,name,denier', 'color:id,name']);
+                    }
+            ]);
+        }
 
         if (isset($input['ids']) && (!empty($input['ids']))) {
             $orders = $orders->whereIn('id', $input['ids']);
@@ -72,5 +82,6 @@ class PurchaseOrderRepository extends BaseRepository
 
         return $orders;
     }
+
 
 }

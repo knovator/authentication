@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Purchase\Http\Requests\CreateRequest;
 use App\Modules\Purchase\Http\Requests\StatusRequest;
 use App\Modules\Purchase\Http\Requests\UpdateRequest;
+use App\Modules\Purchase\Http\Resources\PurchaseOrderThread;
 use App\Modules\Purchase\Models\PurchaseOrder;
 use App\Modules\Purchase\Repositories\PurchasedThreadRepository;
 use App\Modules\Purchase\Repositories\PurchaseOrderRepository;
@@ -189,6 +190,7 @@ class PurchaseController extends Controller
      */
     public function exportCsv(Request $request) {
         try {
+
             $purchases = $this->purchaseOrderRepository->getPurchaseOrderList($request->all(),
                 true);
             if (($purchases = collect($purchases->getData()->data))->isEmpty()) {
@@ -211,8 +213,11 @@ class PurchaseController extends Controller
      * @return BinaryFileResponse
      */
     private function downloadCsv($purchases) {
+//        return (new ExportPurchaseOrder($purchases))->view();
         return Excel::download(new ExportPurchaseOrder($purchases),
             'orders.xlsx');
+
+
     }
 
     /**
@@ -298,6 +303,27 @@ class PurchaseController extends Controller
             return $this->sendResponse(null, __('messages.something_wrong'),
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
+    }
+
+    /**
+     * @param PurchaseOrder $purchaseOrder
+     * @return JsonResponse
+     */
+    public function threads(PurchaseOrder $purchaseOrder) {
+        try {
+            $threads = $this->purchasedThreadRepository->getPurchaseOrderList($purchaseOrder->id,
+                null, true);
+
+            return $this->sendResponse(PurchaseOrderThread::collection($threads),
+                __('messages.retrieved', ['module' => 'Threads']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+
     }
 
     /**
