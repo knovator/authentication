@@ -11,7 +11,7 @@
     </tr>
     </thead>
     <tbody>
-    @foreach($orders as $orderKey => $order)
+    @foreach($purchaseOrders as $orderKey => $order)
         @if($order->customer)
             @php
                 $rowSpan = count($order->threads);
@@ -31,10 +31,11 @@
 
             </tr>
             @php
-                unset($order->threads[0]);
+                $threads = $order->threads;
+                unset($threads[0]);
             @endphp
 
-            @foreach($order->threads as $thread)
+            @foreach($threads as $thread)
                 <tr>
                     <td>{{'('.$thread->thread_color->thread->denier.') '.$thread->thread_color->thread->name.' ('.$thread->thread_color->color->name.')'}}
                         : {{$thread->kg_qty. ' KG'}}</td>
@@ -59,10 +60,12 @@
                     </tr>
 
                     @php
-                        unset($delivery->partial_orders[0]);
+
+                        $partialDelivery = $delivery->partial_orders;
+                            unset($partialDelivery[0]);
                     @endphp
 
-                    @foreach($delivery->partial_orders as $partialOrder)
+                    @foreach($partialDelivery as $partialOrder)
                         <tr>
                             <td>{{'('.$partialOrder->purchased_thread->thread_color->thread->denier.') '.$partialOrder->purchased_thread->thread_color->thread->name.' ('.$partialOrder->purchased_thread->thread_color->color->name.')'}}
                                 : {{$partialOrder->kg_qty. ' KG'}}</td>
