@@ -45,8 +45,8 @@ class PurchasedThreadRepository extends BaseRepository
 
         if ($loadRelation) {
             $purchasedThreads = $purchasedThreads->with([
-                'recipe.fiddles.thread',
-                'recipe.fiddles.color'
+                'threadColor.thread',
+                'threadColor.color'
             ]);
         }
 

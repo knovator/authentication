@@ -14,6 +14,9 @@ Route::group([
         Route::get('purchases/{purchase}/deliveries', 'DeliveryController@index')
              ->name('purchases.deliveries.index');
 
+        Route::get('purchases/{purchase}/threads', 'PurchaseController@threads')
+             ->name('purchases.threads.index');
+
         Route::post('purchases/{purchase}/deliveries', 'DeliveryController@store')
              ->name('purchases.deliveries.create');
 

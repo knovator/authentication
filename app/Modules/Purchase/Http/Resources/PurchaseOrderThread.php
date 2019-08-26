@@ -20,10 +20,19 @@ class PurchaseOrderThread extends JsonResource
      * @return array
      */
     public function toArray($request) {
-        return [
+        $thread = [
             'id'          => $this->id,
             'kg_qty'      => $this->kg_qty,
             'threadColor' => new ThreadColorResource($this->whenLoaded('threadColor'))
         ];
+
+
+        /** @var \App\Modules\Purchase\Models\PurchaseOrderThread $this */
+        if ($this->relationLoaded('remainingQuantity')) {
+            $thread['remaining_kg_qty'] = $this->remaining_kg_qty;
+        }
+
+        return $thread;
+
     }
 }
