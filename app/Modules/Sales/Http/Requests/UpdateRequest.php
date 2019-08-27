@@ -62,6 +62,7 @@ class UpdateRequest extends FormRequest
     public function messages() {
 
         return [
+            'order_recipes.required'    => 'At least one recipe must be required',
             'thread_color_ids.required' => 'Please fill the fiddle details.',
         ];
 
