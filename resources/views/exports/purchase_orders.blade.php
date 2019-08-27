@@ -26,7 +26,7 @@
 
                 @if(!isset($order->deliveries[0]))
                     <td rowspan="{{$rowSpan}}"></td>
-                    <td rowspan="{{$rowSpan}}"></td>
+                    <td rowspan="{{$rowSpan}}">{{$order->challan_no}}</td>
                 @endif
 
             </tr>

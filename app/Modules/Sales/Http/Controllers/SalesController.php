@@ -3,18 +3,17 @@
 namespace App\Modules\Sales\Http\Controllers;
 
 use App\Constants\GenerateNumber;
-use App\Modules\Sales\Http\Exports\SalesOrder as ExportSalesOrder;
 use App\Constants\Master;
 use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
 use App\Jobs\OrderFormJob;
 use App\Modules\Design\Repositories\DesignDetailRepository;
+use App\Modules\Sales\Http\Exports\SalesOrder as ExportSalesOrder;
 use App\Modules\Sales\Http\Requests\AnalysisRequest;
 use App\Modules\Sales\Http\Requests\CreateRequest;
 use App\Modules\Sales\Http\Requests\MailRequest;
 use App\Modules\Sales\Http\Requests\StatusRequest;
 use App\Modules\Sales\Http\Requests\UpdateRequest;
-use App\Modules\Sales\Http\Resources\RecipePartialOrder;
 use App\Modules\Sales\Http\Resources\SalesOrder as SalesOrderResource;
 use App\Modules\Sales\Models\Delivery;
 use App\Modules\Sales\Models\SalesOrder;
@@ -32,7 +31,6 @@ use App\Repositories\MasterRepository;
 use App\Support\DestroyObject;
 use App\Support\Formula;
 use App\Support\UniqueIdGenerator;
-use Barryvdh\Snappy\Facades\SnappyPdf;
 use DB;
 use Exception;
 use Illuminate\Container\Container;
@@ -327,9 +325,8 @@ class SalesController extends Controller
      * @return JsonResponse
      */
     public function show(SalesOrder $salesOrder) {
-        $salesOrder->load([
+        $relations = [
             'customer',
-            'status',
             'design.detail',
             'design.mainImage.file',
             'designBeam.threadColor.thread',
@@ -338,7 +335,29 @@ class SalesController extends Controller
             'orderRecipes.recipe.fiddles.thread',
             'orderRecipes.recipe.fiddles.color',
             'manufacturingCompany'
-        ]);
+        ];
+
+        $salesOrder->load('status');
+
+        if ($salesOrder->status->code == MasterConstant::SO_MANUFACTURING) {
+            $deliveredId = $this->masterRepository->findByCode(MasterConstant::SO_DELIVERED)->id;
+            $relations['orderRecipes'] = function ($orderRecipes) use ($deliveredId) {
+                /** @var Builder $orderRecipes */
+                $orderRecipes->withCount([
+                    'partialOrders as delivered_count' => function ($partialOrders) use (
+                        $deliveredId
+                    ) {
+                        /** @var Builder $partialOrders */
+                        $partialOrders->whereHas('delivery',
+                            function ($delivery) use ($deliveredId) {
+                                /** @var Builder $delivery */
+                                $delivery->where('status_id', $deliveredId);
+                            });
+                    }
+                ]);
+            };
+        }
+        $salesOrder->load($relations);
 
         return $this->sendResponse($this->makeResource($salesOrder),
             __('messages.retrieved', ['module' => 'Sales Order']),
