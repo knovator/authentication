@@ -50,4 +50,14 @@ class RecipePartialRepository extends BaseRepository
     }
 
 
+    /**
+     * @param $field
+     * @param $orderRecipeIds
+     * @return mixed
+     */
+    public function removeByField($field, $orderRecipeIds) {
+        return $this->model->whereIn($field, $orderRecipeIds)->delete();
+    }
+
+
 }

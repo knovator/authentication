@@ -3,6 +3,7 @@
 namespace App\Modules\Stock\Repositories;
 
 use App\Modules\Stock\Models\Stock;
+use Exception;
 use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
 use Prettus\Repository\Exceptions\RepositoryException;
@@ -30,19 +31,20 @@ class StockRepository extends BaseRepository
     }
 
     /**
-     * @param $partialOrderIds
+     * @param $field
+     * @param $values
      * @return mixed
      */
-    public function removeByPartialOrderId($partialOrderIds) {
-        return $this->model->whereIn('order_recipe_id',
-            $partialOrderIds)->delete();
+    public function removeByField($field, $values) {
+        return $this->model->whereIn($field,
+            $values)->delete();
     }
 
     /**
      * @param $threadColor
      * @param $statusIds
      * @return
-     * @throws \Exception
+     * @throws Exception
      */
     public function getThreadOrderReport($threadColor, $statusIds) {
         $reports = $this->model->selectRaw('order_id,order_type,SUM(kg_qty) as stock')->where([

@@ -3,7 +3,8 @@
 namespace App\Modules\Sales\Repositories;
 
 use App\Modules\Sales\Models\Delivery;
-use App\Modules\Sales\Models\SalesOrderRecipe;
+use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
 use Prettus\Repository\Exceptions\RepositoryException;
@@ -35,7 +36,7 @@ class DeliveryRepository extends BaseRepository
      * @param $salesOrderId
      * @return
      * @throws RepositoryException
-     * @throws \Exception
+     * @throws Exception
      */
     public function getDeliveryList($salesOrderId) {
         $this->applyCriteria();
@@ -67,4 +68,15 @@ class DeliveryRepository extends BaseRepository
     }
 
 
+    /**
+     * @param $partialOrderIds
+     * @param $salesOrderId
+     */
+    public function removeSinglePartialOrders($partialOrderIds, $salesOrderId) {
+        $this->model->newQuery()->whereDoesntHave('partialOrders',
+            function ($partialOrders) use ($partialOrderIds) {
+                /** @var Builder $partialOrders */
+                $partialOrders->whereKeyNot($partialOrderIds);
+            })->where('sales_order_id', '=', $salesOrderId)->delete();
+    }
 }
