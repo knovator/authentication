@@ -53,7 +53,7 @@ class StockRepository extends BaseRepository
         ])->whereNotIn('status_id', $statusIds)->groupBy(['order_id', 'order_type'])->with([
             'order.customer.state:id,name,code',
             'order.status:id,name,code'
-        ])->orderByDesc('order_id');
+        ])->orderByDesc('created_at');
 
         $reports = datatables()->of($reports)->make(true);
 
