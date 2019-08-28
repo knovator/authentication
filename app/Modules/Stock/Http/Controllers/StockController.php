@@ -51,11 +51,7 @@ class StockController extends Controller
      */
     public function index(Request $request) {
         try {
-            $statusIds = $this->masterRepository->findWhereIn('code',
-                [Master::PO_CANCELED, Master::PO_PENDING, Master::SO_CANCELED])->pluck('id')
-                                                ->toArray();
-
-            $stocks = $this->threadColorRepository->getStockOverview($statusIds);
+            $stocks = $this->threadColorRepository->getStockOverview();
 
             return $this->sendResponse($stocks,
                 __('messages.retrieved', ['module' => 'Stocks']),
@@ -75,11 +71,7 @@ class StockController extends Controller
      */
     public function threadCount(ThreadColor $threadColor) {
         try {
-            $statusIds = $this->masterRepository->findWhereIn('code',
-                [Master::PO_CANCELED, Master::PO_PENDING, Master::SO_CANCELED])->pluck('id')
-                                                ->toArray();
-
-            $stocks = $this->threadColorRepository->stockCount($threadColor->id, $statusIds);
+            $stocks = $this->threadColorRepository->stockCount($threadColor->id);
 
             return $this->sendResponse($stocks,
                 __('messages.retrieved', ['module' => 'Stocks']),

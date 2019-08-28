@@ -22,10 +22,8 @@ class ThreadColor extends Model
 
     use SoftDeletes;
 
-    protected $table = 'threads_colors';
-
     public $timestamps = false;
-
+    protected $table = 'threads_colors';
     protected $fillable = [
         'color_id',
         'thread_id',
@@ -76,12 +74,28 @@ class ThreadColor extends Model
         });
     }
 
+    /**
+     * @return mixed
+     */
+    public function stockQty() {
+        return $this->morphOne(Stock::class, 'product', 'product_type', 'product_id')
+                    ->selectRaw('product_id,product_type,sum(kg_qty) as total')
+                    ->groupBy(['product_id', 'product_type']);
+    }
 
     /**
      * @return mixed
      */
     public function availableStock() {
         return $this->morphOne(Stock::class, 'product', 'product_type', 'product_id')
+                    ->whereHas('status', function ($master) {
+                        /** @var Builder $master */
+                        $master->whereIn('code', [
+                            MasterConstant::PO_DELIVERED,
+                            MasterConstant::SO_MANUFACTURING,
+                            MasterConstant::SO_DELIVERED
+                        ]);
+                    })
                     ->selectRaw('product_id,product_type,sum(kg_qty) as available_qty')
                     ->groupBy(['product_id', 'product_type']);
     }
@@ -95,7 +109,6 @@ class ThreadColor extends Model
             $status->where('code', MasterConstant::SO_PENDING);
         });
     }
-
 
     /**
      * @return mixed
@@ -117,7 +130,6 @@ class ThreadColor extends Model
         });
     }
 
-
     /**
      * @return mixed
      */
@@ -125,16 +137,6 @@ class ThreadColor extends Model
         return $this->belongsToMany(Recipe::class, 'recipes_fiddles', 'thread_color_id',
             'recipe_id');
     }
-
-    /**
-     * @return mixed
-     */
-    public function stockQty() {
-        return $this->morphOne(Stock::class, 'product', 'product_type', 'product_id')
-                    ->selectRaw('product_id,product_type,sum(kg_qty) as total')
-                    ->groupBy(['product_id', 'product_type']);
-    }
-
 
     /**
      * @return mixed

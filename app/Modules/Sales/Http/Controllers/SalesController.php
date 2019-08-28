@@ -423,16 +423,9 @@ class SalesController extends Controller
         $input = $request->all();
         $collection = collect($input['reports'])->keyBy('thread_color_id');
         try {
-
-            $statusIds = $this->masterRepository->findWhereIn('code',
-                [Master::PO_CANCELED, Master::PO_PENDING])->pluck('id')->toArray();
-
             $threadColors = $this->threadColorRepository->with([
-                'availableStock' => function ($availableStock) use ($statusIds) {
-                    /** @var Builder $availableStock */
-                    $availableStock->whereNotIn('status_id', $statusIds);
-                },
-                'thread'         => function ($thread) {
+                'availableStock',
+                'thread' => function ($thread) {
                     /** @var Builder $thread */
                     $thread->select(['id', 'name', 'type_id', 'denier', 'company_name'])
                            ->with('type:id,name');
