@@ -12,6 +12,7 @@ use App\Repositories\MasterRepository;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Knovators\Support\Helpers\HTTPCode;
 use Log;
 use function Symfony\Component\Debug\Tests\testHeader;
@@ -99,14 +100,12 @@ class StockController extends Controller
      * @return JsonResponse
      */
     public function threadReport(ThreadColor $threadColor) {
+        $statuses = $this->getMasterByCodes();
+        $stockCountStatus = Arr::except($statuses, [Master::PO_CANCELED, Master::SO_CANCELED]);
         try {
-
-            $statusIds = $this->masterRepository->findWhereIn('code',
-                [Master::PO_CANCELED, Master::SO_CANCELED])->pluck('id')
-                                                ->toArray();
-
-
-            $reports = $this->stockRepository->getThreadOrderReport($threadColor,$statusIds);
+            $reports = $this->stockRepository->getThreadOrderReport($threadColor,
+                [$statuses[Master::SO_CANCELED]['id'], $statuses[Master::PO_CANCELED]['id']],
+                $stockCountStatus);
 
             return $this->sendResponse($reports,
                 __('messages.retrieved', ['module' => 'Stocks']),
@@ -117,6 +116,29 @@ class StockController extends Controller
             return $this->sendResponse(null, __('messages.something_wrong'),
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
+    }
+
+
+    /**
+     * @return mixed
+     */
+    private function getMasterByCodes() {
+        return $this->masterRepository->findWhereIn('code',
+            [
+                // Po statuses
+                Master::PO_PENDING,
+                Master::PO_DELIVERED,
+                // So statuses
+                Master::SO_PENDING,
+                Master::SO_MANUFACTURING,
+                Master::SO_DELIVERED,
+                // Wo statuses
+                Master::WASTAGE_PENDING,
+                Master::WASTAGE_DELIVERED,
+                // canceled statuses
+                Master::PO_CANCELED,
+                Master::SO_CANCELED,
+            ], ['id', 'code'])->keyBy('code')->toArray();
     }
 
 

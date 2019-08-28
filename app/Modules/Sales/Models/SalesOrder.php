@@ -76,6 +76,8 @@ class SalesOrder extends Model
         return $this->morphMany(Stock::class, 'order', 'order_type', 'order_id', 'id');
     }
 
+
+
     /**
      * @return mixed
      */
