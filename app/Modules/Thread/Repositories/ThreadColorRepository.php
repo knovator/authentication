@@ -70,9 +70,9 @@ class ThreadColorRepository extends BaseRepository
      * @return mixed
      * @throws RepositoryException
      */
-    public function getStockOverview($statusIds) {
+    public function getStockOverview() {
         $this->applyCriteria();
-        $threadColors = $this->model->with($this->commonRelations($statusIds))
+        $threadColors = $this->model->with($this->commonRelations())
                                     ->has('stocks');
 
         $threadColors = datatables()->of($threadColors)->make(true);
@@ -87,9 +87,9 @@ class ThreadColorRepository extends BaseRepository
      * @param $poCancel
      * @return mixed
      */
-    public function stockCount($threadColorId, $statusIds) {
+    public function stockCount($threadColorId) {
 
-        $threadColors = $this->model->with($this->commonRelations($statusIds))
+        $threadColors = $this->model->with($this->commonRelations())
                                     ->find($threadColorId);
 
         return $threadColors;
@@ -100,15 +100,12 @@ class ThreadColorRepository extends BaseRepository
      * @param $statusIds
      * @return array
      */
-    private function commonRelations($statusIds) {
+    private function commonRelations() {
         return [
             'thread:id,name,denier',
             'color:id,name,code',
             'inPurchaseQty',
-            'availableStock' => function ($availableStock) use ($statusIds) {
-                /** @var Builder $availableStock */
-                $availableStock->whereNotIn('status_id', $statusIds);
-            },
+            'availableStock',
             'pendingStock',
             'manufacturingStock',
             'deliveredStock',
