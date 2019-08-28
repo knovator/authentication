@@ -65,22 +65,6 @@ class ThreadColorRepository extends BaseRepository
         return $threadColors;
     }
 
-    /**
-     * @param $statusIds
-     * @return mixed
-     * @throws RepositoryException
-     */
-    public function getStockOverview() {
-        $this->applyCriteria();
-        $threadColors = $this->model->with($this->commonRelations())
-                                    ->has('stocks');
-
-        $threadColors = datatables()->of($threadColors)->make(true);
-        $this->resetModel();
-
-        return $threadColors;
-    }
-
 
     /**
      * @param $threadColorId
