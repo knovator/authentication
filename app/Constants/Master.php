@@ -25,4 +25,10 @@ class Master
     const SO_MANUFACTURING = 'SO_MANUFACTURING';
     const SO_CANCELED = 'SO_CANCELED';
     const SO_DELIVERED = 'SO_DELIVERED';
+
+
+    // Wastage Order Statuses
+    const WASTAGE_STATUS = 'WASTAGE_STATUS'; // parent
+    const WASTAGE_PENDING = 'WASTAGE_PENDING';
+    const WASTAGE_DELIVERED = 'WASTAGE_DELIVERED';
 }
