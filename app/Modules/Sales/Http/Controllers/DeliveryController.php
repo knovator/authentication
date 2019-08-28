@@ -19,6 +19,7 @@ use App\Modules\Sales\Repositories\SalesRecipeRepository;
 use App\Modules\Stock\Repositories\StockRepository;
 use App\Modules\Thread\Constants\ThreadType;
 use App\Repositories\MasterRepository;
+use App\Support\DestroyObject;
 use App\Support\Formula;
 use App\Support\UniqueIdGenerator;
 use Barryvdh\Snappy\Facades\SnappyPdf;
@@ -28,14 +29,10 @@ use Exception;
 use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
 use Knovators\Support\Helpers\HTTPCode;
-use App\Support\DestroyObject;
-use Knp\Snappy\Pdf;
 use Log;
 use Prettus\Repository\Exceptions\RepositoryException;
 use Str;
-use View;
 
 /**
  * Class DeliveryController
