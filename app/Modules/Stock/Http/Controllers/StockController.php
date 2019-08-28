@@ -5,17 +5,15 @@ namespace App\Modules\Stock\Http\Controllers;
 use App\Constants\Master;
 use App\Http\Controllers\Controller;
 use App\Modules\Stock\Repositories\StockRepository;
-use App\Modules\Thread\Models\Thread;
 use App\Modules\Thread\Models\ThreadColor;
 use App\Modules\Thread\Repositories\ThreadColorRepository;
 use App\Repositories\MasterRepository;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
+use Arr;
 use Knovators\Support\Helpers\HTTPCode;
 use Log;
-use function Symfony\Component\Debug\Tests\testHeader;
 
 /**
  * Class StockController
