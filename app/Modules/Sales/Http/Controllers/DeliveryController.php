@@ -18,6 +18,7 @@ use App\Modules\Sales\Repositories\DeliveryRepository;
 use App\Modules\Sales\Repositories\SalesRecipeRepository;
 use App\Modules\Stock\Repositories\StockRepository;
 use App\Modules\Thread\Constants\ThreadType;
+use App\Modules\Thread\Repositories\ThreadColorRepository;
 use App\Repositories\MasterRepository;
 use App\Support\DestroyObject;
 use App\Support\Formula;
@@ -33,6 +34,7 @@ use Knovators\Support\Helpers\HTTPCode;
 use Log;
 use Prettus\Repository\Exceptions\RepositoryException;
 use Str;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class DeliveryController
@@ -53,6 +55,8 @@ class DeliveryController extends Controller
 
     protected $designDetailRepository;
 
+    protected $threadColorRepository;
+
     /**
      * DeliveryController constructor.
      * @param DeliveryRepository     $deliveryRepository
@@ -60,19 +64,22 @@ class DeliveryController extends Controller
      * @param SalesRecipeRepository  $orderRecipeRepository
      * @param StockRepository        $stockRepository
      * @param DesignDetailRepository $designDetailRepository
+     * @param ThreadColorRepository  $threadColorRepository
      */
     public function __construct(
         DeliveryRepository $deliveryRepository,
         MasterRepository $masterRepository,
         SalesRecipeRepository $orderRecipeRepository,
         StockRepository $stockRepository,
-        DesignDetailRepository $designDetailRepository
+        DesignDetailRepository $designDetailRepository,
+        ThreadColorRepository $threadColorRepository
     ) {
         $this->deliveryRepository = $deliveryRepository;
         $this->masterRepository = $masterRepository;
         $this->orderRecipeRepository = $orderRecipeRepository;
         $this->stockRepository = $stockRepository;
         $this->designDetailRepository = $designDetailRepository;
+        $this->threadColorRepository = $threadColorRepository;
     }
 
 
@@ -183,7 +190,7 @@ class DeliveryController extends Controller
 
             $remainingMeters = ($orderRecipe->total_meters - $orderRecipe->partialOrders->sum('total_meters'));
             // create remaining order stocks
-            if ($remainingMeters) {
+            if ($remainingMeters > 0) {
                 // weft remaining meters thread color stock
                 $this->createStockQuantity($orderRecipe,
                     $pendingStatusId, $formula, $designDetail,
@@ -391,7 +398,7 @@ class DeliveryController extends Controller
     /**
      * @param SalesOrder $salesOrder
      * @param Delivery   $delivery
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function exportManufacturing(SalesOrder $salesOrder, Delivery $delivery) {
         $salesOrder->load(['design.detail', 'design.fiddlePicks']);
@@ -415,7 +422,7 @@ class DeliveryController extends Controller
     /**
      * @param SalesOrder $salesOrder
      * @param Delivery   $delivery
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function exportAccounting(SalesOrder $salesOrder, Delivery $delivery) {
         $salesOrder->load([
@@ -558,6 +565,24 @@ class DeliveryController extends Controller
      */
     private function updateSOMANUFACTURINGStatus(Delivery $delivery, $input) {
         try {
+            $deliveryStocks = $this->deliveryRepository->usedStocks($delivery);
+            $threadColors = $this->threadColorRepository->findWithAvailableQty(array_keys($deliveryStocks));
+            foreach ($threadColors as $thread) {
+                if (!is_null($thread->availableStock)) {
+                    $newQty = $thread->availableStock->available_qty +
+                        $deliveryStocks[$thread->id]['used_stock'];
+                } else {
+                    $newQty = $deliveryStocks[$thread->id]['used_stock'];
+                }
+                if ($newQty < 0) {
+                    $newQty = ceil(str_replace('-', '', $newQty));
+
+                    return $this->sendResponse(null,
+                        "{$thread->thread->denier}-{$thread->thread->name}-{$thread->color->name} ({$newQty}KG) is not available for manufacturing.",
+                        HTTPCode::UNPROCESSABLE_ENTITY);
+                }
+            }
+
             return $this->updateStatus($delivery, MasterConstant::SO_MANUFACTURING, $input);
         } catch (Exception $exception) {
             Log::error($exception);

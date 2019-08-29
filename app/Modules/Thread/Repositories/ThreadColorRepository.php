@@ -7,6 +7,7 @@ use App\Models\Master;
 use App\Modules\Thread\Models\ThreadColor;
 use DB;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
@@ -65,6 +66,17 @@ class ThreadColorRepository extends BaseRepository
         return $threadColors;
     }
 
+
+    /**
+     * @param $ids
+     * @return Builder[]|Collection|Model[]
+     */
+    public function findWithAvailableQty($ids) {
+        return $this->model->with(['availableStock', 'thread:id,name,denier', 'color:id,name'])
+                           ->whereKey($ids)
+                           ->get();
+    }
+
     /**
      * @param $statusIds
      * @return mixed
@@ -81,21 +93,6 @@ class ThreadColorRepository extends BaseRepository
         return $threadColors;
     }
 
-
-    /**
-     * @param $threadColorId
-     * @param $poCancel
-     * @return mixed
-     */
-    public function stockCount($threadColorId) {
-
-        $threadColors = $this->model->with($this->commonRelations())
-                                    ->find($threadColorId);
-
-        return $threadColors;
-    }
-
-
     /**
      * @param $statusIds
      * @return array
@@ -110,5 +107,18 @@ class ThreadColorRepository extends BaseRepository
             'manufacturingStock',
             'deliveredStock',
         ];
+    }
+
+    /**
+     * @param $threadColorId
+     * @param $poCancel
+     * @return mixed
+     */
+    public function stockCount($threadColorId) {
+
+        $threadColors = $this->model->with($this->commonRelations())
+                                    ->find($threadColorId);
+
+        return $threadColors;
     }
 }
