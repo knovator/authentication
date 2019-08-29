@@ -2,13 +2,8 @@
 
 namespace App\Modules\Stock\Repositories;
 
-use App\Modules\Purchase\Models\PurchaseOrder;
-use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Stock\Models\Stock;
 use Exception;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
 use Prettus\Repository\Exceptions\RepositoryException;

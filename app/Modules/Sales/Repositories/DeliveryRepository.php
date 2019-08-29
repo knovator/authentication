@@ -31,6 +31,17 @@ class DeliveryRepository extends BaseRepository
         return Delivery::class;
     }
 
+    /**
+     * @param $delivery
+     * @return
+     */
+    public function usedStocks(Delivery $delivery) {
+        return $delivery->orderStocks()
+                        ->selectRaw('product_id,product_type,SUM(kg_qty) as used_stock')
+                        ->groupBy('product_id', 'product_type')->get()->keyBy('product_id')
+                        ->toArray();
+    }
+
 
     /**
      * @param $salesOrderId
