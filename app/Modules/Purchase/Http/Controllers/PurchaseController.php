@@ -373,10 +373,14 @@ class PurchaseController extends Controller
      * @throws Exception
      */
     private function updatePODELIVEREDStatus(PurchaseOrder $purchaseOrder, $input) {
-        $purchasedThreads = $this->purchasedThreadRepository->getPurchaseOrderList($purchaseOrder->id);
+        /*$purchasedThreads = $this->purchasedThreadRepository->getPurchaseOrderList($purchaseOrder->id);
         if ((int) $purchasedThreads->sum('remaining_kg_qty')) {
             return $this->sendResponse(null,
                 __('messages.purchase_deliveries_must_complete'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }*/
+        if (!isset($input['challan_no'])) {
+            return $this->sendResponse(null, 'Challan Number is must be required',
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
 
