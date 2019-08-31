@@ -1,14 +1,11 @@
 <?php
 
-namespace App\Modules\Sales\Http\Requests;
+namespace App\Modules\Sales\Http\Requests\Delivery;
 
 use App\Constants\Master as MasterConstant;
 use App\Support\FetchMaster;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 use Knovators\Support\Traits\APIResponse;
-use Prettus\Repository\Exceptions\RepositoryException;
 
 /**
  * Class StatusRequest
@@ -32,22 +29,18 @@ class StatusRequest extends FormRequest
      * Get the validation rules that apply to the request.
      *
      * @return array
-     * @throws RepositoryException
      */
     public function rules() {
 
         switch ($this->code) {
 
-//            case MasterConstant::SO_PENDING:
-//                $currentStatusId = $this->retrieveMasterId(MasterConstant::SO_CANCELED);
-//
-//                return $this->customValidation($currentStatusId);
+            case MasterConstant::SO_PENDING:
+                $currentStatusId = $this->retrieveMasterId(MasterConstant::SO_CANCELED);
+
+                return $this->customValidation($currentStatusId);
 
             case MasterConstant::SO_CANCELED:
-                $currentStatusId = $this->findMasterByCode([
-                    MasterConstant::SO_PENDING,
-                    MasterConstant::SO_MANUFACTURING,
-                ]);
+                $currentStatusId = $this->retrieveMasterId(MasterConstant::SO_PENDING);
 
                 return $this->customValidation($currentStatusId);
 
@@ -63,37 +56,23 @@ class StatusRequest extends FormRequest
 
             default:
                 return [
-                    'code' => 'required|string|not_in:' . MasterConstant::SO_PENDING
+                    'code' => 'required|string'
                 ];
         }
     }
+
 
     /**
      * @param $currentStatusId
      * @return array
      */
     private function customValidation($currentStatusId) {
+
         return [
-            'sales_order_id' => $this->oldStatusValidation($currentStatusId)
+            'delivery_id' => 'required|exists:deliveries,id,status_id,' . $currentStatusId
         ];
     }
 
-    /**
-     * @param $currentStatusId
-     * @return array
-     */
-    private function oldStatusValidation($currentStatusId) {
-
-        $currentStatusIds = is_array($currentStatusId) ? $currentStatusId : [$currentStatusId];
-
-        return [
-            'required',
-            Rule::exists('sales_orders', 'id')->where(function ($query) use ($currentStatusIds) {
-                /** @var Builder $query */
-                $query->whereIn('status_id', $currentStatusIds);
-            }),
-        ];
-    }
 
     /**
      * Get custom messages for validator errors.
@@ -101,10 +80,8 @@ class StatusRequest extends FormRequest
      * @return array
      */
     public function messages() {
-
         return [
-            'code.not_in'           => 'This Order is in canceled status,you can not change.',
-            'sales_order_id.exists' => 'Please select valid status.'
+            'delivery_id.exists' => 'Please select valid status.'
         ];
     }
 

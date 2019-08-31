@@ -33,12 +33,12 @@ class SalesRecipeRepository extends BaseRepository
     }
 
     /**
-     * @param $orderRecipeIds
+     * @param $values
      * @return mixed
      */
-    public function removeById($orderRecipeIds) {
-        return $this->model->whereIn('id',
-            $orderRecipeIds)->delete();
+    public function removeByField($field, $values) {
+        return $this->model->whereIn($field,
+            $values)->delete();
     }
 
 
@@ -64,8 +64,8 @@ class SalesRecipeRepository extends BaseRepository
             $salesOrderId);
 
 
-        if ($loadRelation){
-            $orderRecipes = $orderRecipes->with(['recipe.fiddles.thread','recipe.fiddles.color']);
+        if ($loadRelation) {
+            $orderRecipes = $orderRecipes->with(['recipe.fiddles.thread', 'recipe.fiddles.color']);
         }
 
         return $orderRecipes->get();

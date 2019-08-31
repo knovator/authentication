@@ -18,7 +18,9 @@ use App\Modules\Sales\Repositories\DeliveryRepository;
 use App\Modules\Sales\Repositories\SalesRecipeRepository;
 use App\Modules\Stock\Repositories\StockRepository;
 use App\Modules\Thread\Constants\ThreadType;
+use App\Modules\Thread\Repositories\ThreadColorRepository;
 use App\Repositories\MasterRepository;
+use App\Support\DestroyObject;
 use App\Support\Formula;
 use App\Support\UniqueIdGenerator;
 use Barryvdh\Snappy\Facades\SnappyPdf;
@@ -28,14 +30,11 @@ use Exception;
 use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
 use Knovators\Support\Helpers\HTTPCode;
-use App\Support\DestroyObject;
-use Knp\Snappy\Pdf;
 use Log;
 use Prettus\Repository\Exceptions\RepositoryException;
 use Str;
-use View;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class DeliveryController
@@ -56,6 +55,8 @@ class DeliveryController extends Controller
 
     protected $designDetailRepository;
 
+    protected $threadColorRepository;
+
     /**
      * DeliveryController constructor.
      * @param DeliveryRepository     $deliveryRepository
@@ -63,19 +64,22 @@ class DeliveryController extends Controller
      * @param SalesRecipeRepository  $orderRecipeRepository
      * @param StockRepository        $stockRepository
      * @param DesignDetailRepository $designDetailRepository
+     * @param ThreadColorRepository  $threadColorRepository
      */
     public function __construct(
         DeliveryRepository $deliveryRepository,
         MasterRepository $masterRepository,
         SalesRecipeRepository $orderRecipeRepository,
         StockRepository $stockRepository,
-        DesignDetailRepository $designDetailRepository
+        DesignDetailRepository $designDetailRepository,
+        ThreadColorRepository $threadColorRepository
     ) {
         $this->deliveryRepository = $deliveryRepository;
         $this->masterRepository = $masterRepository;
         $this->orderRecipeRepository = $orderRecipeRepository;
         $this->stockRepository = $stockRepository;
         $this->designDetailRepository = $designDetailRepository;
+        $this->threadColorRepository = $threadColorRepository;
     }
 
 
@@ -113,6 +117,160 @@ class DeliveryController extends Controller
         }
     }
 
+    /**
+     * @param      $salesOrder
+     * @param      $orders
+     * @param null $deliveryId
+     * @return bool
+     */
+    private function checkQuantityNotExists($salesOrder, $orders, $deliveryId = null) {
+        $orders = collect($orders)->groupBy('sales_order_recipe_id');
+        $orderRecipes = $this->orderRecipeRepository->getOrderRecipeList($salesOrder->id,
+            $deliveryId);
+        foreach ($orders as $key => $order) {
+            $totalMeters = $order->sum('total_meters');
+            $orderRecipe = $orderRecipes->find($key);
+            if ($orderRecipe->remaining_meters < $totalMeters) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param SalesOrder $salesOrder
+     * @param            $pendingStatusId
+     */
+    private function storeStockDetails(SalesOrder $salesOrder, $pendingStatusId) {
+        $salesOrder->orderStocks()->delete();
+        $salesOrder->load([
+            'orderRecipes.partialOrders.delivery',
+            'orderRecipes.recipe.fiddles.thread',
+            'design.detail',
+            'design.fiddlePicks' => function ($fiddlePicks) {
+                /** @var Builder $fiddlePicks */
+                $fiddlePicks->orderBy('fiddle_no');
+            },
+            'designBeam.threadColor.thread'
+        ]);
+        $salesOrder->orderStocks()->createMany($this->getStockQuantity($salesOrder,
+            $pendingStatusId));
+    }
+
+    /**
+     * @param $salesOrder
+     * @param $pendingStatusId
+     * @return array
+     */
+    private function getStockQuantity($salesOrder, $pendingStatusId) {
+        $stockQty = [];
+        $formula = Formula::getInstance();
+        $designDetail = $salesOrder->design->detail;
+        $designPicks = $salesOrder->design->fiddlePicks;
+        $beam = $salesOrder->designBeam->threadColor;
+        foreach ($salesOrder->orderRecipes as $orderRecipe) {
+
+            // create partial order stocks
+            if ($orderRecipe->partialOrders->isNotEmpty()) {
+                foreach ($orderRecipe->partialOrders as $partialOrder) {
+                    // weft partial order per recipe thread color stock
+                    $this->createStockQuantity($orderRecipe,
+                        $partialOrder->delivery->status_id, $formula, $designDetail,
+                        $partialOrder->total_meters, $designPicks, $stockQty, $partialOrder);
+
+                    // warp partial order per recipe thread color stock
+                    $stockQty[] = $this->setStockArray($orderRecipe->id, $beam->id,
+                        $partialOrder->delivery->status_id,
+                        $formula->getTotalKgQty(ThreadType::WARP,
+                            $beam->thread, $designDetail,
+                            $partialOrder->total_meters), $partialOrder);
+                }
+            }
+
+            $remainingMeters = ($orderRecipe->total_meters - $orderRecipe->partialOrders->sum('total_meters'));
+            // create remaining order stocks
+            if ($remainingMeters > 0) {
+                // weft remaining meters thread color stock
+                $this->createStockQuantity($orderRecipe,
+                    $pendingStatusId, $formula, $designDetail,
+                    $remainingMeters, $designPicks, $stockQty);
+
+                // warp remaining meters thread color stock
+                $stockQty[] = $this->setStockArray($orderRecipe->id, $beam->id,
+                    $pendingStatusId,
+                    $formula->getTotalKgQty(ThreadType::WARP,
+                        $beam->thread, $designDetail,
+                        $remainingMeters));
+
+            }
+
+        }
+
+        return $stockQty;
+    }
+
+    /**
+     * @param         $orderRecipe
+     * @param         $statusId
+     * @param Formula $formula
+     * @param         $designDetail
+     * @param         $totalMeters
+     * @param         $designPicks
+     * @param         $stockQty
+     * @param bool    $partialOrder
+     */
+    private function createStockQuantity(
+        $orderRecipe,
+        $statusId,
+        Formula $formula,
+        $designDetail,
+        $totalMeters,
+        $designPicks,
+        &$stockQty,
+        $partialOrder = false
+    ) {
+        foreach ($orderRecipe->recipe->fiddles as $threadColorKey => $threadColor) {
+            $threadColor->thread->pick = $designPicks[$threadColorKey]->pick;
+            $stockQty[] = $this->setStockArray($orderRecipe->id, $threadColor['id'],
+                $statusId,
+                $formula->getTotalKgQty(ThreadType::WEFT,
+                    $threadColor->thread, $designDetail,
+                    $totalMeters), $partialOrder);
+        }
+    }
+
+    /**
+     * @param      $orderRecipeId
+     * @param      $threadColorId
+     * @param      $statusId
+     * @param      $kgQty
+     * @param bool $partialOrder
+     * @return array
+     */
+    private function setStockArray(
+        $orderRecipeId,
+        $threadColorId,
+        $statusId,
+        $kgQty,
+        $partialOrder = false
+    ) {
+        $stock = [
+            'order_recipe_id' => $orderRecipeId,
+            'product_id'      => $threadColorId,
+            'product_type'    => 'thread_color',
+            'status_id'       => $statusId,
+            'kg_qty'          => '-' . $kgQty,
+        ];
+
+        if ($partialOrder) {
+            /** @var RecipePartialOrder $partialOrder */
+            $stock['partial_order_id'] = $partialOrder->id;
+            $stock['partial_order_type'] = 'sales_partial';
+        }
+
+        return $stock;
+    }
 
     /**
      * @param SalesOrder    $salesOrder
@@ -147,7 +305,6 @@ class DeliveryController extends Controller
         }
     }
 
-
     /**
      * @param Delivery $delivery
      * @param array    $input
@@ -168,166 +325,6 @@ class DeliveryController extends Controller
             $delivery->partialOrders()->whereIn('id', $input['removed_partial_orders'])->delete();
         }
     }
-
-
-    /**
-     * @param SalesOrder $salesOrder
-     * @param            $pendingStatusId
-     */
-    private function storeStockDetails(SalesOrder $salesOrder, $pendingStatusId) {
-        $salesOrder->orderStocks()->delete();
-        $salesOrder->load([
-            'orderRecipes.partialOrders.delivery',
-            'orderRecipes.recipe.fiddles.thread',
-            'design.detail',
-            'design.fiddlePicks' => function ($fiddlePicks) {
-                /** @var Builder $fiddlePicks */
-                $fiddlePicks->orderBy('fiddle_no');
-            },
-            'designBeam.threadColor.thread'
-        ]);
-        $salesOrder->orderStocks()->createMany($this->getStockQuantity($salesOrder,
-            $pendingStatusId));
-    }
-
-
-    /**
-     * @param $salesOrder
-     * @param $pendingStatusId
-     * @return array
-     */
-    private function getStockQuantity($salesOrder, $pendingStatusId) {
-        $stockQty = [];
-        $formula = Formula::getInstance();
-        $designDetail = $salesOrder->design->detail;
-        $designPicks = $salesOrder->design->fiddlePicks;
-        $beam = $salesOrder->designBeam->threadColor;
-        foreach ($salesOrder->orderRecipes as $orderRecipe) {
-
-            // create partial order stocks
-            if ($orderRecipe->partialOrders->isNotEmpty()) {
-                foreach ($orderRecipe->partialOrders as $partialOrder) {
-                    // weft partial order per recipe thread color stock
-                    $this->createStockQuantity($orderRecipe,
-                        $partialOrder->delivery->status_id, $formula, $designDetail,
-                        $partialOrder->total_meters, $designPicks, $stockQty, $partialOrder);
-
-                    // warp partial order per recipe thread color stock
-                    $stockQty[] = $this->setStockArray($orderRecipe->id, $beam->id,
-                        $partialOrder->delivery->status_id,
-                        $formula->getTotalKgQty(ThreadType::WARP,
-                            $beam->thread, $designDetail,
-                            $partialOrder->total_meters), $partialOrder);
-                }
-            }
-
-            $remainingMeters = ($orderRecipe->total_meters - $orderRecipe->partialOrders->sum('total_meters'));
-            // create remaining order stocks
-            if ($remainingMeters) {
-                // weft remaining meters thread color stock
-                $this->createStockQuantity($orderRecipe,
-                    $pendingStatusId, $formula, $designDetail,
-                    $remainingMeters, $designPicks, $stockQty);
-
-                // warp remaining meters thread color stock
-                $stockQty[] = $this->setStockArray($orderRecipe->id, $beam->id,
-                    $pendingStatusId,
-                    $formula->getTotalKgQty(ThreadType::WARP,
-                        $beam->thread, $designDetail,
-                        $remainingMeters));
-
-            }
-
-        }
-
-        return $stockQty;
-    }
-
-
-    /**
-     * @param         $orderRecipe
-     * @param         $statusId
-     * @param Formula $formula
-     * @param         $designDetail
-     * @param         $totalMeters
-     * @param         $designPicks
-     * @param         $stockQty
-     * @param bool    $partialOrder
-     */
-    private function createStockQuantity(
-        $orderRecipe,
-        $statusId,
-        Formula $formula,
-        $designDetail,
-        $totalMeters,
-        $designPicks,
-        &$stockQty,
-        $partialOrder = false
-    ) {
-        foreach ($orderRecipe->recipe->fiddles as $threadColorKey => $threadColor) {
-            $threadColor->thread->pick = $designPicks[$threadColorKey]->pick;
-            $stockQty[] = $this->setStockArray($orderRecipe->id, $threadColor['id'],
-                $statusId,
-                $formula->getTotalKgQty(ThreadType::WEFT,
-                    $threadColor->thread, $designDetail,
-                    $totalMeters), $partialOrder);
-        }
-    }
-
-
-    /**
-     * @param      $orderRecipeId
-     * @param      $threadColorId
-     * @param      $statusId
-     * @param      $kgQty
-     * @param bool $partialOrder
-     * @return array
-     */
-    private function setStockArray(
-        $orderRecipeId,
-        $threadColorId,
-        $statusId,
-        $kgQty,
-        $partialOrder = false
-    ) {
-        $stock = [
-            'order_recipe_id' => $orderRecipeId,
-            'product_id'      => $threadColorId,
-            'product_type'    => 'thread_color',
-            'status_id'       => $statusId,
-            'kg_qty'          => '-' . $kgQty,
-        ];
-
-        if ($partialOrder) {
-            /** @var RecipePartialOrder $partialOrder */
-            $stock['partial_order_id'] = $partialOrder->id;
-        }
-
-        return $stock;
-    }
-
-
-    /**
-     * @param      $salesOrder
-     * @param      $orders
-     * @param null $deliveryId
-     * @return bool
-     */
-    private function checkQuantityNotExists($salesOrder, $orders, $deliveryId = null) {
-        $orders = collect($orders)->groupBy('sales_order_recipe_id');
-        $orderRecipes = $this->orderRecipeRepository->getOrderRecipeList($salesOrder->id,
-            $deliveryId);
-        foreach ($orders as $key => $order) {
-            $totalMeters = $order->sum('total_meters');
-            $orderRecipe = $orderRecipes->find($key);
-            if ($orderRecipe->remaining_meters < $totalMeters) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
 
     /**
      * @param SalesOrder $salesOrder
@@ -398,6 +395,64 @@ class DeliveryController extends Controller
 
     }
 
+    /**
+     * @param SalesOrder $salesOrder
+     * @param Delivery   $delivery
+     * @return Response
+     */
+    public function exportManufacturing(SalesOrder $salesOrder, Delivery $delivery) {
+        $salesOrder->load(['design.detail', 'design.fiddlePicks']);
+        $machineRepo = new MachineRepository(new Container());
+        $machines = $machineRepo->manufacturingReceipts($delivery->id);
+
+        if ($machines->isEmpty()) {
+            return $this->sendResponse(null, __('messages.partial_order_not_present'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+
+        $pdf = SnappyPdf::loadView('receipts.sales-orders.manufacturing.manufacturing',
+            compact('machines', 'salesOrder', 'delivery'));
+
+        /** @var ImageWrapper $pdf */
+        return $pdf->download($delivery->delivery_no . '-manufacturing' . ".pdf");
+        /*return view('receipts.sales-orders.manufacturing.manufacturing',
+            compact('machines', 'salesOrder', 'delivery'));*/
+    }
+
+    /**
+     * @param SalesOrder $salesOrder
+     * @param Delivery   $delivery
+     * @return Response
+     */
+    public function exportAccounting(SalesOrder $salesOrder, Delivery $delivery) {
+        $salesOrder->load([
+            'manufacturingCompany',
+            'design.mainImage.file',
+            'customer.state'
+        ]);
+        $delivery->load([
+            'partialOrders' => function ($partialOrders) {
+                /** @var Builder $partialOrders */
+                $partialOrders->with([
+                    'orderRecipe.recipe.fiddles' => function ($fiddles) {
+                        $fiddles->where('recipes_fiddles.fiddle_no', '=', 1)->with('color');
+                    }
+                ])->orderByDesc('id');
+            }
+        ]);
+        if ($delivery->partialOrders->isEmpty()) {
+            return $this->sendResponse(null, __('messages.partial_order_not_present'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+
+        $pdf = SnappyPdf::loadView('receipts.sales-orders.accounting.accounting',
+            compact('salesOrder', 'delivery'));
+
+        /** @var ImageWrapper $pdf */
+        return $pdf->download($delivery->delivery_no . '-accounting' . ".pdf");
+//        return view('receipts.sales-orders.accounting.accounting',
+//            compact('salesOrder', 'delivery'));
+    }
 
     /**
      * @param Delivery $delivery
@@ -417,6 +472,40 @@ class DeliveryController extends Controller
 
     }
 
+    /**
+     * @param Delivery $delivery
+     * @param          $code
+     * @param          $input
+     * @return JsonResponse
+     * @throws Exception
+     */
+    private function updateStatus(Delivery $delivery, $code, $input) {
+        $status = $this->findMasterIdByCode($code);
+        try {
+            /** @var Master $status */
+            $input['status_id'] = $status->id;
+            DB::beginTransaction();
+            $delivery->orderStocks()->update(['status_id' => $status->id]);
+            $delivery->update($input);
+            DB::commit();
+
+            return $this->sendResponse($delivery->fresh(['status:id,name,code']),
+                __('messages.updated', ['module' => 'Status']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            DB::rollBack();
+            Log::error($exception);
+            throw $exception;
+        }
+    }
+
+    /**
+     * @param $code
+     * @return integer
+     */
+    private function findMasterIdByCode($code) {
+        return $this->masterRepository->findByCode($code);
+    }
 
     /**
      * @param Delivery $delivery
@@ -452,16 +541,6 @@ class DeliveryController extends Controller
 
     }
 
-
-    /**
-     * @param $code
-     * @return integer
-     */
-    private function findMasterIdByCode($code) {
-        return $this->masterRepository->findByCode($code);
-    }
-
-
     /**
      * @param Delivery $delivery
      * @param          $input
@@ -486,6 +565,24 @@ class DeliveryController extends Controller
      */
     private function updateSOMANUFACTURINGStatus(Delivery $delivery, $input) {
         try {
+            $deliveryStocks = $this->deliveryRepository->usedStocks($delivery);
+            $threadColors = $this->threadColorRepository->findWithAvailableQty(array_keys($deliveryStocks));
+            foreach ($threadColors as $thread) {
+                if (!is_null($thread->availableStock)) {
+                    $newQty = $thread->availableStock->available_qty +
+                        $deliveryStocks[$thread->id]['used_stock'];
+                } else {
+                    $newQty = $deliveryStocks[$thread->id]['used_stock'];
+                }
+                if ($newQty < 0) {
+                    $newQty = ceil(str_replace('-', '', $newQty));
+
+                    return $this->sendResponse(null,
+                        "{$thread->thread->denier}-{$thread->thread->name}-{$thread->color->name} ({$newQty}KG) is not available for manufacturing.",
+                        HTTPCode::UNPROCESSABLE_ENTITY);
+                }
+            }
+
             return $this->updateStatus($delivery, MasterConstant::SO_MANUFACTURING, $input);
         } catch (Exception $exception) {
             Log::error($exception);
@@ -494,91 +591,6 @@ class DeliveryController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
 
-    }
-
-
-    /**
-     * @param Delivery $delivery
-     * @param          $code
-     * @param          $input
-     * @return JsonResponse
-     * @throws Exception
-     */
-    private function updateStatus(Delivery $delivery, $code, $input) {
-        $status = $this->findMasterIdByCode($code);
-        try {
-            /** @var Master $status */
-            $input['status_id'] = $status->id;
-            DB::beginTransaction();
-            $delivery->orderStocks()->update(['status_id' => $status->id]);
-            $delivery->update($input);
-            DB::commit();
-
-            return $this->sendResponse($delivery->fresh(['status:id,name,code']),
-                __('messages.updated', ['module' => 'Status']),
-                HTTPCode::OK);
-        } catch (Exception $exception) {
-            DB::rollBack();
-            Log::error($exception);
-            throw $exception;
-        }
-    }
-
-    /**
-     * @param SalesOrder $salesOrder
-     * @param Delivery   $delivery
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function exportManufacturing(SalesOrder $salesOrder, Delivery $delivery) {
-        $salesOrder->load(['design.detail', 'design.fiddlePicks']);
-        $machineRepo = new MachineRepository(new Container());
-        $machines = $machineRepo->manufacturingReceipts($delivery->id);
-
-        if ($machines->isEmpty()) {
-            return $this->sendResponse(null, __('messages.partial_order_not_present'),
-                HTTPCode::UNPROCESSABLE_ENTITY);
-        }
-
-        $pdf = SnappyPdf::loadView('receipts.sales-orders.manufacturing.manufacturing',
-            compact('machines', 'salesOrder', 'delivery'));
-
-        /** @var ImageWrapper $pdf */
-        return $pdf->download($delivery->delivery_no . '-manufacturing' . ".pdf");
-        /*return view('receipts.sales-orders.manufacturing.manufacturing',
-            compact('machines', 'salesOrder', 'delivery'));*/
-    }
-
-    /**
-     * @param SalesOrder $salesOrder
-     * @param Delivery   $delivery
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function exportAccounting(SalesOrder $salesOrder, Delivery $delivery) {
-        $salesOrder->load([
-            'manufacturingCompany',
-            'design.mainImage.file',
-            'customer.state'
-        ]);
-        $delivery->load([
-            'partialOrders' => function ($partialOrders) {
-                /** @var Builder $partialOrders */
-                $partialOrders->with([
-                    'orderRecipe.recipe.fiddles' => function ($fiddles) {
-                        $fiddles->where('recipes_fiddles.fiddle_no', '=', 1)->with('color');
-                    }
-                ])->orderByDesc('id');
-            }
-        ]);
-        if ($delivery->partialOrders->isEmpty()) {
-            return $this->sendResponse(null, __('messages.partial_order_not_present'),
-                HTTPCode::UNPROCESSABLE_ENTITY);
-        }
-
-        $pdf = SnappyPdf::loadView('receipts.sales-orders.accounting.accounting',
-            compact('salesOrder', 'delivery'));
-
-        /** @var ImageWrapper $pdf */
-        return $pdf->download($delivery->delivery_no . '-accounting' . ".pdf");
     }
 
 

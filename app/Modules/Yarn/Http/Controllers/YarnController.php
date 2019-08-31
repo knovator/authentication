@@ -74,7 +74,7 @@ class YarnController extends Controller
             $this->storeStockOrders($yarnOrder, $input);
             DB::commit();
 
-            return $this->sendResponse($yarnOrder,
+            return $this->sendResponse($yarnOrder->load($this->commonRelations()),
                 __('messages.created', ['module' => 'Sales Order']),
                 HTTPCode::CREATED);
         } catch (Exception $exception) {
@@ -105,6 +105,19 @@ class YarnController extends Controller
     }
 
     /**
+     * @return array
+     */
+    private function commonRelations() {
+        return [
+            'threads.threadColor.thread:id,name,denier,company_name',
+            'threads.threadColor.color:id,name,code',
+            'customer.state:id,name,code,gst_code',
+            'status:id,name,code',
+            'manufacturingCompany:id,name'
+        ];
+    }
+
+    /**
      * @param YarnOrder     $yarnOrder
      * @param UpdateRequest $request
      * @return mixed
@@ -121,7 +134,7 @@ class YarnController extends Controller
         try {
             DB::beginTransaction();
             $yarnOrder->update($input);
-            $this->storeThreadDetails($yarnOrder = $yarnOrder->fresh(), $input);
+            $this->storeThreadDetails($yarnOrder->refresh(), $input);
             DB::commit();
 
             return $this->sendResponse($yarnOrder->load($this->commonRelations()),
@@ -135,7 +148,6 @@ class YarnController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
     }
-
 
     /**
      * @param $yarnOrder
@@ -164,18 +176,6 @@ class YarnController extends Controller
     }
 
     /**
-     * @return array
-     */
-    private function commonRelations() {
-        return [
-            'threads.threadColor.thread:id,name,denier,company_name',
-            'threads.threadColor.color:id,name,code',
-            'customer.state:id,name,code,gst_code',
-            'status:id,name,code'
-        ];
-    }
-
-    /**
      * @param YarnOrder $yarnOrder
      * @return JsonResponse
      */
@@ -184,7 +184,7 @@ class YarnController extends Controller
             $yarnOrder->load('status');
             if ($yarnOrder->status->code === MasterConstant::SO_DELIVERED) {
                 return $this->sendResponse(null,
-                    __('messages.can_not_delete_order'),
+                    __('messages.can_not_delete_complete_order'),
                     HTTPCode::UNPROCESSABLE_ENTITY);
             }
 

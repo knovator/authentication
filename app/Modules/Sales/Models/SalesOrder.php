@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Knovators\Support\Traits\HasModelEvent;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use App\Constants\Master as MasterConstant;
 
 /**
  * Class SalesOrder
@@ -69,6 +69,14 @@ class SalesOrder extends Model
             'id');
     }
 
+    /**
+     * @return mixed
+     */
+    public function orderStocks() {
+        return $this->morphMany(Stock::class, 'order', 'order_type', 'order_id', 'id');
+    }
+
+
 
     /**
      * @return mixed
@@ -78,18 +86,6 @@ class SalesOrder extends Model
             'id')->selectRaw('SUM(total_meters) as total,sales_order_id')
                     ->groupBy('sales_order_id');
     }
-
-
-    /**
-     * @return mixed
-     */
-    public function totalMeters() {
-        return $this->hasOneThrough(RecipePartialOrder::class, Delivery::class, 'sales_order_id',
-            'delivery_id', 'id', 'id')
-                    ->selectRaw('SUM(total_meters) as total,delivery_id')
-                    ->groupBy('laravel_through_key');
-    }
-
 
     /**
      * @return mixed
@@ -101,10 +97,19 @@ class SalesOrder extends Model
     /**
      * @return mixed
      */
+    public function totalMeters() {
+        return $this->hasOneThrough(RecipePartialOrder::class, Delivery::class, 'sales_order_id',
+            'delivery_id', 'id', 'id')
+                    ->selectRaw('SUM(total_meters) as total,delivery_id')
+                    ->groupBy('laravel_through_key');
+    }
+
+    /**
+     * @return mixed
+     */
     public function deliveredTotalMeters() {
         return $this->totalMeters();
     }
-
 
     /**
      * @return mixed
@@ -112,7 +117,6 @@ class SalesOrder extends Model
     public function deliveries() {
         return $this->hasMany(Delivery::class, 'sales_order_id', 'id');
     }
-
 
     /**
      * @return mixed
@@ -130,7 +134,6 @@ class SalesOrder extends Model
             'id');
     }
 
-
     /**
      * @return mixed
      */
@@ -138,7 +141,6 @@ class SalesOrder extends Model
         return $this->belongsTo(Design::class, 'design_id',
             'id');
     }
-
 
     /**
      * @return mixed
@@ -148,20 +150,12 @@ class SalesOrder extends Model
             'id');
     }
 
-
     /**
      * @return mixed
      */
     public function designBeam() {
         return $this->belongsTo(DesignBeam::class, 'design_beam_id',
             'id');
-    }
-
-    /**
-     * @return mixed
-     */
-    public function orderStocks() {
-        return $this->morphMany(Stock::class, 'order', 'order_type', 'order_id', 'id');
     }
 
     /**
@@ -174,20 +168,27 @@ class SalesOrder extends Model
 
 
     /**
-     * @return UnloadedRelationException
+     * @return UnloadedRelationException|int
      */
     public function getPendingMetersAttribute() {
+        if (!$this->relationLoaded('status')) {
+            throw UnloadedRelationException::make($this, 'status');
+        }
+
+        if ($this->status->code == MasterConstant::SO_CANCELED) {
+            return 0;
+        }
 
         if (!$this->relationLoaded('recipeMeters')) {
-            return UnloadedRelationException::make($this, 'recipeMeters');
+            throw UnloadedRelationException::make($this, 'recipeMeters');
         }
 
         if (!$this->relationLoaded('manufacturingTotalMeters')) {
-            return UnloadedRelationException::make($this, 'manufacturingTotalMeters');
+            throw UnloadedRelationException::make($this, 'manufacturingTotalMeters');
         }
 
         if (!$this->relationLoaded('deliveredTotalMeters')) {
-            return UnloadedRelationException::make($this, 'deliveredTotalMeters');
+            throw UnloadedRelationException::make($this, 'deliveredTotalMeters');
         }
 
         $total = $this->recipeMeters->total;
