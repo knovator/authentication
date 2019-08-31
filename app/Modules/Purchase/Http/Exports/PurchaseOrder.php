@@ -9,6 +9,8 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Exception;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 /**
  * Class App\Modules\Purchase\Http\Exports
@@ -32,7 +34,7 @@ class PurchaseOrder implements FromView, ShouldAutoSize, WithEvents
      */
     public function view() : View {
         return view('exports.purchase_orders', [
-            'orders' => $this->orders,
+            'purchaseOrders' => $this->orders,
         ]);
     }
 
@@ -40,8 +42,30 @@ class PurchaseOrder implements FromView, ShouldAutoSize, WithEvents
      * @return array
      */
     public function registerEvents() : array {
+        $mainBorderStyle = [
+            'borders' => [
+                'outline' => [
+                    'borderStyle' => Border::BORDER_HAIR,
+                    'color'       => ['argb' => '#32CD32'],
+                ],
+            ],
+        ];
+
+        $subBorderStyle = [
+            'borders' => [
+                'outline' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color'       => ['argb' => '75,0,130'],
+                ],
+            ],
+        ];
+
         return [
-            AfterSheet::class => function (AfterSheet $event) {
+            AfterSheet::class => function (AfterSheet $event) use (
+                $mainBorderStyle,
+                $subBorderStyle
+            ) {
+                $this->setBorderOnCell($event, $mainBorderStyle, $subBorderStyle);
                 $this->createStyle($event, 'A1:G1', 11);
                 $event->sheet->styleCells(
                     'A1:G1',
@@ -51,8 +75,34 @@ class PurchaseOrder implements FromView, ShouldAutoSize, WithEvents
                         ]
                     ]
                 );
+                $event->sheet->getStyle('A1:G1')->getFill()
+                             ->setFillType(Fill::FILL_SOLID)
+                             ->getStartColor()->setARGB('FFFF00');
             },
         ];
+    }
+
+    /**
+     * @param $event
+     * @param $styleArray
+     * @param $subBorderStyle
+     */
+    private function setBorderOnCell($event, $styleArray, $subBorderStyle) {
+        $mainStart = 2;
+        foreach ($this->orders as $orderKey => $order) {
+            $deliveries = count($order->deliveries);
+            $threads = count($order->threads) - 1;
+            $mainEnd = $deliveries + $threads + $mainStart;
+            $subStart = $mainStart + $threads + 1;
+            $event->sheet->getDelegate()->getStyle("A{$mainStart}:G{$mainEnd}")
+                         ->applyFromArray($styleArray);
+            if ($deliveries) {
+                $event->sheet->getDelegate()->getStyle("E{$subStart}:G{$mainEnd}")
+                             ->applyFromArray($subBorderStyle);
+
+            }
+            $mainStart = $mainEnd + 2;
+        }
     }
 
     /**
@@ -65,4 +115,6 @@ class PurchaseOrder implements FromView, ShouldAutoSize, WithEvents
         /** @var AfterSheet $event */
         $event->sheet->getDelegate()->getStyle($cell)->getFont()->setSize($size);
     }
+
+
 }

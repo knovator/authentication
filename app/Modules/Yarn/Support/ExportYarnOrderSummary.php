@@ -26,6 +26,7 @@ trait ExportYarnOrderSummary
             'threads.threadColor.thread:id,name,denier,company_name',
             'threads.threadColor.color:id,name,code',
             'customer.state:id,name,code,gst_code',
+            'manufacturingCompany'
         ]);
 
         return SnappyPdf::loadView('receipts.yarn-orders.main_summary.summary',

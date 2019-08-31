@@ -7,6 +7,7 @@ use App\Models\Master;
 use App\Modules\Thread\Models\ThreadColor;
 use DB;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
@@ -65,14 +66,25 @@ class ThreadColorRepository extends BaseRepository
         return $threadColors;
     }
 
+
+    /**
+     * @param $ids
+     * @return Builder[]|Collection|Model[]
+     */
+    public function findWithAvailableQty($ids) {
+        return $this->model->with(['availableStock', 'thread:id,name,denier', 'color:id,name'])
+                           ->whereKey($ids)
+                           ->get();
+    }
+
     /**
      * @param $statusIds
      * @return mixed
      * @throws RepositoryException
      */
-    public function getStockOverview($statusIds) {
+    public function getStockOverview() {
         $this->applyCriteria();
-        $threadColors = $this->model->with($this->commonRelations($statusIds))
+        $threadColors = $this->model->with($this->commonRelations())
                                     ->has('stocks');
 
         $threadColors = datatables()->of($threadColors)->make(true);
@@ -81,37 +93,32 @@ class ThreadColorRepository extends BaseRepository
         return $threadColors;
     }
 
+    /**
+     * @param $statusIds
+     * @return array
+     */
+    private function commonRelations() {
+        return [
+            'thread:id,name,denier',
+            'color:id,name,code',
+            'inPurchaseQty',
+            'availableStock',
+            'pendingStock',
+            'manufacturingStock',
+            'deliveredStock',
+        ];
+    }
 
     /**
      * @param $threadColorId
      * @param $poCancel
      * @return mixed
      */
-    public function stockCount($threadColorId, $statusIds) {
+    public function stockCount($threadColorId) {
 
-        $threadColors = $this->model->with($this->commonRelations($statusIds))
+        $threadColors = $this->model->with($this->commonRelations())
                                     ->find($threadColorId);
 
         return $threadColors;
-    }
-
-
-    /**
-     * @param $statusIds
-     * @return array
-     */
-    private function commonRelations($statusIds) {
-        return [
-            'thread:id,name,denier',
-            'color:id,name,code',
-            'inPurchaseQty',
-            'availableStock' => function ($availableStock) use ($statusIds) {
-                /** @var Builder $availableStock */
-                $availableStock->whereNotIn('status_id', $statusIds);
-            },
-            'pendingStock',
-            'manufacturingStock',
-            'deliveredStock',
-        ];
     }
 }

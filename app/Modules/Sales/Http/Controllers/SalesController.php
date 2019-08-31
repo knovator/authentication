@@ -3,21 +3,23 @@
 namespace App\Modules\Sales\Http\Controllers;
 
 use App\Constants\GenerateNumber;
-use App\Modules\Sales\Http\Exports\SalesOrder as ExportSalesOrder;
 use App\Constants\Master;
 use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
 use App\Jobs\OrderFormJob;
 use App\Modules\Design\Repositories\DesignDetailRepository;
+use App\Modules\Sales\Http\Exports\SalesOrder as ExportSalesOrder;
 use App\Modules\Sales\Http\Requests\AnalysisRequest;
 use App\Modules\Sales\Http\Requests\CreateRequest;
 use App\Modules\Sales\Http\Requests\MailRequest;
 use App\Modules\Sales\Http\Requests\StatusRequest;
 use App\Modules\Sales\Http\Requests\UpdateRequest;
 use App\Modules\Sales\Http\Resources\SalesOrder as SalesOrderResource;
+use App\Modules\Sales\Models\Delivery;
 use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Sales\Models\SalesOrderRecipe;
 use App\Modules\Sales\Repositories\CompanyRepository;
+use App\Modules\Sales\Repositories\DeliveryRepository;
 use App\Modules\Sales\Repositories\RecipePartialRepository;
 use App\Modules\Sales\Repositories\SalesOrderRepository;
 use App\Modules\Sales\Repositories\SalesRecipeRepository;
@@ -29,7 +31,6 @@ use App\Repositories\MasterRepository;
 use App\Support\DestroyObject;
 use App\Support\Formula;
 use App\Support\UniqueIdGenerator;
-use Barryvdh\Snappy\Facades\SnappyPdf;
 use DB;
 use Exception;
 use Illuminate\Container\Container;
@@ -63,6 +64,11 @@ class SalesController extends Controller
 
     protected $threadColorRepository;
 
+    protected $stockRepository;
+
+    protected $deliveryRepository;
+
+
     /**
      * SalesController constructor.
      * @param SalesOrderRepository    $salesOrderRepository
@@ -70,19 +76,25 @@ class SalesController extends Controller
      * @param DesignDetailRepository  $designDetailRepository
      * @param RecipePartialRepository $recipePartialOrderRepository
      * @param ThreadColorRepository   $threadColorRepository
+     * @param StockRepository         $stockRepository
+     * @param DeliveryRepository      $deliveryRepository
      */
     public function __construct(
         SalesOrderRepository $salesOrderRepository,
         MasterRepository $masterRepository,
         DesignDetailRepository $designDetailRepository,
         RecipePartialRepository $recipePartialOrderRepository,
-        ThreadColorRepository $threadColorRepository
+        ThreadColorRepository $threadColorRepository,
+        StockRepository $stockRepository,
+        DeliveryRepository $deliveryRepository
     ) {
         $this->salesOrderRepository = $salesOrderRepository;
         $this->masterRepository = $masterRepository;
         $this->designDetailRepository = $designDetailRepository;
         $this->recipePartialOrderRepo = $recipePartialOrderRepository;
         $this->threadColorRepository = $threadColorRepository;
+        $this->stockRepository = $stockRepository;
+        $this->deliveryRepository = $deliveryRepository;
     }
 
 
@@ -130,7 +142,7 @@ class SalesController extends Controller
     private function createOrUpdateSalesDetails(SalesOrder $salesOrder, $input, $update) {
         $designDetail = $this->designDetailRepository->findBy('design_id',
             $input['design_id'], ['panno', 'additional_panno', 'reed']);
-        $salesOrder->load('designBeam.threadColor.thread');
+        $salesOrder->load(['designBeam.threadColor.thread', 'status']);
         $this->storeSalesOrderRecipes($salesOrder, $input, $designDetail, $update);
     }
 
@@ -146,21 +158,22 @@ class SalesController extends Controller
         $designDetail,
         $update
     ) {
-        if ($update) {
-            // remove old stock results
-            $salesOrder->orderStocks()->delete();
-        }
+        if ($salesOrder->status->code != MasterConstant::SO_MANUFACTURING) {
+            if ($update) {
+                // remove old stock results
+                $salesOrder->orderStocks()->delete();
+            }
 
-        foreach ($input['order_recipes'] as $items) {
-            $orderRecipeId = isset($items['id']) ? $items['id'] : null;
-            $orderRecipe = $salesOrder->orderRecipes()
-                                      ->updateOrCreate(['id' => $orderRecipeId], $items);
-            $items['status_id'] = $salesOrder->status_id;
-            $this->storeRecipeOrderQuantities($salesOrder, $orderRecipe, $items, $designDetail);
+            foreach ($input['order_recipes'] as $items) {
+                $orderRecipeId = isset($items['id']) ? $items['id'] : null;
+                $orderRecipe = $salesOrder->orderRecipes()
+                                          ->updateOrCreate(['id' => $orderRecipeId], $items);
+                $this->storeRecipeOrderQuantities($salesOrder, $orderRecipe, $items, $designDetail);
+            }
         }
 
         if ($update && isset($input['removed_order_recipes_id']) && !empty($input['removed_order_recipes_id'])) {
-            $this->destroyOrderRecipes($input['removed_order_recipes_id']);
+            $this->destroyOrderRecipes($input['removed_order_recipes_id'], $salesOrder);
         }
     }
 
@@ -185,7 +198,7 @@ class SalesController extends Controller
                 'order_recipe_id' => $orderRecipe->id,
                 'product_id'      => $quantityDetails['thread_color_id'],
                 'product_type'    => 'thread_color',
-                'status_id'       => $items['status_id'],
+                'status_id'       => $salesOrder->status_id,
                 'kg_qty'          => '-' . $formula->getTotalKgQty(ThreadType::WEFT,
                         $quantityDetails, $designDetail, $items['total_meters']),
             ];
@@ -196,7 +209,7 @@ class SalesController extends Controller
             'order_recipe_id' => $orderRecipe->id,
             'product_id'      => $salesOrder->designBeam->thread_color_id,
             'product_type'    => 'thread_color',
-            'status_id'       => $items['status_id'],
+            'status_id'       => $salesOrder->status_id,
             'kg_qty'          => '-' . $formula->getTotalKgQty(ThreadType::WARP,
                     $threadDetail, $designDetail, $items['total_meters']),
         ]);
@@ -206,12 +219,19 @@ class SalesController extends Controller
 
     /**
      * @param $orderRecipeIds
+     * @param $salesOrder
      */
-    private function destroyOrderRecipes($orderRecipeIds) {
+    private function destroyOrderRecipes($orderRecipeIds, $salesOrder) {
+
+        if ($salesOrder->status->code == MasterConstant::SO_MANUFACTURING) {
+            $partialOrderIds = $this->recipePartialOrderRepo->findIdByRecipeIds($orderRecipeIds);
+            $this->deliveryRepository->removeSinglePartialOrders($partialOrderIds, $salesOrder->id);
+            $this->recipePartialOrderRepo->removeByField('id', $partialOrderIds);
+        }
         // remove sales partial order stocks
-        (new StockRepository(new Container()))->removeByPartialOrderId($orderRecipeIds);
+        $this->stockRepository->removeByField('order_recipe_id', $orderRecipeIds);
         // remove sales partial orders
-        (new SalesRecipeRepository(new Container()))->removeById($orderRecipeIds);
+        (new SalesRecipeRepository(new Container()))->removeByField('id', $orderRecipeIds);
 
     }
 
@@ -261,8 +281,7 @@ class SalesController extends Controller
         try {
             DB::beginTransaction();
             $salesOrder->update($input);
-            $salesOrder->fresh();
-            $this->createOrUpdateSalesDetails($salesOrder, $input, true);
+            $this->createOrUpdateSalesDetails($salesOrder->refresh(), $input, true);
             DB::commit();
 
             return $this->sendResponse($this->makeResource($salesOrder),
@@ -306,9 +325,8 @@ class SalesController extends Controller
      * @return JsonResponse
      */
     public function show(SalesOrder $salesOrder) {
-        $salesOrder->load([
+        $relations = [
             'customer',
-            'status',
             'design.detail',
             'design.mainImage.file',
             'designBeam.threadColor.thread',
@@ -317,7 +335,29 @@ class SalesController extends Controller
             'orderRecipes.recipe.fiddles.thread',
             'orderRecipes.recipe.fiddles.color',
             'manufacturingCompany'
-        ]);
+        ];
+
+        $salesOrder->load('status');
+
+        if ($salesOrder->status->code == MasterConstant::SO_MANUFACTURING) {
+            $deliveredId = $this->masterRepository->findByCode(MasterConstant::SO_DELIVERED)->id;
+            $relations['orderRecipes'] = function ($orderRecipes) use ($deliveredId) {
+                /** @var Builder $orderRecipes */
+                $orderRecipes->withCount([
+                    'partialOrders as delivered_count' => function ($partialOrders) use (
+                        $deliveredId
+                    ) {
+                        /** @var Builder $partialOrders */
+                        $partialOrders->whereHas('delivery',
+                            function ($delivery) use ($deliveredId) {
+                                /** @var Builder $delivery */
+                                $delivery->where('status_id', $deliveredId);
+                            });
+                    }
+                ]);
+            };
+        }
+        $salesOrder->load($relations);
 
         return $this->sendResponse($this->makeResource($salesOrder),
             __('messages.retrieved', ['module' => 'Sales Order']),
@@ -345,6 +385,9 @@ class SalesController extends Controller
         }
     }
 
+    /**
+     * @return mixed
+     */
     private function totalMeterStatuses() {
         return $this->masterRepository->findWhereIn('code',
             [Master::SO_DELIVERED, Master::SO_MANUFACTURING], ['id', 'code'])
@@ -380,16 +423,9 @@ class SalesController extends Controller
         $input = $request->all();
         $collection = collect($input['reports'])->keyBy('thread_color_id');
         try {
-
-            $statusIds = $this->masterRepository->findWhereIn('code',
-                [Master::PO_CANCELED, Master::PO_PENDING])->pluck('id')->toArray();
-
             $threadColors = $this->threadColorRepository->with([
-                'availableStock' => function ($availableStock) use ($statusIds) {
-                    /** @var Builder $availableStock */
-                    $availableStock->whereNotIn('status_id', $statusIds);
-                },
-                'thread'         => function ($thread) {
+                'availableStock',
+                'thread' => function ($thread) {
                     /** @var Builder $thread */
                     $thread->select(['id', 'name', 'type_id', 'denier', 'company_name'])
                            ->with('type:id,name');
@@ -558,7 +594,13 @@ class SalesController extends Controller
 
         $status = $this->masterRepository->findByCode(MasterConstant::SO_CANCELED);
 
-        $salesOrder->orderStocks()->update(['status_id' => $status->id]);
+        $salesOrder->deliveries->each(function (Delivery $delivery) {
+            $delivery->partialOrders()->delete();
+        });
+
+        $salesOrder->deliveries()->delete();
+
+        $salesOrder->orderStocks()->delete();
 
         return $this->updateStatus($salesOrder, $status);
 

@@ -3,6 +3,7 @@
 namespace App\Modules\Design\Repositories;
 
 use App\Modules\Design\Models\Design;
+use Exception;
 use Knovators\Support\Criteria\IsActiveCriteria;
 use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
@@ -33,14 +34,18 @@ class DesignRepository extends BaseRepository
     /**
      * @return mixed
      * @throws RepositoryException
-     * @throws \Exception
+     * @throws Exception
      */
     public function getDesignList() {
         $this->applyCriteria();
         $designs = datatables()->of($this->model->select('designs.*')->with([
             'detail',
             'mainImage.file:id,uri'
-        ])->with('beamRecipes')->withCount(['beams as total_beams', 'recipes as total_recipes']))
+        ])->with('beamRecipes')->withCount([
+            'beams as total_beams',
+            'recipes as total_recipes',
+            'salesOrders as associated_count'
+        ]))
                                ->make(true);
         $this->resetModel();
 
@@ -50,7 +55,7 @@ class DesignRepository extends BaseRepository
     /**
      * @return mixed
      * @throws RepositoryException
-     * @throws \Exception
+     * @throws Exception
      */
     public function getActiveDesigns() {
         $this->pushCriteria(IsActiveCriteria::class);

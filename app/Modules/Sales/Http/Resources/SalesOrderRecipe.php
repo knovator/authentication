@@ -27,11 +27,16 @@ class SalesOrderRecipe extends JsonResource
             'total_meters'  => $this->total_meters,
             'recipe'        => new RecipeResource($this->whenLoaded('recipe')),
             'partialOrders' => RecipePartialOrder::collection($this->whenLoaded('partialOrders')),
+
+            $this->mergeWhen(isset($this->delivered_count), [
+                'delivered_count' => $this->delivered_count
+            ]),
         ];
         /** @var \App\Modules\Sales\Models\SalesOrderRecipe $this */
         if ($this->relationLoaded('remainingQuantity')) {
             $orderRecipe['remaining_meters'] = $this->remaining_meters;
         }
+
 
         return $orderRecipe;
     }

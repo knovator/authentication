@@ -18,10 +18,8 @@ class RecipePartialOrder extends Model
 
     use SoftDeletes;
 
-    protected $table = 'recipes_partial_orders';
-
     public $timestamps = false;
-
+    protected $table = 'recipes_partial_orders';
     protected $fillable = [
         'sales_order_recipe_id',
         'pcs',
@@ -75,8 +73,8 @@ class RecipePartialOrder extends Model
      * @return mixed
      */
     public function stocks() {
-        return $this->hasMany(Stock::class, 'partial_order_id',
-            'id');
+        return $this->morphMany(Stock::class, 'partial_order',
+            'partial_order_type', 'partial_order_id');
     }
 
 }

@@ -4,6 +4,7 @@ namespace App\Modules\Yarn\Models;
 
 use App\Models\Master;
 use App\Modules\Customer\Models\Customer;
+use App\Modules\Sales\Models\ManufacturingCompany;
 use App\Modules\Stock\Models\Stock;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -27,7 +28,7 @@ class YarnOrder extends Model
         'status_id',
         'challan_no',
         'created_by',
-        'deleted_by' .
+        'deleted_by',
         'manufacturing_company_id'
     ];
 
@@ -63,6 +64,14 @@ class YarnOrder extends Model
      */
     public function orderStocks() {
         return $this->morphMany(Stock::class, 'order', 'order_type', 'order_id', 'id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function manufacturingCompany() {
+        return $this->belongsTo(ManufacturingCompany::class, 'manufacturing_company_id',
+            'id');
     }
 
     /**
