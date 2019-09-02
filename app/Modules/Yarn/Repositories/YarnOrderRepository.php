@@ -50,11 +50,11 @@ class YarnOrderRepository extends BaseRepository
             $orders = $orders->whereIn('id', $input['ids']);
         }
         if (isset($input['start_date'])) {
-            $orders = $orders->whereDate('created_at', '>=', $input['start_date']);
+            $orders = $orders->whereDate('order_date', '>=', $input['start_date']);
         }
 
         if (isset($input['end_date'])) {
-            $orders = $orders->whereDate('created_at', '<=', $input['end_date']);
+            $orders = $orders->whereDate('order_date', '<=', $input['end_date']);
         }
 
 
