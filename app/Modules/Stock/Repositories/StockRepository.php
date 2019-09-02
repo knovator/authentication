@@ -2,12 +2,8 @@
 
 namespace App\Modules\Stock\Repositories;
 
-use App\Modules\Purchase\Models\PurchaseOrder;
-use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Stock\Models\Stock;
 use Exception;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
 use Prettus\Repository\Exceptions\RepositoryException;
@@ -52,13 +48,18 @@ class StockRepository extends BaseRepository
      * @throws Exception
      */
     public function getThreadOrderReport($threadColor, $exceptIds, $stockCountStatus) {
-        $reports = $this->model->selectRaw($this->setStockCountColumn($stockCountStatus))->where([
-            'product_id'   => $threadColor->id,
-            'product_type' => 'thread_color',
-        ])->whereNotIn('status_id', $exceptIds)->groupBy(['order_id', 'order_type'])->with([
-            'order.customer.state:id,name,code',
-            'order.status:id,name,code',
-        ])->orderByDesc('created_at');
+        $columns = 'order_id,order_type,SUM(kg_qty) as stock';
+        $reports = $this->model->selectRaw($this->setStockCountColumn($stockCountStatus, $columns))
+                               ->where([
+                                   'product_id'   => $threadColor->id,
+                                   'product_type' => 'thread_color',
+                               ])->whereNotIn('status_id', $exceptIds)->groupBy([
+                'order_id',
+                'order_type'
+            ])->with([
+                'order.customer.state:id,name,code',
+                'order.status:id,name,code',
+            ])->orderByDesc('created_at');
 
         $reports = datatables()->of($reports)->make(true);
 
@@ -67,17 +68,44 @@ class StockRepository extends BaseRepository
 
     /**
      * @param $stockCountStatus
+     * @param $columns
      * @return string
      */
-    private function setStockCountColumn($stockCountStatus) {
-        $columns = 'order_id,order_type,SUM(kg_qty) as stock';
-        foreach ($stockCountStatus as $status) {
-            $status['code'] = strtolower($status['code']);
-            $columns .= ",SUM(IF(status_id = {$status['id']}, kg_qty, 0)) AS {$status['code']}";
+    private function setStockCountColumn($stockCountStatus, $columns) {
+        foreach ($stockCountStatus as $key => $status) {
+            if ($key == 'available_count') {
+                $condition = '';
+                $last = end($stockCountStatus[$key]);
+                foreach ($stockCountStatus[$key] as $availableId) {
+                    $condition .= 'status_id = ' . $availableId . ($availableId != $last ? ' OR ' : '');
+                }
+                $columns .= ",SUM(IF($condition, kg_qty, 0)) AS {$key}";
+
+            } else {
+                $status['code'] = strtolower($status['code']);
+                $columns .= ",SUM(IF(status_id = {$status['id']}, kg_qty, 0)) AS {$status['code']}";
+            }
         }
 
         return $columns;
 
     }
+
+
+    /**
+     * @param $usedCount
+     * @return mixed
+     * @throws Exception
+     */
+    public function getStockOverview($usedCount) {
+        $columns = $this->setStockCountColumn($usedCount, 'product_id,product_type');
+        $stocks = $this->model->selectRaw($columns)->with([
+            'product.thread:id,name,denier',
+            'product.color:id,name,code'
+        ])->groupBy('product_id', 'product_type')->orderBy('available_count');
+
+        return datatables()->of($stocks)->make(true);
+    }
+
 
 }

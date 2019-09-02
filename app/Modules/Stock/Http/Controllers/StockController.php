@@ -48,22 +48,39 @@ class StockController extends Controller
     /**
      * @param Request $request
      * @return JsonResponse
+     * @throws Exception
      */
     public function index(Request $request) {
-        try {
-            $stocks = $this->threadColorRepository->getStockOverview();
+        $statuses = $this->getMasterByCodes([
+            Master::PO_PENDING,
+            Master::SO_PENDING,
+            Master::SO_MANUFACTURING,
+            Master::SO_DELIVERED,
+            Master::PO_DELIVERED,
+        ]);
+        $usedCount = Arr::except($statuses, [Master::PO_DELIVERED]);
 
-            return $this->sendResponse($stocks,
-                __('messages.retrieved', ['module' => 'Stocks']),
-                HTTPCode::OK);
-        } catch (Exception $exception) {
-            Log::error($exception);
+        $usedCount['available_count'] = array_column([
+            $statuses[Master::PO_DELIVERED],
+            $statuses[Master::SO_MANUFACTURING],
+            $statuses[Master::SO_DELIVERED]
+        ], 'id');
 
-            return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
-        }
+        $stocks = $this->stockRepository->getStockOverview($usedCount);
+
+        return $this->sendResponse($stocks,
+            __('messages.retrieved', ['module' => 'Stocks']),
+            HTTPCode::OK);
     }
 
+    /**
+     * @param $codes
+     * @return mixed
+     */
+    private function getMasterByCodes($codes) {
+        return $this->masterRepository->findWhereIn('code',
+            $codes, ['id', 'code'])->keyBy('code')->toArray();
+    }
 
     /**
      * @param ThreadColor $threadColor
@@ -84,13 +101,22 @@ class StockController extends Controller
         }
     }
 
-
     /**
      * @param ThreadColor $threadColor
      * @return JsonResponse
      */
     public function threadReport(ThreadColor $threadColor) {
-        $statuses = $this->getMasterByCodes();
+        $statuses = $this->getMasterByCodes([
+            Master::PO_PENDING,
+            Master::PO_DELIVERED,
+            Master::SO_PENDING,
+            Master::SO_MANUFACTURING,
+            Master::SO_DELIVERED,
+            Master::WASTAGE_PENDING,
+            Master::WASTAGE_DELIVERED,
+            Master::PO_CANCELED,
+            Master::SO_CANCELED,
+        ]);
         $stockCountStatus = Arr::except($statuses, [Master::PO_CANCELED, Master::SO_CANCELED]);
         try {
             $reports = $this->stockRepository->getThreadOrderReport($threadColor,
@@ -106,38 +132,6 @@ class StockController extends Controller
             return $this->sendResponse(null, __('messages.something_wrong'),
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
-    }
-
-
-    /**
-     * @return mixed
-     */
-    private function getMasterByCodes() {
-        return $this->masterRepository->findWhereIn('code',
-            [
-                // Po statuses
-                Master::PO_PENDING,
-                Master::PO_DELIVERED,
-                // So statuses
-                Master::SO_PENDING,
-                Master::SO_MANUFACTURING,
-                Master::SO_DELIVERED,
-                // Wo statuses
-                Master::WASTAGE_PENDING,
-                Master::WASTAGE_DELIVERED,
-                // canceled statuses
-                Master::PO_CANCELED,
-                Master::SO_CANCELED,
-            ], ['id', 'code'])->keyBy('code')->toArray();
-    }
-
-
-    /**
-     * @param $code
-     * @return integer
-     */
-    private function findMasterIdByCode($code) {
-        return $this->masterRepository->findByCode($code)->id;
     }
 
 }
