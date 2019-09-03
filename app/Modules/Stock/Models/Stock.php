@@ -40,6 +40,13 @@ class Stock extends Model
     /**
      * @return mixed
      */
+    public function product() {
+        return $this->morphTo('product', 'product_type', 'product_id');
+    }
+
+    /**
+     * @return mixed
+     */
     public function order() {
         return $this->morphTo('order', 'order_type', 'order_id');
     }

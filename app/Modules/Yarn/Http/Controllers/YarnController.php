@@ -402,6 +402,29 @@ class YarnController extends Controller
      * @throws Exception
      */
     private function updateSODELIVEREDStatus(YarnOrder $yarnOrder, $input) {
+
+        $yarnOrder->load([
+            'threads.threadColor' => function ($threadColor) {
+                /** @var Builder $threadColor */
+                $threadColor->with(['thread', 'color', 'availableStock']);
+            }
+        ]);
+        foreach ($yarnOrder->threads as $yarnThread) {
+            if (!is_null($yarnThread->threadColor->availableStock)) {
+                $newQty = $yarnThread->threadColor->availableStock->available_qty -
+                    $yarnThread->kg_qty;
+            } else {
+                $newQty = -1 * (int) $yarnThread->kg_qty;
+            }
+            if ($newQty < 0) {
+                $newQty = ceil(str_replace('-', '', $newQty));
+
+                return $this->sendResponse(null,
+                    "You need to purchase {$yarnThread->threadColor->thread->denier}-{$yarnThread->threadColor->thread->name}-{$yarnThread->threadColor->color->name} ({$newQty} KG) for deliver this order.",
+                    HTTPCode::UNPROCESSABLE_ENTITY);
+            }
+
+        }
         try {
             return $this->updateStatus($yarnOrder, $input);
         } catch (Exception $exception) {
