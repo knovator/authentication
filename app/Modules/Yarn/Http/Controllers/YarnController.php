@@ -213,8 +213,12 @@ class YarnController extends Controller
      * @return JsonResponse
      */
     public function index(Request $request) {
+        $input = $request->all();
+        if ($request->has('payment') && $request->get('payment') == 'no') {
+            $input['delivered_id'] = $this->masterRepository->findByCode(MasterConstant::SO_DELIVERED)->id;
+        }
         try {
-            $orders = $this->yarnOrderRepository->getYarnOrderList($request->all(),
+            $orders = $this->yarnOrderRepository->getYarnOrderList($input,
                 $this->commonRelations());
 
             return $this->sendResponse($orders,
@@ -274,8 +278,12 @@ class YarnController extends Controller
      * @return JsonResponse|BinaryFileResponse
      */
     public function exportCsv(Request $request) {
+        $input = $request->all();
+        if ($request->has('payment') && $request->get('payment') == 'no') {
+            $input['delivered_id'] = $this->masterRepository->findByCode(MasterConstant::SO_DELIVERED)->id;
+        }
         try {
-            $purchases = $this->yarnOrderRepository->getYarnOrderList($request->all(),
+            $purchases = $this->yarnOrderRepository->getYarnOrderList($input,
                 $this->commonRelations(), true);
             if (($purchases = collect($purchases->getData()->data))->isEmpty()) {
                 return $this->sendResponse(null,
