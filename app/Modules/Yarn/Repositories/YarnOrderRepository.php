@@ -63,7 +63,8 @@ class YarnOrderRepository extends BaseRepository
                 $orders = $orders->whereNotNull('challan_no');
             }
             if ($input['payment'] == 'no') {
-                $orders = $orders->whereNull('challan_no');
+                $orders = $orders->where('status_id', $input['delivered_id'])
+                                 ->whereNull('challan_no');
             }
         }
 

@@ -58,6 +58,8 @@
                                 : {{$salesOrder->design->detail->pick_on_loom}} {{($salesOrder->design->detail->creming)?' - Creming':''}}</td>
                         </tr>
                         <tr>
+                            <td class="text-left label">Customer</td>
+                            <td>: {{$salesOrder->customer->full_name}}</td>
                             <td class="text-left label">Worker Name</td>
                             <td>:</td>
                         </tr>

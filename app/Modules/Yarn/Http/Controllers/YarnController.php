@@ -213,8 +213,12 @@ class YarnController extends Controller
      * @return JsonResponse
      */
     public function index(Request $request) {
+        $input = $request->all();
+        if ($request->has('payment') && $request->get('payment') == 'no') {
+            $input['delivered_id'] = $this->masterRepository->findByCode(MasterConstant::SO_DELIVERED)->id;
+        }
         try {
-            $orders = $this->yarnOrderRepository->getYarnOrderList($request->all(),
+            $orders = $this->yarnOrderRepository->getYarnOrderList($input,
                 $this->commonRelations());
 
             return $this->sendResponse($orders,
@@ -274,8 +278,12 @@ class YarnController extends Controller
      * @return JsonResponse|BinaryFileResponse
      */
     public function exportCsv(Request $request) {
+        $input = $request->all();
+        if ($request->has('payment') && $request->get('payment') == 'no') {
+            $input['delivered_id'] = $this->masterRepository->findByCode(MasterConstant::SO_DELIVERED)->id;
+        }
         try {
-            $purchases = $this->yarnOrderRepository->getYarnOrderList($request->all(),
+            $purchases = $this->yarnOrderRepository->getYarnOrderList($input,
                 $this->commonRelations(), true);
             if (($purchases = collect($purchases->getData()->data))->isEmpty()) {
                 return $this->sendResponse(null,
@@ -402,6 +410,29 @@ class YarnController extends Controller
      * @throws Exception
      */
     private function updateSODELIVEREDStatus(YarnOrder $yarnOrder, $input) {
+
+        $yarnOrder->load([
+            'threads.threadColor' => function ($threadColor) {
+                /** @var Builder $threadColor */
+                $threadColor->with(['thread', 'color', 'availableStock']);
+            }
+        ]);
+        foreach ($yarnOrder->threads as $yarnThread) {
+            if (!is_null($yarnThread->threadColor->availableStock)) {
+                $newQty = $yarnThread->threadColor->availableStock->available_qty -
+                    $yarnThread->kg_qty;
+            } else {
+                $newQty = -1 * (int) $yarnThread->kg_qty;
+            }
+            if ($newQty < 0) {
+                $newQty = ceil(str_replace('-', '', $newQty));
+
+                return $this->sendResponse(null,
+                    "You need to purchase {$yarnThread->threadColor->thread->denier}-{$yarnThread->threadColor->thread->name}-{$yarnThread->threadColor->color->name} ({$newQty} KG) for deliver this order.",
+                    HTTPCode::UNPROCESSABLE_ENTITY);
+            }
+
+        }
         try {
             return $this->updateStatus($yarnOrder, $input);
         } catch (Exception $exception) {
