@@ -42,7 +42,6 @@ class CreateRequest extends FormRequest
             'recipes'                                      => 'required|array',
             'recipes.*.name'                               => 'required|string|max:60',
             'recipes.*.total_fiddles'                      => 'required|integer',
-            'recipes.*.is_active'                          => 'required|boolean',
             'recipes.*.thread_color_ids'                   => 'required|array',
             'recipes.*.thread_color_ids.*.thread_color_id' => 'required|integer',
             'recipes.*.thread_color_ids.*.fiddle_no'       => 'required|integer',

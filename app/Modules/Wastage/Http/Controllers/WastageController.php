@@ -7,7 +7,6 @@ use App\Constants\Master;
 use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
 use App\Modules\Wastage\Http\Requests\CreateRequest;
-use App\Modules\Wastage\Models\WastageOrder;
 use App\Modules\Wastage\Repositories\WastageOrderRepository;
 use App\Support\DestroyObject;
 use App\Support\UniqueIdGenerator;
@@ -50,12 +49,13 @@ class WastageController extends Controller
      */
     public function store(CreateRequest $request) {
         $input = $request->all();
+        dd($input);
         try {
             DB::beginTransaction();
             $input['order_no'] = $this->generateUniqueId(GenerateNumber::WASTAGE);
             $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::WASTAGE_PENDING)->id;
             $wastageOrder = $this->wastageOrderRepository->create($input);
-//            $this->storeStockOrders($wastageOrder, $input);
+            $this->storeStockOrders($wastageOrder, $input);
             DB::commit();
 
             return $this->sendResponse($wastageOrder,
