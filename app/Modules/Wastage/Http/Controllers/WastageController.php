@@ -125,7 +125,7 @@ class WastageController extends Controller
     ) {
         $designDetail = $this->designDetailRepository->findBy('design_id', $input['design_id'],
             ['panno', 'additional_panno', 'reed']);
-        $wastageOrder->load(['beam.thread']);
+        $wastageOrder->load(['beam.thread:id,name,denier']);
         $this->storeWastageOrderRecipes($wastageOrder, $input, $designDetail, $update);
     }
 
