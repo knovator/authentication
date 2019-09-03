@@ -26,6 +26,7 @@ class Stock extends Model
         'partial_order_type',
         'order_recipe_id',
         'purchased_thread_id',
+        'wastage_recipe_id',
     ];
 
 

@@ -30,21 +30,23 @@ class CreateRequest extends FormRequest
      */
     public function rules() {
         return [
-            'order_date'                                   => 'required|date_format:Y-m-d',
-            'total_fiddles'                                => 'required|integer',
-            'customer_id'                                  => 'required|exists:customers,id',
-            'design_id'                                    => 'required|exists:designs,id',
-            'manufacturing_company_id'                     => 'required|required',
-            'fiddle_picks'                                 => 'required|array',
-            'fiddle_picks.*.pick'                          => 'required|integer',
-            'fiddle_picks.*.fiddle_no'                     => 'required|integer',
-            'beam_id'                                      => 'required|exists:threads_colors,id',
-            'recipes'                                      => 'required|array',
-            'recipes.*.name'                               => 'required|string|max:60',
-            'recipes.*.total_fiddles'                      => 'required|integer',
-            'recipes.*.thread_color_ids'                   => 'required|array',
-            'recipes.*.thread_color_ids.*.thread_color_id' => 'required|integer',
-            'recipes.*.thread_color_ids.*.fiddle_no'       => 'required|integer',
+            'order_date'                                         => 'required|date_format:Y-m-d',
+            'total_fiddles'                                      => 'required|integer',
+            'customer_id'                                        => 'required|exists:customers,id',
+            'design_id'                                          => 'required|exists:designs,id',
+            'manufacturing_company_id'                           => 'required|required',
+            'fiddle_picks'                                       => 'required|array',
+            'fiddle_picks.*.pick'                                => 'required|integer',
+            'fiddle_picks.*.fiddle_no'                           => 'required|integer',
+            'beam_id'                                            => 'required|exists:threads_colors,id',
+            'order_recipes'                                      => 'required|array',
+            'order_recipes.*.name'                               => 'required|string|max:60',
+            'order_recipes.*.total_fiddles'                      => 'required|integer',
+            'order_recipes.*.thread_color_ids'                   => 'required|array',
+            'order_recipes.*.thread_color_ids.*.thread_color_id' => 'required|integer',
+            'order_recipes.*.thread_color_ids.*.fiddle_no'       => 'required|integer',
+            'order_recipes.*.quantity_details.*.denier'          => 'required|integer',
+            'order_recipes.*.quantity_details.*.pick'            => 'required|integer',
 
         ];
     }

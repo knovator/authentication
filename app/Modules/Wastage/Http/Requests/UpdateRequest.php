@@ -30,15 +30,29 @@ class UpdateRequest extends FormRequest
      */
     public function rules() {
         return [
-            'order_date'                => 'required|date_format:Y-m-d',
-            'customer_id'               => 'required|exists:customers,id',
-            'manufacturing_company_id'  => 'sometimes|required',
-            'threads'                   => 'required|array',
-            'threads.*.thread_color_id' => 'required|integer',
-            'threads.*.kg_qty'          => 'required|numeric',
-            'threads.*.rate'            => 'required|numeric',
+            'order_date'                                         => 'required|date_format:Y-m-d',
+            'total_fiddles'                                      => 'required|integer',
+            'customer_id'                                        => 'required|exists:customers,id',
+            'design_id'                                          => 'required|exists:designs,id',
+            'manufacturing_company_id'                           => 'required|required',
+            'fiddle_picks'                                       => 'required|array',
+            'fiddle_picks.*.id'                                  => 'sometimes|required|integer',
+            'fiddle_picks.*.pick'                                => 'required|integer',
+            'fiddle_picks.*.fiddle_no'                           => 'required|integer',
+            'beam_id'                                            => 'required|exists:threads_colors,id',
+            'order_recipes'                                      => 'required|array',
+            'order_recipes.*.id'                                 => 'sometimes|required|integer',
+            'order_recipes.*.name'                               => 'required|string|max:60',
+            'order_recipes.*.total_fiddles'                      => 'required|integer',
+            'order_recipes.*.thread_color_ids'                   => 'required|array',
+            'order_recipes.*.thread_color_ids.*.thread_color_id' => 'required|integer',
+            'order_recipes.*.thread_color_ids.*.fiddle_no'       => 'required|integer',
+            'order_recipes.*.quantity_details.*.denier'          => 'required|integer',
+            'order_recipes.*.quantity_details.*.pick'            => 'required|integer',
+
         ];
     }
+
 
     /**
      * Get custom messages for validator errors.
@@ -47,14 +61,9 @@ class UpdateRequest extends FormRequest
      */
     public function messages() {
         return [
-            'threads.required'                   => 'Please select at least one thread.',
-            'threads.*.thread_color_id.required' => 'Please fill all the selected Threads and Quantity.',
-            'threads.*.kg_qty.required'          => 'Please fill all the selected Threads and Quantity.',
-            'threads.*.kg_qty.numeric'           => 'Quantity must be numeric value.',
-            'threads.*.kg_qty.rate'              => 'Rate must be numeric value.',
+
         ];
 
     }
-
 
 }

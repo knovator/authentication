@@ -69,7 +69,6 @@ class RecipeRepository extends BaseRepository
      * @throws RepositoryException
      */
     public function findUniqueNesRecipe($input) {
-        $this->applyCriteria();
 
         $recipe = $this->model->where(['total_fiddles' => $input['total_fiddles']]);
 
@@ -89,11 +88,7 @@ class RecipeRepository extends BaseRepository
             });
         }
 
-        $recipe = $recipe->first();
-
-        $this->resetModel();
-
-        return $recipe;
+        return $recipe->first();
 
     }
 

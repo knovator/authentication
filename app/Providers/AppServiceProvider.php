@@ -7,6 +7,7 @@ use App\Modules\Purchase\Models\PurchasePartialOrder;
 use App\Modules\Sales\Models\RecipePartialOrder;
 use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Thread\Models\ThreadColor;
+use App\Modules\Wastage\Models\WastageOrder;
 use App\Modules\Yarn\Models\YarnOrder;
 use Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -30,6 +31,7 @@ class AppServiceProvider extends ServiceProvider
             'yarn'             => YarnOrder::class,
             'purchase'         => PurchaseOrder::class,
             'sales'            => SalesOrder::class,
+            'wastage'          => WastageOrder::class,
             'thread_color'     => ThreadColor::class,
             'purchase_partial' => PurchasePartialOrder::class,
             'sales_partial'    => RecipePartialOrder::class,

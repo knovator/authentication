@@ -14,6 +14,8 @@ class WastageOrderRecipe extends Model
 
     use SoftDeletes;
 
+    public $timestamps = false;
+
     protected $table = 'wastage_order_recipes';
 
     protected $fillable = [

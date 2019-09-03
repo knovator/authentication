@@ -2,6 +2,8 @@
 
 namespace App\Modules\Wastage\Models;
 
+use App\Modules\Stock\Models\Stock;
+use App\Modules\Thread\Models\ThreadColor;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Knovators\Support\Traits\HasModelEvent;
@@ -41,4 +43,33 @@ class WastageOrder extends Model
         'created_at',
         'updated_at'
     ];
+
+
+    /**
+     * @return mixed
+     */
+    public function fiddlePicks() {
+        return $this->hasMany(WastageFiddle::class, 'wastage_order_id', 'id')->orderBy('fiddle_no');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function orderRecipes() {
+        return $this->hasMany(WastageOrderRecipe::class, 'wastage_order_id', 'id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function beam() {
+        return $this->belongsTo(ThreadColor::class, 'beam_id', 'id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function orderStocks() {
+        return $this->morphMany(Stock::class, 'order', 'order_type', 'order_id', 'id');
+    }
 }

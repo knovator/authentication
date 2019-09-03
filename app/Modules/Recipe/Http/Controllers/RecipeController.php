@@ -89,6 +89,13 @@ class RecipeController extends Controller
         return $this->recipeRepository->findUniqueNesRecipe($input);
     }
 
+    /**
+     * @param Recipe $recipe
+     * @return RecipeResource
+     */
+    private function makeResource($recipe) {
+        return new RecipeResource($recipe);
+    }
 
     /**
      * @param Recipe        $recipe
@@ -125,7 +132,6 @@ class RecipeController extends Controller
         }
     }
 
-
     /**
      * @param Recipe                 $recipe
      * @param PartiallyUpdateRequest $request
@@ -143,7 +149,6 @@ class RecipeController extends Controller
             __('messages.updated', ['module' => 'Recipe']),
             HTTPCode::OK);
     }
-
 
     /**
      * @param Recipe $recipe
@@ -166,15 +171,6 @@ class RecipeController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
     }
-
-    /**
-     * @param Recipe $recipe
-     * @return RecipeResource
-     */
-    private function makeResource($recipe) {
-        return new RecipeResource($recipe);
-    }
-
 
     /**
      * @return JsonResponse
