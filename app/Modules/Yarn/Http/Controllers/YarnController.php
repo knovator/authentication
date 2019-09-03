@@ -97,7 +97,7 @@ class YarnController extends Controller
             $stockItems[$key] = [
                 'product_id'   => $purchasedThread->thread_color_id,
                 'product_type' => 'thread_color',
-                'kg_qty'       => '-' . $purchasedThread->kg_qty,
+                'kg_qty'       => -1 * $purchasedThread->kg_qty,
                 'status_id'    => $input['status_id'],
             ];
         }

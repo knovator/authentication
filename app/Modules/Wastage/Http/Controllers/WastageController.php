@@ -81,7 +81,6 @@ class WastageController extends Controller
             $this->findRecipeByFiddle($input['order_recipes']);
             $wastageOrder = $this->wastageOrderRepository->create($input);
             $wastageOrder->fiddlePicks()->createMany($input['fiddle_picks']);
-            $wastageOrder->orderRecipes()->createMany($input['order_recipes']);
             $this->createOrUpdateOrderDetails($wastageOrder, $input);
             DB::commit();
 
@@ -152,7 +151,7 @@ class WastageController extends Controller
         }
 
         if ($update && isset($input['removed_order_recipes_id']) && !empty($input['removed_order_recipes_id'])) {
-            $this->wastageOrderRecipeRepo->deleteWhere(['id', $input['removed_order_recipes_id']]);
+            $this->wastageOrderRecipeRepo->deleteWhere(['id' => $input['removed_order_recipes_id']]);
         }
     }
 
@@ -212,7 +211,7 @@ class WastageController extends Controller
             DB::commit();
 
             return $this->sendResponse($wastageOrder,
-                __('messages.updated', ['module' => 'Wastage order']),
+                __('messages.updated', ['module' => 'Wastage Order']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
             DB::rollBack();
@@ -238,18 +237,18 @@ class WastageController extends Controller
         $newItems = [];
         foreach ($input[$column] as $item) {
             if (isset($item['id'])) {
-                $wastageOrder->{$relation()}->whereId($item['id'])->update($item);
+                $wastageOrder->{$relation}()->whereId($item['id'])->update($item);
             } else {
                 $newItems[] = $item;
             }
         }
         if (!empty($newItems)) {
-            $wastageOrder->{$relation()}->createMany($newItems);
+            $wastageOrder->{$relation}()->createMany($newItems);
         }
         $removableLabel = 'removed_' . $column . '_id';
 
         if (isset($input[$removableLabel]) && !empty($input[$removableLabel])) {
-            $wastageOrder->{$relation()}->whereIn('id', $input[$removableLabel])->delete();
+            $wastageOrder->{$relation}()->whereIn('id', $input[$removableLabel])->delete();
         }
     }
 

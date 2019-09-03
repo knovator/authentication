@@ -29,5 +29,20 @@ class WastageOrderRecipeRepository extends BaseRepository
         return WastageOrderRecipe::class;
     }
 
+    /**
+     * Applies the given where conditions to the model.
+     *
+     * @param array $where
+     * @return void
+     */
+    public function deleteWhere(array $where) {
+        foreach ($where as $field => $value) {
+            if (is_array($value)) {
+                $this->model = $this->model->where($field, $value);
+            } else {
+                $this->model = $this->model->where($field, '=', $value);
+            }
+        }
+    }
 
 }

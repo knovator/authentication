@@ -260,7 +260,7 @@ class DeliveryController extends Controller
             'product_id'      => $threadColorId,
             'product_type'    => 'thread_color',
             'status_id'       => $statusId,
-            'kg_qty'          => '-' . $kgQty,
+            'kg_qty'          => -1 * $kgQty,
         ];
 
         if ($partialOrder) {
