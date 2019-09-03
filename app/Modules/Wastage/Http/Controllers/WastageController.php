@@ -151,7 +151,7 @@ class WastageController extends Controller
         }
 
         if ($update && isset($input['removed_order_recipes_id']) && !empty($input['removed_order_recipes_id'])) {
-            $this->wastageOrderRecipeRepo->deleteWhere(['id' => $input['removed_order_recipes_id']]);
+            $this->wastageOrderRecipeRepo->deleteRecipeById($input['removed_order_recipes_id']);
         }
     }
 
