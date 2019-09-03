@@ -401,7 +401,7 @@ class DeliveryController extends Controller
      * @return Response
      */
     public function exportManufacturing(SalesOrder $salesOrder, Delivery $delivery) {
-        $salesOrder->load(['design.detail', 'design.fiddlePicks']);
+        $salesOrder->load(['design.detail', 'design.fiddlePicks','customer']);
         $machineRepo = new MachineRepository(new Container());
         $machines = $machineRepo->manufacturingReceipts($delivery->id);
 
