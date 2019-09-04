@@ -20,10 +20,13 @@ use App\Support\DestroyObject;
 use App\Support\Formula;
 use App\Support\UniqueIdGenerator;
 use Arr;
+use Barryvdh\Snappy\Facades\SnappyPdf;
 use DB;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Knovators\Masters\Repository\MasterRepository;
 use Knovators\Support\Helpers\HTTPCode;
 use Log;
@@ -210,6 +213,32 @@ class WastageController extends Controller
         ]);
 
         $wastageOrder->orderStocks()->createMany($data);
+    }
+
+    /**
+     * @param WastageOrder $wastageOrder
+     * @return Response
+     */
+    public function exportSummary(WastageOrder $wastageOrder) {
+        $wastageOrder->load([
+            'orderRecipes' => function ($orderRecipes) {
+                /** @var Builder $orderRecipes */
+                $orderRecipes->orderBy('id')->with([
+                    'recipe.fiddles' => function ($fiddles) {
+                        /** @var Builder $fiddles */
+                        $fiddles->where('recipes_fiddles.fiddle_no', '=', 1)->with('color');
+                    }
+                ]);
+            },
+            'manufacturingCompany',
+            'design.detail',
+            'design.mainImage.file',
+            'customer.state'
+        ]);
+        $isInvoice = true;
+
+        return SnappyPdf::loadView('receipts.wastage-orders.main_summary.summary',
+            compact('wastageOrder','isInvoice'));
     }
 
     /**
