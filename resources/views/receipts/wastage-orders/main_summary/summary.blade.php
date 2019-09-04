@@ -144,9 +144,7 @@
         @endforeach
 
         @php
-
-            $costRate = (!is_null($wastageOrder->cost_per_meter)) ? $wastageOrder->cost_per_meter:0;
-                $price = $totalQuantity * $costRate;
+            $price = $totalQuantity * $wastageOrder->cost_per_meter;
         @endphp
 
         </tbody>
@@ -155,7 +153,7 @@
             <td></td>
             <td><b>TOTAL : </b></td>
             <td class="text-center"><b>{{$totalQuantity}}</b></td>
-            <td class="text-center">{{$costRate}}</td>
+            <td class="text-center">{{$wastageOrder->cost_per_meter}}</td>
             <td class="text-right d-flex"><img class="rupee-sign" src="{{asset('img/rupee.png')}}"><b>{{$price}}</b>
             </td>
         </tr>

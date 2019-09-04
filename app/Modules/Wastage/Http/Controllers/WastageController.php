@@ -96,7 +96,7 @@ class WastageController extends Controller
             $this->createOrUpdateOrderDetails($wastageOrder, $input);
             DB::commit();
 
-            return $this->sendResponse($wastageOrder,
+            return $this->sendResponse($this->makeResource($wastageOrder),
                 __('messages.created', ['module' => 'Wastage Order']),
                 HTTPCode::CREATED);
         } catch (Exception $exception) {
@@ -292,7 +292,7 @@ class WastageController extends Controller
             $this->createOrUpdateOrderDetails($wastageOrder->refresh(), $input, true);
             DB::commit();
 
-            return $this->sendResponse($wastageOrder,
+            return $this->sendResponse($this->makeResource($wastageOrder),
                 __('messages.updated', ['module' => 'Wastage Order']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -345,7 +345,7 @@ class WastageController extends Controller
                 return $this->destroyModelObject([], $wastageOrder, 'Wastage Order');
             }
 
-            return $this->sendResponse($wastageOrder,
+            return $this->sendResponse($this->makeResource($wastageOrder),
                 __('messages.not_delete_order', ['status' => $wastageOrder->status->name]),
                 HTTPCode::UNPROCESSABLE_ENTITY);
 
@@ -442,7 +442,7 @@ class WastageController extends Controller
         try {
             $wastageOrder->update($input);
 
-            return $this->sendResponse($wastageOrder->refresh(),
+            return $this->sendResponse($this->makeResource($wastageOrder->fresh()),
                 __('messages.updated', ['module' => 'Status']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
