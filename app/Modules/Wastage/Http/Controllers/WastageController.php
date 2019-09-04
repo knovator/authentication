@@ -349,7 +349,6 @@ class WastageController extends Controller
     private function updateStatus(WastageOrder $wastageOrder, $input) {
         try {
             $wastageOrder->update($input);
-
             return $this->sendResponse($wastageOrder->refresh(),
                 __('messages.updated', ['module' => 'Status']),
                 HTTPCode::OK);
