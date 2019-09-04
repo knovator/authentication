@@ -21,6 +21,7 @@ use App\Support\UniqueIdGenerator;
 use Arr;
 use DB;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Knovators\Masters\Repository\MasterRepository;
 use Knovators\Support\Helpers\HTTPCode;
 use Log;
@@ -111,6 +112,7 @@ class WastageController extends Controller
                 $fiddles = collect($input['thread_color_ids'])->map(function ($threadColor) {
                     unset($threadColor['denier']);
                     unset($threadColor['pick']);
+
                     return $threadColor;
                 })->all();
                 $recipe->fiddles()->attach($fiddles);
@@ -257,6 +259,29 @@ class WastageController extends Controller
 
         if (isset($input[$removableLabel]) && !empty($input[$removableLabel])) {
             $wastageOrder->{$relation}()->whereIn('id', $input[$removableLabel])->delete();
+        }
+    }
+
+    /**
+     * @param WastageOrder $wastageOrder
+     * @return JsonResponse
+     */
+    public function destroy(WastageOrder $wastageOrder) {
+        try {
+            $wastageOrder->load('status');
+            if ($wastageOrder->status->code === MasterConstant::WASTAGE_PENDING) {
+                return $this->destroyModelObject([], $wastageOrder, 'Wastage Order');
+            }
+
+            return $this->sendResponse($wastageOrder,
+                __('messages.not_delete_order', ['status' => $wastageOrder->status->name]),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
     }
 

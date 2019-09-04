@@ -21,10 +21,6 @@ Route::group([
         Route::resource('wastages', 'WastageController');
         Route::put('wastages/order/change-status', 'WastageController@changeStatus')
              ->name('wastages.change-status');
-
-
-        Route::get('wastages-statuses', 'WastageController@statuses')
-             ->name('wastages.statuses');
     });
 
 Route::group([

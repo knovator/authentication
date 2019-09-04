@@ -2,6 +2,7 @@
 
 namespace App\Modules\Wastage\Models;
 
+use App\Models\Master;
 use App\Modules\Stock\Models\Stock;
 use App\Modules\Thread\Models\ThreadColor;
 use Illuminate\Database\Eloquent\Model;
@@ -45,11 +46,22 @@ class WastageOrder extends Model
     ];
 
 
+    public static function boot() {
+        parent::boot();
+        self::creatingEvent();
+        static::deleting(function (WastageOrder $wastageOrder) {
+            $wastageOrder->orderStocks()->delete();
+            $wastageOrder->fiddlePicks()->delete();
+            $wastageOrder->orderRecipes()->delete();
+        });
+        self::deletedEvent();
+    }
+
     /**
      * @return mixed
      */
-    public function fiddlePicks() {
-        return $this->hasMany(WastageFiddle::class, 'wastage_order_id', 'id')->orderBy('fiddle_no');
+    public function orderStocks() {
+        return $this->morphMany(Stock::class, 'order', 'order_type', 'order_id', 'id');
     }
 
     /**
@@ -62,6 +74,13 @@ class WastageOrder extends Model
     /**
      * @return mixed
      */
+    public function fiddlePicks() {
+        return $this->hasMany(WastageFiddle::class, 'wastage_order_id', 'id')->orderBy('fiddle_no');
+    }
+
+    /**
+     * @return mixed
+     */
     public function beam() {
         return $this->belongsTo(ThreadColor::class, 'beam_id', 'id');
     }
@@ -69,7 +88,8 @@ class WastageOrder extends Model
     /**
      * @return mixed
      */
-    public function orderStocks() {
-        return $this->morphMany(Stock::class, 'order', 'order_type', 'order_id', 'id');
+    public function status() {
+        return $this->belongsTo(Master::class, 'status_id',
+            'id');
     }
 }

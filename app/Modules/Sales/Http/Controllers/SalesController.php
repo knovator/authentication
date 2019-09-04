@@ -309,7 +309,7 @@ class SalesController extends Controller
             }
 
             return $this->sendResponse($this->makeResource($salesOrder),
-                __('messages.not_delete_sales_order', ['status' => $salesOrder->status->name]),
+                __('messages.not_delete_order', ['status' => $salesOrder->status->name]),
                 HTTPCode::UNPROCESSABLE_ENTITY);
 
         } catch (Exception $exception) {
