@@ -32,6 +32,8 @@ class CreateRequest extends FormRequest
         return [
             'order_date'                                         => 'required|date_format:Y-m-d',
             'total_fiddles'                                      => 'required|integer',
+            'cost_per_meter'                                     => 'required|numeric',
+            'customer_po_number'                                 => 'nullable|string',
             'customer_id'                                        => 'required|exists:customers,id,deleted_at,NULL',
             'design_id'                                          => 'required|exists:designs,id,deleted_at,NULL',
             'manufacturing_company_id'                           => 'required|required',

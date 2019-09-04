@@ -237,8 +237,11 @@ class WastageController extends Controller
         ]);
         $isInvoice = true;
 
-        return SnappyPdf::loadView('receipts.wastage-orders.main_summary.summary',
-            compact('wastageOrder','isInvoice'));
+//        return SnappyPdf::loadView('receipts.wastage-orders.main_summary.summary',
+//            compact('wastageOrder', 'isInvoice'))->download($wastageOrder->order_no . ".pdf");
+
+        return view('receipts.wastage-orders.main_summary.summary',
+            compact('wastageOrder', 'isInvoice'));
     }
 
     /**

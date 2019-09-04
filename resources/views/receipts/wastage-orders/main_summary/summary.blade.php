@@ -99,9 +99,12 @@
                     <tbody>
                     <tr>
                         <td class="text-left label"><b>ORDER NO</b>: {{$wastageOrder->order_no}}</td>
-                        <td class="text-left label"><b>DESIGN NAME</b>: {{$wastageOrder->design->quality_name}}</td>
                         <td class="text-left label"><b>ORDER
                                 DATE</b>: {{\Carbon\Carbon::parse($wastageOrder->order_date)->format('d M Y')}}</td>
+                        <td class="text-left label"><b>DESIGN NAME</b>: {{$wastageOrder->design->quality_name}}</td>
+                        @if(!is_null($wastageOrder->challan_no))
+                            <td class="text-left label"><b>Challan No</b>: {{$wastageOrder->challan_no}}</td>
+                        @endif
                     </tr>
                     </tbody>
                 </table>
@@ -134,7 +137,7 @@
                 $totalQuantity = $totalQuantity +  $orderRecipe->total_meters;
             @endphp
             <tr>
-                <td class="sr-no text-left"><b>{{$orderRecipeKey}}</b></td>
+                <td class="sr-no text-left"><b>{{$orderRecipeKey + 1}}</b></td>
                 <td><b>{{$orderRecipe->recipe->fiddles->first()->color->name}}</b></td>
                 <td class="text-center"><b>{{$orderRecipe->total_meters}}</b></td>
                 <td class="text-center"></td>
@@ -205,16 +208,6 @@
                             </td>
                         </tr>
                         </tbody>
-                        {{--                        <tfoot>--}}
-                        {{--                        <tr>--}}
-                        {{--                            <td>--}}
-                        {{--                                <b--}}
-                        {{--                                >Received the above goods in good condition and order--}}
-                        {{--                                    along with transpoter invoice copy.</b--}}
-                        {{--                                >--}}
-                        {{--                            </td>--}}
-                        {{--                        </tr>--}}
-                        {{--                        </tfoot>--}}
                     </table>
                 </div>
             </td>
