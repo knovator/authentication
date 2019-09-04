@@ -44,7 +44,8 @@ class WastageOrderRepository extends BaseRepository
         $orders = $this->model->with([
             'customer.state:id,name,code,gst_code',
             'status:id,name,code',
-            'design:id,design_no,quality_name'
+            'design:id,design_no,quality_name',
+            'recipeMeters',
         ])->select('wastage_orders.*');
 
 

@@ -27,10 +27,13 @@ use Illuminate\Http\Request;
 use Knovators\Masters\Repository\MasterRepository;
 use Knovators\Support\Helpers\HTTPCode;
 use Log;
+use Maatwebsite\Excel\Facades\Excel;
 use Prettus\Repository\Exceptions\RepositoryException;
 use Prettus\Validator\Exceptions\ValidatorException;
 use Str;
 use App\Modules\Wastage\Http\Resources\WastageOrder as WastageOrderResource;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use App\Modules\Wastage\Http\Exports\WastageOrder as ExportWastageOrder;
 
 /**
  * Class WastageController
@@ -339,6 +342,29 @@ class WastageController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
     }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse|BinaryFileResponse
+     */
+    public function exportCsv(Request $request) {
+        try {
+            $orders = $this->wastageOrderRepository->wastageOrderList($request->all(), true);
+            if (($orders = collect($orders->getData()->data))->isEmpty()) {
+                return $this->sendResponse(null,
+                    __('messages.can_not_export', ['module' => 'Sales orders']),
+                    HTTPCode::OK);
+            }
+
+            return Excel::download(new ExportWastageOrder($orders), 'wastage-orders.xlsx');
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
+
 
     /**
      * @param StatusRequest $request

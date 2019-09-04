@@ -84,6 +84,15 @@ class WastageOrder extends Model
     /**
      * @return mixed
      */
+    public function recipeMeters() {
+        return $this->hasOne(WastageOrderRecipe::class, 'wastage_order_id',
+            'id')->selectRaw('SUM(total_meters) as total,wastage_order_id')
+                    ->groupBy('wastage_order_id');
+    }
+
+    /**
+     * @return mixed
+     */
     public function beam() {
         return $this->belongsTo(ThreadColor::class, 'beam_id', 'id');
     }
