@@ -81,11 +81,19 @@ class ThreadController extends Controller
 
     /**
      * @param Thread $thread
+     * @return ThreadResource
+     */
+    private function makeResource($thread) {
+        return new ThreadResource($thread);
+    }
+
+    /**
+     * @param Thread $thread
      * @return JsonResponse
      */
     public function destroy(Thread $thread) {
         try {
-            return $this->destroyModelObject(['fiddles', 'beams'], $thread, 'Thread');
+            return $this->destroyModelObject(['fiddles', 'beams', 'wastage'], $thread, 'Thread');
 
         } catch (Exception $exception) {
             Log::error($exception);
@@ -94,7 +102,6 @@ class ThreadController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
     }
-
 
     /**
      * @param Thread        $thread
@@ -138,15 +145,6 @@ class ThreadController extends Controller
 
     /**
      * @param Thread $thread
-     * @return ThreadResource
-     */
-    private function makeResource($thread) {
-        return new ThreadResource($thread);
-    }
-
-
-    /**
-     * @param Thread $thread
      * @return JsonResponse
      */
     public function show(Thread $thread) {
@@ -156,7 +154,8 @@ class ThreadController extends Controller
                 /** @var Builder $threadColors */
                 $threadColors->with('color')->withCount([
                     'recipes as recipes_count',
-                    'designBeams as beams_count'
+                    'designBeams as beams_count',
+                    'wastageBeams as wastage_count',
                 ]);
             }
         ]);
@@ -164,7 +163,7 @@ class ThreadController extends Controller
         $thread->threadColors->map(function ($threadColor) {
             /** @var ThreadColor $threadColor */
             $threadColor->updatable = true;
-            if ($threadColor->recipes_count || $threadColor->beams_count) {
+            if ($threadColor->recipes_count || $threadColor->beams_count || $threadColor->wastage_count) {
                 $threadColor->updatable = false;
             }
         });

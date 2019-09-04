@@ -6,6 +6,7 @@ namespace App\Modules\Recipe\Models;
 use App\Modules\Design\Models\DesignBeam;
 use App\Modules\Sales\Models\SalesOrderRecipe;
 use App\Modules\Thread\Models\ThreadColor;
+use App\Modules\Wastage\Models\WastageOrderRecipe;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Knovators\Support\Traits\HasModelEvent;
@@ -69,6 +70,14 @@ class Recipe extends Model
     public function designBeams() {
         return $this->belongsToMany(DesignBeam::class, 'beams_recipes', 'recipe_id',
             'design_beam_id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function wastageOrderRecipe() {
+        return $this->hasMany(WastageOrderRecipe::class, 'recipe_id', 'id');
     }
 
 }

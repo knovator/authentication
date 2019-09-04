@@ -158,9 +158,7 @@ class RecipeController extends Controller
     public function destroy(Recipe $recipe) {
         try {
             // Recipe relations
-            $relations = [
-                'designBeams'
-            ];
+            $relations = ['designBeams', 'wastageOrderRecipe'];
 
             return $this->destroyModelObject($relations, $recipe, 'Recipe');
 
