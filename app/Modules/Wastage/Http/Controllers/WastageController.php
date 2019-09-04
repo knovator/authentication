@@ -108,7 +108,11 @@ class WastageController extends Controller
             if (!$recipe) {
                 $input['type'] = 'wastage';
                 $recipe = $this->recipeRepository->create($input);
-                $fiddles = Arr::except($input['thread_color_ids'][0],['denier','pick']);
+                $fiddles = collect($input['thread_color_ids'])->map(function ($threadColor) {
+                    unset($threadColor['denier']);
+                    unset($threadColor['pick']);
+                    return $threadColor;
+                })->all();
                 $recipe->fiddles()->attach($fiddles);
             }
             $input['recipe_id'] = $recipe->id;
