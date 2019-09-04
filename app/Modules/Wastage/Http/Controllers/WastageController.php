@@ -10,6 +10,7 @@ use App\Modules\Design\Repositories\DesignDetailRepository;
 use App\Modules\Recipe\Repositories\RecipeRepository;
 use App\Modules\Thread\Constants\ThreadType;
 use App\Modules\Wastage\Http\Requests\CreateRequest;
+use App\Modules\Wastage\Http\Requests\StatusRequest;
 use App\Modules\Wastage\Http\Requests\UpdateRequest;
 use App\Modules\Wastage\Models\WastageOrder;
 use App\Modules\Wastage\Models\WastageOrderRecipe;
@@ -28,6 +29,7 @@ use Knovators\Support\Helpers\HTTPCode;
 use Log;
 use Prettus\Repository\Exceptions\RepositoryException;
 use Prettus\Validator\Exceptions\ValidatorException;
+use Str;
 
 /**
  * Class WastageController
@@ -270,7 +272,7 @@ class WastageController extends Controller
     public function destroy(WastageOrder $wastageOrder) {
         try {
             $wastageOrder->load('status');
-            if ($wastageOrder->status->code === MasterConstant::WASTAGE_PENDING) {
+            if (($wastageOrder->status->code === MasterConstant::WASTAGE_PENDING) || $wastageOrder->status->code === MasterConstant::WASTAGE_CANCELED) {
                 return $this->destroyModelObject([], $wastageOrder, 'Wastage Order');
             }
 
@@ -303,6 +305,84 @@ class WastageController extends Controller
             return $this->sendResponse(null, __('messages.something_wrong'),
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
+    }
+
+    /**
+     * @param StatusRequest $request
+     * @return JsonResponse
+     */
+    public function changeStatus(StatusRequest $request) {
+        $status = $request->get('code');
+        $method = 'update' . Str::studly($status) . 'Status';
+        try {
+            $wastageOrder = $this->wastageOrderRepository->find($request->get('sales_order_id'));
+
+            return $this->{$method}($wastageOrder, $request->all());
+        } catch (Exception $exception) {
+            Log::error('Unable to find status method: ' . $status);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+
+    }
+
+    /**
+     * @param WastageOrder  $wastageOrder
+     * @param               $input
+     * @return JsonResponse
+     * @throws Exception
+     */
+    private function updateWASTAGEPENDINGStatus(WastageOrder $wastageOrder, $input) {
+        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::WASTAGE_PENDING)->id;
+        $wastageOrder->orderStocks()->update(['status_id' => $input['status_id']]);
+
+        return $this->updateStatus($wastageOrder, $input);
+    }
+
+    /**
+     * @param WastageOrder $wastageOrder
+     * @param              $input
+     * @return JsonResponse
+     * @throws Exception
+     */
+    private function updateStatus(WastageOrder $wastageOrder, $input) {
+        try {
+            $wastageOrder->update($input);
+
+            return $this->sendResponse($wastageOrder->refresh(),
+                __('messages.updated', ['module' => 'Status']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            throw $exception;
+        }
+    }
+
+    /**
+     * @param WastageOrder  $wastageOrder
+     * @param               $input
+     * @return JsonResponse
+     * @throws Exception
+     */
+    private function updateWASTAGEDELIVEREDStatus(WastageOrder $wastageOrder, $input) {
+        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::WASTAGE_DELIVERED)->id;
+        $wastageOrder->orderStocks()->update(['status_id' => $input['status_id']]);
+
+        return $this->updateStatus($wastageOrder, $input);
+    }
+
+    /**
+     * @param WastageOrder  $wastageOrder
+     * @param               $input
+     * @return JsonResponse
+     * @throws Exception
+     */
+    private function updateWASTAGECANCELEDStatus(WastageOrder $wastageOrder, $input) {
+        $wastageOrder->orderStocks()->delete();
+
+        return $this->updateStatus($wastageOrder, $input);
     }
 
 
