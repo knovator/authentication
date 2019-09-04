@@ -22,6 +22,7 @@ use Arr;
 use DB;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Knovators\Masters\Repository\MasterRepository;
 use Knovators\Support\Helpers\HTTPCode;
 use Log;
@@ -277,6 +278,25 @@ class WastageController extends Controller
                 __('messages.not_delete_order', ['status' => $wastageOrder->status->name]),
                 HTTPCode::UNPROCESSABLE_ENTITY);
 
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function index(Request $request) {
+        try {
+            $orders = $this->wastageOrderRepository->wastageOrderList($request->all());
+
+            return $this->sendResponse($orders,
+                __('messages.retrieved', ['module' => 'Wastage Orders']),
+                HTTPCode::OK);
         } catch (Exception $exception) {
             Log::error($exception);
 

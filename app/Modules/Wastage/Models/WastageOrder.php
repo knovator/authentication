@@ -3,6 +3,8 @@
 namespace App\Modules\Wastage\Models;
 
 use App\Models\Master;
+use App\Modules\Customer\Models\Customer;
+use App\Modules\Design\Models\Design;
 use App\Modules\Stock\Models\Stock;
 use App\Modules\Thread\Models\ThreadColor;
 use Illuminate\Database\Eloquent\Model;
@@ -34,6 +36,7 @@ class WastageOrder extends Model
         'created_by',
         'deleted_by',
         'cost_per_meter',
+        'design_id',
     ];
 
 
@@ -67,15 +70,15 @@ class WastageOrder extends Model
     /**
      * @return mixed
      */
-    public function orderRecipes() {
-        return $this->hasMany(WastageOrderRecipe::class, 'wastage_order_id', 'id');
+    public function fiddlePicks() {
+        return $this->hasMany(WastageFiddle::class, 'wastage_order_id', 'id')->orderBy('fiddle_no');
     }
 
     /**
      * @return mixed
      */
-    public function fiddlePicks() {
-        return $this->hasMany(WastageFiddle::class, 'wastage_order_id', 'id')->orderBy('fiddle_no');
+    public function orderRecipes() {
+        return $this->hasMany(WastageOrderRecipe::class, 'wastage_order_id', 'id');
     }
 
     /**
@@ -89,7 +92,20 @@ class WastageOrder extends Model
      * @return mixed
      */
     public function status() {
-        return $this->belongsTo(Master::class, 'status_id',
-            'id');
+        return $this->belongsTo(Master::class, 'status_id', 'id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function customer() {
+        return $this->belongsTo(Customer::class, 'customer_id', 'id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function design() {
+        return $this->belongsTo(Design::class, 'design_id', 'id');
     }
 }
