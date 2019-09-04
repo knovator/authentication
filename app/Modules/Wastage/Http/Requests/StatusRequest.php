@@ -97,7 +97,7 @@ class StatusRequest extends FormRequest
     public function messages() {
 
         return [
-            'code.not_in'           => 'This Order is in canceled status,you can not change.',
+            'code.not_in'           => 'This Order is delivered or canceled,you can not change.',
             'sales_order_id.exists' => 'Please select valid status.'
         ];
     }

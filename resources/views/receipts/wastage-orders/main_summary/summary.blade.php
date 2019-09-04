@@ -7,7 +7,7 @@
 <body>
 <main>
     <div
-        class="receipt-heading text-center">{{($isInvoice) ? 'TAX INVOICE':'ORDER FORM'}}{{(!is_null($wastageOrder->challan_no))? ' ('.$wastageOrder->challan_no.')':''}}</div>
+        class="receipt-heading text-center">TAX INVOICE{{(!is_null($wastageOrder->challan_no))? ' ('.$wastageOrder->challan_no.')':''}}</div>
     <div class="text-center">
         <small>(Invoice For supply of goods u/s 31 of GST Act, 2017 read with Rule 6 of tax invoice rules 2017)
         </small>
@@ -75,23 +75,25 @@
                             </td>
                         @endif
 
+                        @if($isInvoice)
 
-                        <td>
-                            <!--                        <b class="underlined">Customers Details</b>-->
-                            <div><b>{{strtoupper($wastageOrder->customer->full_name)}}</b></div>
-                            <div>
-                                <small>
-                                    {{strtoupper($wastageOrder->customer->address.', '.$wastageOrder->customer->city_name)}}
-                                    .
-                                </small>
-                            </div>
-                            <div><b>PHONE NO :</b> {{$wastageOrder->customer->phone}}</div>
-                            <div><b>State :</b> {{strtoupper($wastageOrder->customer->state->name)}} {{--&amp; <b>Code :</b>
+                            <td>
+                                <!--                        <b class="underlined">Customers Details</b>-->
+                                <div><b>{{strtoupper($wastageOrder->customer->full_name)}}</b></div>
+                                <div>
+                                    <small>
+                                        {{strtoupper($wastageOrder->customer->address.', '.$wastageOrder->customer->city_name)}}
+                                        .
+                                    </small>
+                                </div>
+                                <div><b>PHONE NO :</b> {{$wastageOrder->customer->phone}}</div>
+                                <div><b>State :</b> {{strtoupper($wastageOrder->customer->state->name)}} {{--&amp; <b>Code :</b>
                                  24--}}
-                            </div>
-                            <div><b>GST NO :</b> {{strtoupper($wastageOrder->customer->gst_no)}}</div>
-                            <div><b>PO NO :</b> {{strtoupper($wastageOrder->customer_po_number)}}</div>
-                        </td>
+                                </div>
+                                <div><b>GST NO :</b> {{strtoupper($wastageOrder->customer->gst_no)}}</div>
+                                <div><b>PO NO :</b> {{strtoupper($wastageOrder->customer_po_number)}}</div>
+                            </td>
+                        @endif
                     </tr>
                     <tr></tr>
                     </tbody>
@@ -222,7 +224,7 @@
                 <div>
                     <table class="right-bordered gst-table">
                         <tbody>
-                        @if($wastageOrder->customer->state->code == 'GUJARAT')
+                        @if($isInvoice && $wastageOrder->customer->state->code == 'GUJARAT')
                             <tr>
                                 <td class=" label">SGST</td>
                                 <td class="text-center">2.50 %</td>

@@ -235,7 +235,7 @@ class WastageController extends Controller
             'design.mainImage.file',
             'customer.state'
         ]);
-        $isInvoice = true;
+        $isInvoice = !is_null($wastageOrder->customer);
 
         return SnappyPdf::loadView('receipts.wastage-orders.main_summary.summary',
             compact('wastageOrder', 'isInvoice'))->download($wastageOrder->order_no . ".pdf");
