@@ -6,7 +6,8 @@
 </head>
 <body>
 <main>
-    <div class="receipt-heading text-center">{{($isInvoice) ? 'TAX INVOICE':'ORDER FORM'}}</div>
+    <div
+        class="receipt-heading text-center">{{($isInvoice) ? 'TAX INVOICE':'ORDER FORM'}}{{(!is_null($wastageOrder->challan_no))? ' ('.$wastageOrder->challan_no.')':''}}</div>
     <div class="text-center">
         <small>(Invoice For supply of goods u/s 31 of GST Act, 2017 read with Rule 6 of tax invoice rules 2017)
         </small>
@@ -99,12 +100,9 @@
                     <tbody>
                     <tr>
                         <td class="text-left label"><b>ORDER NO</b>: {{$wastageOrder->order_no}}</td>
+                        <td class="text-left label"><b>DESIGN NAME</b>: {{$wastageOrder->design->quality_name}}</td>
                         <td class="text-left label"><b>ORDER
                                 DATE</b>: {{\Carbon\Carbon::parse($wastageOrder->order_date)->format('d M Y')}}</td>
-                        <td class="text-left label"><b>DESIGN NAME</b>: {{$wastageOrder->design->quality_name}}</td>
-                        @if(!is_null($wastageOrder->challan_no))
-                            <td class="text-left label"><b>Challan No</b>: {{$wastageOrder->challan_no}}</td>
-                        @endif
                     </tr>
                     </tbody>
                 </table>
