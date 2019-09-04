@@ -30,6 +30,7 @@ use Log;
 use Prettus\Repository\Exceptions\RepositoryException;
 use Prettus\Validator\Exceptions\ValidatorException;
 use Str;
+use App\Modules\Wastage\Http\Resources\WastageOrder as WastageOrderResource;
 
 /**
  * Class WastageController
@@ -209,6 +210,38 @@ class WastageController extends Controller
     }
 
     /**
+     * @param WastageOrder $wastageOrder
+     * @return JsonResponse
+     */
+    public function show(WastageOrder $wastageOrder) {
+
+        $wastageOrder->load([
+            'beam.thread',
+            'beam.color',
+            'status',
+            'customer.state:id,name,code',
+            'design.detail',
+            'design.mainImage.file',
+            'fiddlePicks',
+            'orderRecipes.recipe.fiddles.thread',
+            'orderRecipes.recipe.fiddles.color',
+            'manufacturingCompany'
+        ]);
+
+        return $this->sendResponse($this->makeResource($wastageOrder),
+            __('messages.retrieved', ['module' => 'Wastage Order']),
+            HTTPCode::OK);
+    }
+
+    /**
+     * @param $wastageOrder
+     * @return WastageOrderResource
+     */
+    private function makeResource($wastageOrder) {
+        return new WastageOrderResource($wastageOrder);
+    }
+
+    /**
      * @param WastageOrder  $wastageOrder
      * @param UpdateRequest $request
      * @return mixed
@@ -349,6 +382,7 @@ class WastageController extends Controller
     private function updateStatus(WastageOrder $wastageOrder, $input) {
         try {
             $wastageOrder->update($input);
+
             return $this->sendResponse($wastageOrder->refresh(),
                 __('messages.updated', ['module' => 'Status']),
                 HTTPCode::OK);
