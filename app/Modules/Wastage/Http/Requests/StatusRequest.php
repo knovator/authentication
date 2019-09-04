@@ -32,7 +32,6 @@ class StatusRequest extends FormRequest
      * Get the validation rules that apply to the request.
      *
      * @return array
-     * @throws RepositoryException
      */
     public function rules() {
 
@@ -45,8 +44,17 @@ class StatusRequest extends FormRequest
 
             case MasterConstant::WASTAGE_DELIVERED:
                 $currentStatusId = $this->retrieveMasterId(MasterConstant::WASTAGE_PENDING);
+                $validation = [
+                    'order_date'               => 'required|date_format:Y-m-d',
+                    'delivery_date'            => 'required|date_format:Y-m-d|after_or_equal:order_date',
+                    'cost_per_meter'           => 'required|numeric',
+                    'customer_po_number'       => 'nullable|string',
+                    'customer_id'              => 'required|exists:customers,id,deleted_at,NULL',
+                    'challan_no'               => 'required|string',
+                    'manufacturing_company_id' => 'required',
+                ];
 
-                return $this->customValidation($currentStatusId);
+                return array_merge($validation, $this->customValidation($currentStatusId));
 
             default:
                 return [
