@@ -407,7 +407,7 @@ class WastageController extends Controller
         $status = $request->get('code');
         $method = 'update' . Str::studly($status) . 'Status';
         try {
-            $wastageOrder = $this->wastageOrderRepository->find($request->get('sales_order_id'));
+            $wastageOrder = $this->wastageOrderRepository->find($request->get('wastage_order_id'));
 
             return $this->{$method}($wastageOrder, $request->all());
         } catch (Exception $exception) {
