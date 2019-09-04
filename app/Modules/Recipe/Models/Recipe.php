@@ -22,6 +22,7 @@ class Recipe extends Model
     protected $table = 'recipes';
 
     protected $fillable = [
+        'type',
         'name',
         'total_fiddles',
         'is_active',

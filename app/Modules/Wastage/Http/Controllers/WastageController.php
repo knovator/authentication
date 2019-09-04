@@ -18,6 +18,7 @@ use App\Modules\Wastage\Repositories\WastageOrderRepository;
 use App\Support\DestroyObject;
 use App\Support\Formula;
 use App\Support\UniqueIdGenerator;
+use Arr;
 use DB;
 use Exception;
 use Knovators\Masters\Repository\MasterRepository;
@@ -105,7 +106,10 @@ class WastageController extends Controller
         foreach ($inputs as $key => &$input) {
             $recipe = $this->recipeRepository->findUniqueNesRecipe($input);
             if (!$recipe) {
-                $recipe = $this->recipeRepository->create($input)->id;
+                $input['type'] = 'wastage';
+                $recipe = $this->recipeRepository->create($input);
+                $fiddles = Arr::except($input['thread_color_ids'][0],['denier','pick']);
+                $recipe->fiddles()->attach($fiddles);
             }
             $input['recipe_id'] = $recipe->id;
         }
