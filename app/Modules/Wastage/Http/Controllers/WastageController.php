@@ -248,6 +248,7 @@ class WastageController extends Controller
      * @param WastageOrder  $wastageOrder
      * @param UpdateRequest $request
      * @return mixed
+     * @throws Exception
      */
     public function update(WastageOrder $wastageOrder, UpdateRequest $request) {
         $input = $request->all();

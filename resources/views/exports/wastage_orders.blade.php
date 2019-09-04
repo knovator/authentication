@@ -18,7 +18,7 @@
             <td>{{\Carbon\Carbon::parse($order->order_date)->format('D m Y')}}</td>
             <td>{{$order->design->quality_name}}</td>
             <td>{{ (!is_null($order->customer)) ? $order->customer->full_name:''}}</td>
-            <td>Total Mtr : {{ (!is_null($order->recipe_meters)) ? $order->recipe_meters->total:0 }}</td>
+            <td>{{ (!is_null($order->recipe_meters)) ? $order->recipe_meters->total:0 }}</td>
             <td>{{$order->status->name}}</td>
         </tr>
     @endforeach

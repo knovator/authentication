@@ -5,6 +5,7 @@ namespace App\Modules\Wastage\Models;
 use App\Models\Master;
 use App\Modules\Customer\Models\Customer;
 use App\Modules\Design\Models\Design;
+use App\Modules\Sales\Models\ManufacturingCompany;
 use App\Modules\Stock\Models\Stock;
 use App\Modules\Thread\Models\ThreadColor;
 use Illuminate\Database\Eloquent\Model;
@@ -88,6 +89,13 @@ class WastageOrder extends Model
         return $this->hasOne(WastageOrderRecipe::class, 'wastage_order_id',
             'id')->selectRaw('SUM(total_meters) as total,wastage_order_id')
                     ->groupBy('wastage_order_id');
+    }
+    /**
+     * @return mixed
+     */
+    public function manufacturingCompany() {
+        return $this->belongsTo(ManufacturingCompany::class, 'manufacturing_company_id',
+            'id');
     }
 
     /**

@@ -4,7 +4,7 @@ namespace App\Modules\Wastage\Http\Resources;
 
 use App\Modules\Customer\Http\Resources\Customer as CustomerResource;
 use App\Modules\Design\Http\Resources\Design as DesignResource;
-use App\Modules\Sales\Models\ManufacturingCompany;
+use App\Modules\Sales\Http\Resources\ManufacturingCompany;
 use App\Modules\Thread\Http\Resources\Master as MasterResource;
 use App\Modules\Thread\Http\Resources\ThreadColor;
 use Illuminate\Http\Request;
