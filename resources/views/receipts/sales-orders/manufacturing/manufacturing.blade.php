@@ -59,7 +59,8 @@
                         </tr>
                         <tr>
                             <td class="text-left label">Customer</td>
-                            <td>: {{$salesOrder->customer->full_name}}</td>
+                            <td>
+                                : {{$salesOrder->customer->full_name}}{{ (!is_null($salesOrder->customer_po_number)) ? ' ('.$salesOrder->customer_po_number.')':'' }}</td>
                             <td class="text-left label">Worker Name</td>
                             <td>:</td>
                         </tr>
