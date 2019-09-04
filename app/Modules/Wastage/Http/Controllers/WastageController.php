@@ -381,6 +381,7 @@ class WastageController extends Controller
      */
     private function updateWASTAGECANCELEDStatus(WastageOrder $wastageOrder, $input) {
         $wastageOrder->orderStocks()->delete();
+        $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::WASTAGE_CANCELED)->id;
 
         return $this->updateStatus($wastageOrder, $input);
     }
