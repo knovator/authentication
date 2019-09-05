@@ -3,8 +3,9 @@
 namespace App\Modules\Recipe\Repositories;
 
 use App\Modules\Recipe\Models\Recipe;
+use App\Support\OrderByUpdatedAt;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
-use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
 use Knovators\Support\Traits\StoreWithTrashedRecord;
 use Prettus\Repository\Exceptions\RepositoryException;
@@ -22,7 +23,7 @@ class RecipeRepository extends BaseRepository
      * @throws RepositoryException
      */
     public function boot() {
-        $this->pushCriteria(OrderByDescId::class);
+        $this->pushCriteria(OrderByUpdatedAt::class);
     }
 
     /**
@@ -38,7 +39,7 @@ class RecipeRepository extends BaseRepository
      * @param $input
      * @return mixed
      * @throws RepositoryException
-     * @throws \Exception
+     * @throws Exception
      */
     public function getRecipeList($input) {
         $this->applyCriteria();
@@ -46,7 +47,7 @@ class RecipeRepository extends BaseRepository
         $recipes = $this->model->with([
             'fiddles.thread:id,name,denier,price',
             'fiddles.color:id,name,code'
-        ])->withCount('designBeams as associated_count');
+        ])->withCount(['designBeams as beams_count', 'wastageOrderRecipe as wastage_count']);
 
         if (isset($input['is_active'])) {
             $recipes = $recipes->where('is_active', $input['is_active']);
@@ -56,7 +57,18 @@ class RecipeRepository extends BaseRepository
             $recipes = $recipes->whereNotIn('id', $input['not_ids']);
         }
 
-        $recipes = datatables()->of($recipes)->make(true);
+        if (!isset($input['wastage']) || $input['wastage'] == 'no') {
+            $recipes = $recipes->where('type', '<>', 'wastage');
+        }
+
+        $recipes = datatables()->of($recipes)
+                               ->addColumn('associated_count', function (Recipe $recipe) {
+                                   if ($recipe->beams_count || $recipe->wastage_count) {
+                                       return 1;
+                                   }
+
+                                   return 0;
+                               })->removeColumn('beams_count', 'wastage_count')->make(true);
         $this->resetModel();
 
         return $recipes;
@@ -69,7 +81,6 @@ class RecipeRepository extends BaseRepository
      * @throws RepositoryException
      */
     public function findUniqueNesRecipe($input) {
-        $this->applyCriteria();
 
         $recipe = $this->model->where(['total_fiddles' => $input['total_fiddles']]);
 
@@ -89,11 +100,7 @@ class RecipeRepository extends BaseRepository
             });
         }
 
-        $recipe = $recipe->first();
-
-        $this->resetModel();
-
-        return $recipe;
+        return $recipe->first();
 
     }
 

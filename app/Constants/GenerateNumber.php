@@ -17,4 +17,5 @@ class GenerateNumber
     const DELIVERY = 'DELIVERY';
     const PO_DELIVERY = 'PO_DELIVERY';
     const YARN_SALES = 'YARN_SALES';
+    const WASTAGE = 'WASTAGE';
 }

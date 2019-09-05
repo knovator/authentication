@@ -30,5 +30,6 @@ class Master
     // Wastage Order Statuses
     const WASTAGE_STATUS = 'WASTAGE_STATUS'; // parent
     const WASTAGE_PENDING = 'WASTAGE_PENDING';
+    const WASTAGE_CANCELED = 'WASTAGE_CANCELED';
     const WASTAGE_DELIVERED = 'WASTAGE_DELIVERED';
 }

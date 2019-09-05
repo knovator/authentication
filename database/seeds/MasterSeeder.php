@@ -135,6 +135,28 @@ class MasterSeeder extends Seeder
                         'is_active' => true,
                     ]
                 ]
+            ],
+            4 => [
+                'name'        => 'Wastage Status',
+                'code'        => 'WASTAGE_STATUS',
+                'is_active'   => true,
+                'sub_masters' => [
+                    0 => [
+                        'name'      => 'Pending',
+                        'code'      => 'WASTAGE_PENDING',
+                        'is_active' => true,
+                    ],
+                    1 => [
+                        'name'      => 'Canceled',
+                        'code'      => 'WASTAGE_CANCELED',
+                        'is_active' => true,
+                    ],
+                    2 => [
+                        'name'      => 'Delivered',
+                        'code'      => 'WASTAGE_DELIVERED',
+                        'is_active' => true,
+                    ]
+                ]
             ]
         ];
     }

@@ -89,6 +89,13 @@ class RecipeController extends Controller
         return $this->recipeRepository->findUniqueNesRecipe($input);
     }
 
+    /**
+     * @param Recipe $recipe
+     * @return RecipeResource
+     */
+    private function makeResource($recipe) {
+        return new RecipeResource($recipe);
+    }
 
     /**
      * @param Recipe        $recipe
@@ -108,7 +115,7 @@ class RecipeController extends Controller
             $recipe->update($input);
             $recipe->fiddles()->sync($input['thread_color_ids']);
             DB::commit();
-            $recipe->fresh();
+            $recipe->refresh();
 
             return $this->sendResponse($this->makeResource($recipe->load([
                 'fiddles.thread',
@@ -125,7 +132,6 @@ class RecipeController extends Controller
         }
     }
 
-
     /**
      * @param Recipe                 $recipe
      * @param PartiallyUpdateRequest $request
@@ -134,7 +140,7 @@ class RecipeController extends Controller
 
     public function partiallyUpdate(Recipe $recipe, PartiallyUpdateRequest $request) {
         $recipe->update($request->all());
-        $recipe->fresh();
+        $recipe->refresh();
 
         return $this->sendResponse($this->makeResource($recipe->load([
             'fiddles.thread',
@@ -144,7 +150,6 @@ class RecipeController extends Controller
             HTTPCode::OK);
     }
 
-
     /**
      * @param Recipe $recipe
      * @return JsonResponse
@@ -153,9 +158,7 @@ class RecipeController extends Controller
     public function destroy(Recipe $recipe) {
         try {
             // Recipe relations
-            $relations = [
-                'designBeams'
-            ];
+            $relations = ['designBeams', 'wastageOrderRecipe'];
 
             return $this->destroyModelObject($relations, $recipe, 'Recipe');
 
@@ -168,15 +171,7 @@ class RecipeController extends Controller
     }
 
     /**
-     * @param Recipe $recipe
-     * @return RecipeResource
-     */
-    private function makeResource($recipe) {
-        return new RecipeResource($recipe);
-    }
-
-
-    /**
+     * @param Request $request
      * @return JsonResponse
      */
     public function index(Request $request) {
