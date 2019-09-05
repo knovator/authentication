@@ -214,7 +214,7 @@ class DesignController extends Controller
         try {
             // Design associated relations
             $relations = [
-                'salesOrders'
+                'salesOrders','wastageOrders'
             ];
 
             return $this->destroyModelObject($relations, $design, 'Design');

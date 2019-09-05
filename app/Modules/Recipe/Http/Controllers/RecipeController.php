@@ -115,7 +115,7 @@ class RecipeController extends Controller
             $recipe->update($input);
             $recipe->fiddles()->sync($input['thread_color_ids']);
             DB::commit();
-            $recipe->fresh();
+            $recipe->refresh();
 
             return $this->sendResponse($this->makeResource($recipe->load([
                 'fiddles.thread',
@@ -140,7 +140,7 @@ class RecipeController extends Controller
 
     public function partiallyUpdate(Recipe $recipe, PartiallyUpdateRequest $request) {
         $recipe->update($request->all());
-        $recipe->fresh();
+        $recipe->refresh();
 
         return $this->sendResponse($this->makeResource($recipe->load([
             'fiddles.thread',

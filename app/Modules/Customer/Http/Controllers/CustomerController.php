@@ -15,6 +15,7 @@ use Illuminate\Http\JsonResponse;
 use Knovators\Support\Helpers\HTTPCode;
 use App\Support\DestroyObject;
 use Log;
+use Prettus\Repository\Exceptions\RepositoryException;
 use Prettus\Validator\Exceptions\ValidatorException;
 use Str;
 
@@ -70,7 +71,7 @@ class CustomerController extends Controller
     /**
      * @param $input
      * @throws ValidatorException
-     * @throws \Prettus\Repository\Exceptions\RepositoryException
+     * @throws RepositoryException
      */
     private function firstOrCreateAgent(&$input) {
         $slug = str_replace(' ', '-', Str::lower($input['agent_name']));
@@ -83,6 +84,14 @@ class CustomerController extends Controller
 
         }
         $input['agent_id'] = $agent->id;
+    }
+
+    /**
+     * @param Customer $customer
+     * @return CustomerResource
+     */
+    private function makeResource($customer) {
+        return new CustomerResource($customer);
     }
 
     /**
@@ -133,7 +142,9 @@ class CustomerController extends Controller
             // Customer associated relations
             $relations = [
                 'salesOrders',
-                'purchaseOrders'
+                'purchaseOrders',
+                'yarnOrders',
+                'wastageOrders'
             ];
 
             return $this->destroyModelObject($relations, $customer, 'Customer');
@@ -155,16 +166,6 @@ class CustomerController extends Controller
             __('messages.retrieved', ['module' => 'Customer']),
             HTTPCode::OK);
     }
-
-
-    /**
-     * @param Customer $customer
-     * @return CustomerResource
-     */
-    private function makeResource($customer) {
-        return new CustomerResource($customer);
-    }
-
 
     /**
      * @return JsonResponse

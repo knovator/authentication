@@ -47,7 +47,7 @@ class RecipeRepository extends BaseRepository
         $recipes = $this->model->with([
             'fiddles.thread:id,name,denier,price',
             'fiddles.color:id,name,code'
-        ])->withCount('designBeams as associated_count');
+        ])->withCount(['designBeams as beams_count', 'wastageOrderRecipe as wastage_count']);
 
         if (isset($input['is_active'])) {
             $recipes = $recipes->where('is_active', $input['is_active']);
@@ -61,7 +61,14 @@ class RecipeRepository extends BaseRepository
             $recipes = $recipes->where('type', '<>', 'wastage');
         }
 
-        $recipes = datatables()->of($recipes)->make(true);
+        $recipes = datatables()->of($recipes)
+                               ->addColumn('associated_count', function (Recipe $recipe) {
+                                   if ($recipe->beams_count || $recipe->wastage_count) {
+                                       return 1;
+                                   }
+
+                                   return 0;
+                               })->removeColumn('beams_count', 'wastage_count')->make(true);
         $this->resetModel();
 
         return $recipes;

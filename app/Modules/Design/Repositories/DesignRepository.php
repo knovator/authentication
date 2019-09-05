@@ -44,9 +44,15 @@ class DesignRepository extends BaseRepository
         ])->with('beamRecipes')->withCount([
             'beams as total_beams',
             'recipes as total_recipes',
-            'salesOrders as associated_count'
+            'salesOrders as sales_count',
+            'wastageOrders as wastage_count',
         ]))
-                               ->make(true);
+                               ->addColumn('associated_count', function (Design $design) {
+                                   if ($design->sales_count || $design->wastage_count) {
+                                       return 1;
+                                   }
+                                   return 0;
+                               })->removeColumn('sales_count', 'wastage_count')->make(true);
         $this->resetModel();
 
         return $designs;
