@@ -9,9 +9,11 @@ use App\Http\Controllers\Controller;
 use App\Modules\Design\Repositories\DesignDetailRepository;
 use App\Modules\Recipe\Repositories\RecipeRepository;
 use App\Modules\Thread\Constants\ThreadType;
+use App\Modules\Wastage\Http\Exports\WastageOrder as ExportWastageOrder;
 use App\Modules\Wastage\Http\Requests\CreateRequest;
 use App\Modules\Wastage\Http\Requests\StatusRequest;
 use App\Modules\Wastage\Http\Requests\UpdateRequest;
+use App\Modules\Wastage\Http\Resources\WastageOrder as WastageOrderResource;
 use App\Modules\Wastage\Models\WastageOrder;
 use App\Modules\Wastage\Models\WastageOrderRecipe;
 use App\Modules\Wastage\Repositories\WastageOrderRecipeRepository;
@@ -19,7 +21,6 @@ use App\Modules\Wastage\Repositories\WastageOrderRepository;
 use App\Support\DestroyObject;
 use App\Support\Formula;
 use App\Support\UniqueIdGenerator;
-use Arr;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use DB;
 use Exception;
@@ -34,9 +35,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Prettus\Repository\Exceptions\RepositoryException;
 use Prettus\Validator\Exceptions\ValidatorException;
 use Str;
-use App\Modules\Wastage\Http\Resources\WastageOrder as WastageOrderResource;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use App\Modules\Wastage\Http\Exports\WastageOrder as ExportWastageOrder;
 
 /**
  * Class WastageController

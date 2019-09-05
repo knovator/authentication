@@ -3,8 +3,9 @@
 namespace App\Modules\Recipe\Repositories;
 
 use App\Modules\Recipe\Models\Recipe;
+use App\Support\OrderByUpdatedAt;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
-use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
 use Knovators\Support\Traits\StoreWithTrashedRecord;
 use Prettus\Repository\Exceptions\RepositoryException;
@@ -22,7 +23,7 @@ class RecipeRepository extends BaseRepository
      * @throws RepositoryException
      */
     public function boot() {
-        $this->pushCriteria(OrderByDescId::class);
+        $this->pushCriteria(OrderByUpdatedAt::class);
     }
 
     /**
@@ -38,7 +39,7 @@ class RecipeRepository extends BaseRepository
      * @param $input
      * @return mixed
      * @throws RepositoryException
-     * @throws \Exception
+     * @throws Exception
      */
     public function getRecipeList($input) {
         $this->applyCriteria();
@@ -54,6 +55,10 @@ class RecipeRepository extends BaseRepository
 
         if (isset($input['not_ids']) && (!empty($input['not_ids']))) {
             $recipes = $recipes->whereNotIn('id', $input['not_ids']);
+        }
+
+        if (!isset($input['wastage']) || $input['wastage'] == 'no') {
+            $recipes = $recipes->where('type', '<>', 'wastage');
         }
 
         $recipes = datatables()->of($recipes)->make(true);
