@@ -39,9 +39,14 @@ class ThreadRepository extends BaseRepository
         $threads = datatables()->of($this->model->with([
             'type:id,name,code',
             'threadColors.color:id,name,code'
-        ])->select('threads.*')->withCount(['fiddles', 'beams', 'wastage']))
+        ])->select('threads.*')->withCount([
+            'fiddles',
+            'beams',
+            'wastage',
+            'yarnPurchases as yarns_count'
+        ]))
                                ->addColumn('beams_count', function (Thread $thread) {
-                                   if ($thread->beams_count || $thread->wastage_count) {
+                                   if ($thread->beams_count || $thread->wastage_count || $thread->yarns_count) {
                                        return 1;
                                    }
 

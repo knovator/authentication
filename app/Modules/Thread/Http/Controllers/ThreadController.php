@@ -93,7 +93,8 @@ class ThreadController extends Controller
      */
     public function destroy(Thread $thread) {
         try {
-            return $this->destroyModelObject(['fiddles', 'beams', 'wastage'], $thread, 'Thread');
+            return $this->destroyModelObject(['fiddles', 'beams', 'wastage', 'yarnPurchases'],
+                $thread, 'Thread');
 
         } catch (Exception $exception) {
             Log::error($exception);
@@ -156,6 +157,7 @@ class ThreadController extends Controller
                     'recipes as recipes_count',
                     'designBeams as beams_count',
                     'wastageBeams as wastage_count',
+                    'yarnPurchases as yarns_count',
                 ]);
             }
         ]);
@@ -163,7 +165,8 @@ class ThreadController extends Controller
         $thread->threadColors->map(function ($threadColor) {
             /** @var ThreadColor $threadColor */
             $threadColor->updatable = true;
-            if ($threadColor->recipes_count || $threadColor->beams_count || $threadColor->wastage_count) {
+            if ($threadColor->recipes_count || $threadColor->beams_count ||
+                $threadColor->wastage_count || $threadColor->yarns_count) {
                 $threadColor->updatable = false;
             }
         });
