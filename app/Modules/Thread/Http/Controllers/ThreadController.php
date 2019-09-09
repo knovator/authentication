@@ -157,7 +157,7 @@ class ThreadController extends Controller
                     'recipes as recipes_count',
                     'designBeams as beams_count',
                     'wastageBeams as wastage_count',
-                    'yarnPurchases as yarns_count',
+                    'yarnOrders as yarns_count',
                 ]);
             }
         ]);
