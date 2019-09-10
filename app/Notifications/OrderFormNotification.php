@@ -20,15 +20,19 @@ class OrderFormNotification extends Notification
 
     public $attachment;
 
+    public $module;
+
     /**
      * Create a new notification instance.
      *
      * @param $companyName
      * @param $attachment
+     * @param $module
      */
-    public function __construct($companyName, $attachment) {
+    public function __construct($companyName, $attachment, $module) {
         $this->companyName = $companyName;
         $this->attachment = $attachment;
+        $this->module = $module;
     }
 
     /**
@@ -49,13 +53,19 @@ class OrderFormNotification extends Notification
      */
     public function toMail($notifiable) {
         $mailMessage = (new MailMessage)->from(env('MAIL_FROM_ADDRESS'), $this->companyName);
+        if ($this->module == 'yarn') {
+            $subject = 'SO Yarn Tax invoice';
+        } else {
+            $subject = 'SO Order Form';
+        }
 
         return $mailMessage->view(
             'emails.order-form', [
-                'customer' => $notifiable,
-                'companyName'    => $this->companyName
+                'customer'    => $notifiable,
+                'companyName' => $this->companyName,
+                'module'      => $this->module,
             ]
-        )->subject('Sales Order Form')->attach($this->attachment);
+        )->subject($subject)->attach($this->attachment);
     }
 
     /**

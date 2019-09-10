@@ -50,7 +50,7 @@ class YarnOrderFormJob implements ShouldQueue
             $companyName = 'JENNY TEXO FAB';
         }
         $this->yarnOrder->customer->sendOrderNotifyMail($companyName,
-            config('app.url') . $fileUri);
+            config('app.url') . $fileUri,'yarn');
     }
 
     /**

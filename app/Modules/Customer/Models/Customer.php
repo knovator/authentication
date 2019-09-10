@@ -64,11 +64,12 @@ class Customer extends Model
 
 
     /**
-     * @param $salesOrder
+     * @param $companyName
      * @param $attachment
+     * @param $module
      */
-    public function sendOrderNotifyMail($companyName, $attachment) {
-        $this->notify((new OrderFormNotification($companyName, $attachment))->delay(now()
+    public function sendOrderNotifyMail($companyName, $attachment,$module) {
+        $this->notify((new OrderFormNotification($companyName, $attachment,$module))->delay(now()
             ->addSeconds(10)));
     }
 

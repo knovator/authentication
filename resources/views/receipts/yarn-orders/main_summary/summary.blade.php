@@ -99,7 +99,7 @@
         <tr>
             <th class="sr-no text-left">#</th>
             <th class="text-left">Threads</th>
-            <th>Quantity (Mtr.)</th>
+            <th>Quantity (KG)</th>
             <th>Rate (INR)</th>
             <th class="text-right">Amount</th>
         </tr>
