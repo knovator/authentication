@@ -31,7 +31,7 @@
                             <td class="text-left label">Order No.</td>
                             <td>: {{$salesOrder->order_no}}</td>
                             <td class="text-left label">Order Date</td>
-                            <td>: {{\Carbon\Carbon::parse($salesOrder->order_date)->format('d, M Y')}}</td>
+                            <td>: {{\Carbon\Carbon::parse($salesOrder->order_date)->format('d M Y')}}</td>
                         </tr>
                         <tr>
                             <td class="text-left label">Beam</td>
@@ -49,7 +49,7 @@
                         </tr>
                         <tr>
                             <td class="text-left label">Delivery Date</td>
-                            <td>: {{\Carbon\Carbon::parse($delivery->delivery_date)->format('d, M Y')}}</td>
+                            <td>: {{\Carbon\Carbon::parse($delivery->delivery_date)->format('d M Y')}}</td>
                             <td class="text-left label">
                                 Pick
                                 <small>(on loom)</small>
@@ -92,10 +92,7 @@
               <span
                   class="color-preview -block -no-color"
                   style="background-color: aquamarine"
-              >({{$fiddle->thread->denier}})</span
-              >
-                                {{$fiddle->thread->name}} ({{$fiddle->color->name}})
-                            </td>
+              >({{$fiddle->thread->denier}})</span>{{$fiddle->thread->name}} <br>({{$fiddle->color->name}})</td>
                         @endforeach
 
                         <td class="total-mtr text-center">{{ ($machine->panno !== 1) ? ($soPartialOrder->total_meters / $machine->panno) : $soPartialOrder->total_meters}}</td>

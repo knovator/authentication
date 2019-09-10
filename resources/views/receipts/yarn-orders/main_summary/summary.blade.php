@@ -99,7 +99,7 @@
         <tr>
             <th class="sr-no text-left">#</th>
             <th class="text-left">Threads</th>
-            <th>Quantity (Mtr.)</th>
+            <th>Quantity (KG)</th>
             <th>Rate (INR)</th>
             <th class="text-right">Amount</th>
         </tr>
@@ -122,7 +122,7 @@
 
             <tr>
                 <td class="sr-no text-left"><b>{{$orderThreadKey + 1}}</b></td>
-                <td class="text-center">{{'('.$orderThread->threadColor->thread->denier.') '}}{{$orderThread->threadColor->thread->name}}
+                <td class="text-center">{{'('.$orderThread->threadColor->thread->denier.') '}}<br>{{$orderThread->threadColor->thread->name}}
                     {{'('.$orderThread->threadColor->color->name.')'}}
                 </td>
                 <td class="text-center">{{$orderThread->kg_qty}}</td>

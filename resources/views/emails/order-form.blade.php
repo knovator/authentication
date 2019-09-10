@@ -42,10 +42,22 @@
     <h3>{{$companyName}}</h3>
 </header>
 <main>
-      <pre>
+
+
+    @if($module == 'yarn')
+        <pre>
+        Dear Customer,
+              As per your requirement here we attached text invoice of SO yarn.
+      </pre>
+
+    @else
+        <pre>
         Dear Customer,
               As per your requirement here we attached order form of based on estimation.
       </pre>
+
+    @endif
+
     <pre>
         Your faithfully,
         {{$companyName}}
