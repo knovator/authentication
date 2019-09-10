@@ -159,7 +159,7 @@
                         <td class="sr-no text-left"></td>
                         <td>
                             {{$key.'.'.($partialOrderKey + 1).')
-                           '.\Carbon\Carbon::parse($partialOrder->delivery->delivery_date)->format('d, M Y')}}
+                           '.\Carbon\Carbon::parse($partialOrder->delivery->delivery_date)->format('d M Y')}}
                             @if(!is_null($partialOrder->delivery->bill_no))
                                 <small><em>({{$partialOrder->delivery->bill_no}})</em></small>
                             @endif
