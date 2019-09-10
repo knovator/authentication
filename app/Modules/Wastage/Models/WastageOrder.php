@@ -90,6 +90,14 @@ class WastageOrder extends Model
             'id')->selectRaw('SUM(total_meters) as total,wastage_order_id')
                     ->groupBy('wastage_order_id');
     }
+
+
+    /**
+     * @return mixed
+     */
+    public function quantity(){
+        return $this->recipeMeters();
+    }
     /**
      * @return mixed
      */

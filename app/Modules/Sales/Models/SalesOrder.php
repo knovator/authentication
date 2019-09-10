@@ -87,6 +87,14 @@ class SalesOrder extends Model
                     ->groupBy('sales_order_id');
     }
 
+
+    /**
+     * @return mixed
+     */
+    public function quantity() {
+        return $this->recipeMeters();
+    }
+
     /**
      * @return mixed
      */
