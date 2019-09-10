@@ -47,7 +47,7 @@
     @if($module == 'yarn')
         <pre>
         Dear Customer,
-              As per your requirement here we attached text invoice of SO yarn.
+              As per your requirement here we attached tax invoice of SO yarn.
       </pre>
 
     @else
