@@ -83,6 +83,15 @@ class YarnOrder extends Model
                     ->selectRaw('sum(kg_qty) as total,yarn_order_id');
     }
 
+
+    /**
+     * @return mixed
+     */
+    public function quantity() {
+        return $this->threadQty();
+    }
+
+
     /**
      * @return mixed
      */

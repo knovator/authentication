@@ -68,6 +68,13 @@ class PurchaseOrder extends Model
     /**
      * @return mixed
      */
+    public function quantity() {
+        return $this->threadQty();
+    }
+
+    /**
+     * @return mixed
+     */
     public function threadQty() {
         return $this->hasOne(PurchaseOrderThread::class, 'purchase_order_id', 'id')
                     ->groupBy('purchase_order_id')

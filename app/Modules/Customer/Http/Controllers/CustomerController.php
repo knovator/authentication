@@ -5,11 +5,16 @@ namespace App\Modules\Customer\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PartiallyUpdateRequest;
 use App\Modules\Customer\Http\Requests\CreateRequest;
+use App\Modules\Customer\Http\Requests\LedgerRequest;
 use App\Modules\Customer\Http\Requests\UpdateRequest;
 use App\Modules\Customer\Http\Resources\Customer as CustomerResource;
 use App\Modules\Customer\Models\Customer;
 use App\Modules\Customer\Repositories\AgentRepository;
 use App\Modules\Customer\Repositories\CustomerRepository;
+use App\Modules\Purchase\Repositories\PurchaseOrderRepository;
+use App\Modules\Sales\Repositories\SalesOrderRepository;
+use App\Modules\Wastage\Repositories\WastageOrderRepository;
+use App\Modules\Yarn\Repositories\YarnOrderRepository;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Knovators\Support\Helpers\HTTPCode;
@@ -17,7 +22,9 @@ use App\Support\DestroyObject;
 use Log;
 use Prettus\Repository\Exceptions\RepositoryException;
 use Prettus\Validator\Exceptions\ValidatorException;
+use App\Constants\Customer as CustomerConstant;
 use Str;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * Class CustomerController
@@ -30,18 +37,38 @@ class CustomerController extends Controller
 
     protected $customerRepository;
 
+    protected $purchaseOrderRepository;
+
+    protected $salesOrderRepository;
+
+    protected $yarnOrderRepository;
+
+    protected $wastageOrderRepository;
+
     protected $agentRepository;
 
     /**
      * CustomerController constructor.
-     * @param CustomerRepository $customerRepository
-     * @param AgentRepository    $agentRepository
+     * @param CustomerRepository      $customerRepository
+     * @param PurchaseOrderRepository $purchaseOrderRepository
+     * @param SalesOrderRepository    $salesOrderRepository
+     * @param YarnOrderRepository     $yarnOrderRepository
+     * @param WastageOrderRepository  $wastageOrderRepository
+     * @param AgentRepository         $agentRepository
      */
     public function __construct(
         CustomerRepository $customerRepository,
+        PurchaseOrderRepository $purchaseOrderRepository,
+        SalesOrderRepository $salesOrderRepository,
+        YarnOrderRepository $yarnOrderRepository,
+        WastageOrderRepository $wastageOrderRepository,
         AgentRepository $agentRepository
     ) {
         $this->customerRepository = $customerRepository;
+        $this->purchaseOrderRepository = $purchaseOrderRepository;
+        $this->salesOrderRepository = $salesOrderRepository;
+        $this->yarnOrderRepository = $yarnOrderRepository;
+        $this->wastageOrderRepository = $wastageOrderRepository;
         $this->agentRepository = $agentRepository;
     }
 
@@ -201,6 +228,61 @@ class CustomerController extends Controller
             return $this->sendResponse(null, __('messages.something_wrong'),
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
+    }
+
+
+    /**
+     * @param Customer      $customer
+     * @param LedgerRequest $request
+     * @return JsonResponse
+     */
+    public function ledgers(Customer $customer, LedgerRequest $request) {
+        $input = $request->all();
+        try {
+            return $this->sendResponse($this->orderList($customer, $input),
+                __('messages.retrieved', ['module' => 'Customer ledger']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY,$exception);
+        }
+    }
+
+
+    /**
+     * @param $customer
+     * @param $input
+     * @return array
+     * @throws Exception
+     */
+    private function orderList($customer, $input) {
+        switch ($input['order_type']) {
+            case CustomerConstant::LEDGER_PURCHASE:
+                $orders = $this->purchaseOrderRepository->customerOrders($customer->id, $input);
+                break;
+
+            case CustomerConstant::LEDGER_FABRIC:
+                $orders = $this->salesOrderRepository->customerOrders($customer->id, $input);
+                break;
+
+            case CustomerConstant::LEDGER_YARN:
+                $orders = $this->yarnOrderRepository->customerOrders($customer->id, $input);
+                break;
+
+            case CustomerConstant::LEDGER_WASTAGE:
+                $orders = $this->wastageOrderRepository->customerOrders($customer->id, $input);
+                break;
+
+            default:
+                throw new UnprocessableEntityHttpException('Invalid order type');
+
+        }
+        $orders = datatables()->of($orders)->make(true);
+
+        return $orders;
+
     }
 
 

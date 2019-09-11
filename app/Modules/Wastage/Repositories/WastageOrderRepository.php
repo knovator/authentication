@@ -4,6 +4,8 @@ namespace App\Modules\Wastage\Repositories;
 
 use App\Modules\Wastage\Models\WastageOrder;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
 use Prettus\Repository\Exceptions\RepositoryException;
@@ -72,6 +74,35 @@ class WastageOrderRepository extends BaseRepository
         $this->resetModel();
 
         return $orders;
+    }
+
+    /**
+     * @param $customerId
+     * @param $input
+     * @return Builder|Model|mixed
+     */
+    public function customerOrders($customerId, $input) {
+
+        $orders = $this->model->with([
+            'status:id,name,code',
+            'quantity'
+        ])->select(['id', 'order_no', 'order_date', 'status_id'])
+                              ->where('customer_id', '=', $customerId);
+
+
+        if (isset($input['ids']) && (!empty($input['ids']))) {
+            $orders = $orders->whereIn('id', $input['ids']);
+        }
+
+        if (isset($input['start_date'])) {
+            $orders = $orders->whereDate('order_date', '>=', $input['start_date']);
+        }
+
+        if (isset($input['end_date'])) {
+            $orders = $orders->whereDate('order_date', '<=', $input['end_date']);
+        }
+
+        return $orders->orderByDesc('id');
     }
 
 
