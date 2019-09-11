@@ -20,7 +20,7 @@
                 <td rowspan="{{$rowSpan}}">{{$orderKey + 1}}</td>
                 <td rowspan="{{$rowSpan}}">{{$order->order_no}}</td>
                 <td rowspan="{{$rowSpan}}">{{$order->customer->full_name}}</td>
-                <td rowspan="{{$rowSpan}}">{{\Carbon\Carbon::parse($order->order_date)->format('D m Y')}}</td>
+                <td rowspan="{{$rowSpan}}">{{\Carbon\Carbon::parse($order->order_date)->format('d M Y')}}</td>
                 <td>{{'('.$order->threads[0]->thread_color->thread->denier.') '.$order->threads[0]->thread_color->thread->name.' ('.$order->threads[0]->thread_color->color->name.')'}}
                     : {{$order->threads[0]->kg_qty. ' KG'}}</td>
 
@@ -55,7 +55,7 @@
                         <td rowspan="{{$rowSpan}}"></td>
                         <td>{{'('.$delivery->partial_orders[0]->purchased_thread->thread_color->thread->denier.') '.$delivery->partial_orders[0]->purchased_thread->thread_color->thread->name.' ('.$delivery->partial_orders[0]->purchased_thread->thread_color->color->name.')'}}
                             : {{$delivery->partial_orders[0]->kg_qty. ' KG'}}</td>
-                        <td rowspan="{{$rowSpan}}">{{\Carbon\Carbon::parse($delivery->delivery_date)->format('D m Y')}}</td>
+                        <td rowspan="{{$rowSpan}}">{{\Carbon\Carbon::parse($delivery->delivery_date)->format('d M Y')}}</td>
                         <td rowspan="{{$rowSpan}}">{{$delivery->bill_no}}</td>
                     </tr>
 

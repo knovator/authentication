@@ -63,6 +63,10 @@ class UniqueIdSeeder extends Seeder
                 'code'   => 'PO_DELIVERY',
                 'prefix' => 'PDN'
             ],
+            6 => [
+                'code'   => 'WASTAGE',
+                'prefix' => 'WO'
+            ],
         ];
     }
 }

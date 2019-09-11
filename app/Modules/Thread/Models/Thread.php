@@ -5,6 +5,8 @@ namespace App\Modules\Thread\Models;
 
 use App\Modules\Design\Models\DesignBeam;
 use App\Modules\Recipe\Models\RecipeFiddle;
+use App\Modules\Wastage\Models\WastageOrder;
+use App\Modules\Yarn\Models\YarnOrderThread;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
@@ -53,19 +55,16 @@ class Thread extends Model
     /**
      * @return mixed
      */
-    public function type() {
-        return $this->belongsTo(Master::class, 'type_id', 'id');
-    }
-
-
-    /**
-     * @return mixed
-     */
     public function threadColors() {
         return $this->hasMany(ThreadColor::class, 'thread_id', 'id');
     }
 
-
+    /**
+     * @return mixed
+     */
+    public function type() {
+        return $this->belongsTo(Master::class, 'type_id', 'id');
+    }
 
     /**
      * @return mixed
@@ -84,6 +83,22 @@ class Thread extends Model
     }
 
 
+    /**
+     * @return mixed
+     */
+    public function wastage() {
+        return $this->hasManyThrough(WastageOrder::class, ThreadColor::class, 'thread_id',
+            'beam_id', 'id', 'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function yarnPurchases() {
+        return $this->hasManyThrough(YarnOrderThread::class, ThreadColor::class, 'thread_id',
+            'thread_color_id', 'id', 'id');
+    }
 
 
     /**

@@ -18,7 +18,7 @@
                 <td rowspan="5">{{$orderKey + 1}}</td>
                 <td rowspan="5">{{$order->order_no}}</td>
                 <td rowspan="5">{{$order->customer->full_name}}</td>
-                <td rowspan="5">{{\Carbon\Carbon::parse($order->order_date)->format('D m Y')}}</td>
+                <td rowspan="5">{{\Carbon\Carbon::parse($order->order_date)->format('d M Y')}}</td>
                 <td rowspan="5">{{$order->design->quality_name}}</td>
                 <td>Total Mtr : {{ (!is_null($order->recipe_meters)) ? $order->recipe_meters->total:0 }}</td>
                 <td rowspan="5">{{$order->status->name}}</td>

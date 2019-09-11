@@ -5,6 +5,8 @@ namespace App\Modules\Customer\Models;
 use App\Models\State;
 use App\Modules\Purchase\Models\PurchaseOrder;
 use App\Modules\Sales\Models\SalesOrder;
+use App\Modules\Wastage\Models\WastageOrder;
+use App\Modules\Yarn\Models\YarnOrder;
 use App\Notifications\OrderFormNotification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -62,11 +64,12 @@ class Customer extends Model
 
 
     /**
-     * @param $salesOrder
+     * @param $companyName
      * @param $attachment
+     * @param $module
      */
-    public function sendOrderNotifyMail($companyName, $attachment) {
-        $this->notify((new OrderFormNotification($companyName, $attachment))->delay(now()
+    public function sendOrderNotifyMail($companyName, $attachment,$module) {
+        $this->notify((new OrderFormNotification($companyName, $attachment,$module))->delay(now()
             ->addSeconds(10)));
     }
 
@@ -76,6 +79,20 @@ class Customer extends Model
      */
     public function salesOrders() {
         return $this->hasMany(SalesOrder::class, 'customer_id', 'id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function yarnOrders() {
+        return $this->hasMany(YarnOrder::class, 'customer_id', 'id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function wastageOrders() {
+        return $this->hasMany(WastageOrder::class, 'customer_id', 'id');
     }
 
     /**

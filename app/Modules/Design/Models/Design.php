@@ -4,6 +4,7 @@ namespace App\Modules\Design\Models;
 
 
 use App\Modules\Sales\Models\SalesOrder;
+use App\Modules\Wastage\Models\WastageOrder;
 use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -118,5 +119,13 @@ class Design extends Model
                     ->selectRaw('recipes.name')
                     ->groupBy(DB::raw('recipes.name,design_id'));
     }
+
+    /**
+     * @return mixed
+     */
+    public function wastageOrders() {
+        return $this->hasMany(WastageOrder::class, 'design_id', 'id');
+    }
+
 
 }

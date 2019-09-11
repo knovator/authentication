@@ -30,7 +30,7 @@ return [
 
 
     // Sales order Messages
-    'not_delete_sales_order'            => 'This Order is in :status state, so you can not delete it.',
+    'not_delete_order'            => 'This Order is in :status state, so you can not delete it.',
     'delivery_can_not_delete'           => 'This Delivery is in :status state, so you can not delete it.',
     'complete_order'                    => 'To complete this order, all partial order must be completed or canceled .',
     'must_partial_delivery'             => 'To Complete this order, you have to create partial delivery.',

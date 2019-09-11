@@ -51,7 +51,7 @@ class OrderFormJob implements ShouldQueue
         }
 
         $this->salesOrder->customer->sendOrderNotifyMail($companyName,
-            config('app.url') . $fileUri);
+            config('app.url') . $fileUri, 'fabric');
     }
 
     /**

@@ -214,7 +214,7 @@ class DesignController extends Controller
         try {
             // Design associated relations
             $relations = [
-                'salesOrders'
+                'salesOrders','wastageOrders'
             ];
 
             return $this->destroyModelObject($relations, $design, 'Design');
@@ -260,7 +260,7 @@ class DesignController extends Controller
                     /** @var Builder $salesOrderRecipes */
                     $salesOrderRecipes->whereHas('salesOrder', function ($salesOrder) use ($beam) {
                         /** @var Builder $salesOrder */
-                        $salesOrder->where('design_beam_id','=', $beam->id);
+                        $salesOrder->where('design_beam_id', '=', $beam->id);
 
                     });
 

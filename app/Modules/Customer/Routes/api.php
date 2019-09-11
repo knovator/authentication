@@ -12,6 +12,8 @@ Route::group([
              ->name('customers.partially-update');
         Route::get('customer/agents', 'CustomerController@agents')
              ->name('customers.agents.index');
+        Route::get('customer/{customer}/ledgers', 'CustomerController@ledgers')
+             ->name('customers.ledgers.index');
     });
 
 Route::model('customer', Customer::class);

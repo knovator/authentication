@@ -7,6 +7,8 @@ use App\Modules\Design\Models\DesignBeam;
 use App\Modules\Purchase\Models\PurchaseOrderThread;
 use App\Modules\Recipe\Models\Recipe;
 use App\Modules\Stock\Models\Stock;
+use App\Modules\Wastage\Models\WastageOrder;
+use App\Modules\Yarn\Models\YarnOrderThread;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -61,6 +63,22 @@ class ThreadColor extends Model
      */
     public function designBeams() {
         return $this->hasMany(DesignBeam::class, 'thread_color_id', 'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function wastageBeams() {
+        return $this->hasMany(WastageOrder::class, 'beam_id', 'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function yarnOrders() {
+        return $this->hasMany(YarnOrderThread::class, 'thread_color_id', 'id');
     }
 
 
