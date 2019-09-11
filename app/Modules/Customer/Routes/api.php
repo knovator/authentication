@@ -16,4 +16,13 @@ Route::group([
              ->name('customers.ledgers.index');
     });
 
+
+Route::group([
+    'prefix' => 'admin'
+],
+    function () {
+        Route::get('customer/{customer}/export-ledgers', 'CustomerController@exportLedger')
+             ->name('customers.ledgers.export');
+    });
+
 Route::model('customer', Customer::class);
