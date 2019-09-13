@@ -110,7 +110,6 @@ class SalesController extends Controller
         $input = $request->all();
         try {
             DB::beginTransaction();
-            dd('here');
             $input['order_no'] = $this->generateUniqueId(GenerateNumber::SALES);
             $input['status_id'] = $this->getMasterByCode(MasterConstant::SO_PENDING);
             $salesOrder = $this->salesOrderRepository->create($input);
