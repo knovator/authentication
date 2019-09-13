@@ -104,10 +104,10 @@ class SalesController extends Controller
      * @throws Exception
      */
     public function store(CreateRequest $request) {
-        $input = $request->all();
         if ($response = $this->uniqueCustomerPoNumber($request)) {
             return $response;
         }
+        $input = $request->all();
         try {
             DB::beginTransaction();
             dd('here');
@@ -305,10 +305,10 @@ class SalesController extends Controller
      * @throws Exception
      */
     public function update(SalesOrder $salesOrder, UpdateRequest $request) {
-        $input = $request->all();
         if ($response = $this->uniqueCustomerPoNumber($request, $salesOrder->id)) {
             return $response;
         }
+        $input = $request->all();
         try {
             DB::beginTransaction();
             $salesOrder->update($input);
