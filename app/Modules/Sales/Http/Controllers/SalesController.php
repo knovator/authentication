@@ -104,10 +104,12 @@ class SalesController extends Controller
      * @throws Exception
      */
     public function store(CreateRequest $request) {
+        if ($response = $this->uniqueCustomerPoNumber($request)) {
+            return $response;
+        }
         $input = $request->all();
         try {
             DB::beginTransaction();
-            $this->uniqueCustomerPoNumber($request);
             dd('here');
             $input['order_no'] = $this->generateUniqueId(GenerateNumber::SALES);
             $input['status_id'] = $this->getMasterByCode(MasterConstant::SO_PENDING);
@@ -130,6 +132,7 @@ class SalesController extends Controller
     /**
      * @param Request $request
      * @param         $ignoreId
+     * @return bool|JsonResponse
      * @throws RepositoryException
      */
     private function uniqueCustomerPoNumber(Request $request, $ignoreId = false) {
@@ -141,9 +144,13 @@ class SalesController extends Controller
                 $oldOrder = $oldOrder->whereKeyNot($ignoreId);
             }
             if ($oldOrder = $oldOrder->first()) {
-                throw new UnprocessableEntityHttpException('Customer po number is already exist in order no ' . $oldOrder->order_no);
+                return $this->sendResponse(null,
+                    'Customer po number is already exist in order no ' . $oldOrder->order_no,
+                    HTTPCode::UNPROCESSABLE_ENTITY);
             }
         }
+
+        return false;
     }
 
     /**
@@ -298,10 +305,12 @@ class SalesController extends Controller
      * @throws Exception
      */
     public function update(SalesOrder $salesOrder, UpdateRequest $request) {
+        if ($response = $this->uniqueCustomerPoNumber($request, $salesOrder->id)) {
+            return $response;
+        }
         $input = $request->all();
         try {
             DB::beginTransaction();
-            $this->uniqueCustomerPoNumber($request, $salesOrder->id);
             $salesOrder->update($input);
             $this->createOrUpdateSalesDetails($salesOrder->refresh(), $input, true);
             DB::commit();
