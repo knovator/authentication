@@ -44,6 +44,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Prettus\Repository\Exceptions\RepositoryException;
 use Str;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * Class SalesController
@@ -97,7 +98,6 @@ class SalesController extends Controller
         $this->deliveryRepository = $deliveryRepository;
     }
 
-
     /**
      * @param CreateRequest $request
      * @return mixed
@@ -107,6 +107,8 @@ class SalesController extends Controller
         $input = $request->all();
         try {
             DB::beginTransaction();
+            $this->uniqueCustomerPoNumber($request);
+            dd('here');
             $input['order_no'] = $this->generateUniqueId(GenerateNumber::SALES);
             $input['status_id'] = $this->getMasterByCode(MasterConstant::SO_PENDING);
             $salesOrder = $this->salesOrderRepository->create($input);
@@ -122,6 +124,25 @@ class SalesController extends Controller
 
             return $this->sendResponse(null, __('messages.something_wrong'),
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @param         $ignoreId
+     * @throws RepositoryException
+     */
+    private function uniqueCustomerPoNumber(Request $request, $ignoreId = false) {
+        if ($request->has('customer_po_number')) {
+            $oldOrder = $this->salesOrderRepository->makeModel()->where('customer_po_number',
+                $request->get('customer_po_number'));
+            /** @var Builder $oldOrder */
+            if ($ignoreId) {
+                $oldOrder = $oldOrder->whereKeyNot($ignoreId);
+            }
+            if ($oldOrder = $oldOrder->first()) {
+                throw new UnprocessableEntityHttpException('Customer po number is already exist in order no ' . $oldOrder->order_no);
+            }
         }
     }
 
@@ -280,6 +301,7 @@ class SalesController extends Controller
         $input = $request->all();
         try {
             DB::beginTransaction();
+            $this->uniqueCustomerPoNumber($request, $salesOrder->id);
             $salesOrder->update($input);
             $this->createOrUpdateSalesDetails($salesOrder->refresh(), $input, true);
             DB::commit();
