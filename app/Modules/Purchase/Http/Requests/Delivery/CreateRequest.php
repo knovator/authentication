@@ -9,7 +9,7 @@ use Knovators\Support\Traits\APIResponse;
  * Class CreateRequest
  * @package App\Modules\Purchase\Http\Requests
  */
-class   CreateRequest extends FormRequest
+class CreateRequest extends FormRequest
 {
 
     use APIResponse;

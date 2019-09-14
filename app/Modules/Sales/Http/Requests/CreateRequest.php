@@ -60,8 +60,13 @@ class CreateRequest extends FormRequest
     public function messages() {
 
         return [
-            'order_recipes.required'    => 'At least one recipe must be required',
-            'thread_color_ids.required' => 'Please fill the fiddle details.',
+            'design_id.required'                => 'Design must be required',
+            'customer_id.required'              => 'Customer must be required',
+            'design_beam_id.required'           => 'Recipe beam must be required',
+            'manufacturing_company_id.required' => 'Manufacturing company must be required',
+            'order_recipes.required'            => 'At least one recipe must be required',
+            'order_recipes.*.pcs.required'      => 'Pcs must be required',
+            'order_recipes.*.meters.required'   => 'Meters must be required',
         ];
 
     }
