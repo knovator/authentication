@@ -47,11 +47,10 @@ class CreateRequest extends FormRequest
     public function messages() {
         return [
             'threads.required'                   => 'Please select at least one thread.',
-            'threads.*.thread_color_id.required' => 'Please fill all the selected Threads and Quantity.',
-            'threads.*.kg_qty.required'          => 'Please fill all the selected Threads and Quantity.',
+            'threads.*.thread_color_id.required' => 'Please fill all selected threads quantity.',
+            'threads.*.kg_qty.required'          => 'Please fill all selected threads quantity.',
             'threads.*.kg_qty.numeric'           => 'Quantity must be numeric value.',
         ];
-
     }
 
 }

@@ -97,8 +97,11 @@ class StatusRequest extends FormRequest
     public function messages() {
 
         return [
-            'code.not_in'           => 'This Order is delivered or canceled,you can not change.',
-            'sales_order_id.exists' => 'Please select valid status.'
+            'delivery_date.after_or_equal'      => 'Delivery date must be an after or equal to order date',
+            'customer_id.required'              => 'Customer must be required',
+            'manufacturing_company_id.required' => 'Manufacturing company must be required',
+            'code.not_in'                       => 'This Order is delivered or canceled,you can not change.',
+            'sales_order_id.exists'             => 'Please select valid status.'
         ];
     }
 
