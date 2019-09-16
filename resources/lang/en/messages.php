@@ -26,7 +26,7 @@ return [
 
     'order_has_deliveries_not_delete'   => 'This Order has deliveries, so you can not delete.',
     'order_has_deliveries_not_cancel'   => 'This Order has deliveries, so you can not cancel this order.',
-    'purchase_deliveries_must_complete' => 'To complete this order, deliveries must be completed.',
+    'purchase_deliveries_must_complete' => 'To complete this order,make sure all threads must be delivered.',
 
 
     // Sales order Messages
