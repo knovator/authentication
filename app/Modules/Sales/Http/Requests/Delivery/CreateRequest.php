@@ -35,8 +35,8 @@ class CreateRequest extends FormRequest
             'orders'                         => 'required|array',
             'orders.*.sales_order_recipe_id' => 'required|integer|exists:sales_orders_recipes,id',
             'orders.*.machine_id'            => 'required|integer',
-            'orders.*.meters'                => 'required|integer',
-            'orders.*.pcs'                   => 'required|integer',
+            'orders.*.meters'                => 'required|integer|min:1',
+            'orders.*.pcs'                   => 'required|integer|min:1',
             'orders.*.total_meters'          => 'required|integer',
         ];
     }
@@ -50,7 +50,13 @@ class CreateRequest extends FormRequest
     public function messages() {
 
         return [
-            'delivery_date.after_or_equal' => 'Delivery date must be an after or equal to order date'
+            'delivery_date.after_or_equal' => 'Delivery date must be an after or equal to order date.',
+            'orders.required'              => 'At least one recipe must be required.',
+            'orders.*.machine_id'          => 'Machine must be required.',
+            'orders.*.meters'              => 'Meters must be required.',
+            'orders.*.meters.min'          => "Meters can't be zero.",
+            'orders.*.pcs.min'             => 'Pcs must be greater than or equal to 1.',
+            'orders.*.pcs'                 => 'Pcs must be required.',
         ];
 
     }
