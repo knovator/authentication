@@ -66,8 +66,10 @@ class Formula
      * @return string
      */
     private function convertRoundValue($value) {
-        return (float) number_format($value,
-            2, '.', ',');
+//        return (float) number_format($value,
+//            2, '.', ',');
+
+        return (float) $value;
     }
 
 
