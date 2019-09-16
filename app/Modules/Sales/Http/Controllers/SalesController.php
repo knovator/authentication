@@ -135,7 +135,7 @@ class SalesController extends Controller
      * @throws RepositoryException
      */
     private function uniqueCustomerPoNumber(Request $request, $ignoreId = false) {
-        if ($request->has('customer_po_number')) {
+        if ($request->has('customer_po_number') && !empty($request->get('customer_po_number'))) {
             $oldOrder = $this->salesOrderRepository->makeModel()->where('customer_po_number',
                 $request->get('customer_po_number'));
             /** @var Builder $oldOrder */
