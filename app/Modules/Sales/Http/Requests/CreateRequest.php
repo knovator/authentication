@@ -40,8 +40,8 @@ class CreateRequest extends FormRequest
             'manufacturing_company_id'                           => 'required',
             'order_recipes'                                      => 'required|array',
             'order_recipes.*.recipe_id'                          => 'required|integer',
-            'order_recipes.*.pcs'                                => 'required|integer',
-            'order_recipes.*.meters'                             => 'required|integer',
+            'order_recipes.*.pcs'                                => 'required|integer|gte:1',
+            'order_recipes.*.meters'                             => 'required|integer|gte:1',
             'order_recipes.*.total_meters'                       => 'required|integer',
             'order_recipes.*.quantity_details'                   => 'required|array',
             'order_recipes.*.quantity_details.*.thread_color_id' => 'required|integer',
@@ -67,6 +67,8 @@ class CreateRequest extends FormRequest
             'order_recipes.required'            => 'At least one recipe must be required',
             'order_recipes.*.pcs.required'      => 'Pcs must be required',
             'order_recipes.*.meters.required'   => 'Meters must be required',
+            'order_recipes.*.pcs.gte'           => 'Pcs must be greater than or equal to 1.',
+            'order_recipes.*.meters.gte'        => "Meters must be greater than or equal to 1.",
         ];
 
     }
