@@ -66,6 +66,14 @@ class StockController extends Controller
             $statuses[Master::SO_DELIVERED]
         ], 'id');
 
+        $usedCount['remaining_count'] = array_column([
+            $statuses[Master::PO_DELIVERED],
+            $statuses[Master::SO_MANUFACTURING],
+            $statuses[Master::SO_DELIVERED],
+            $statuses[Master::PO_PENDING],
+            $statuses[Master::SO_PENDING],
+        ], 'id');
+
         $stocks = $this->stockRepository->getStockOverview($usedCount);
 
         return $this->sendResponse($stocks,
