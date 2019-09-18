@@ -70,12 +70,13 @@ class UpdateRequest extends FormRequest
     public function messages() {
 
         return [
+            'fiddles.required'                   => 'Total feeders are required.',
+            'fiddle_picks.required'              => 'Feeder picks are required.',
+            'fiddle_picks.*.pick.required'       => 'Feeder picks are required.',
             'fiddle_picks.size'                  => 'Please fill all the selected feeders.',
-            'fiddle_picks.*.pick.required'       => 'Please fill all the selected feeders.',
             'design_beams.required'              => 'At least one beam must be required.',
             'design_beams.*.recipes_id.required' => 'At least one recipe must be required for beam.',
         ];
     }
-
 
 }
