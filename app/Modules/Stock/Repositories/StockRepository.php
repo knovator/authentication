@@ -73,7 +73,7 @@ class StockRepository extends BaseRepository
      */
     private function setStockCountColumn($stockCountStatus, $columns) {
         foreach ($stockCountStatus as $key => $status) {
-            if ($key == 'available_count') {
+            if ($key == 'available_count' || $key == 'remaining_count') {
                 $condition = '';
                 $last = end($stockCountStatus[$key]);
                 foreach ($stockCountStatus[$key] as $availableId) {
@@ -102,7 +102,7 @@ class StockRepository extends BaseRepository
         $stocks = $this->model->selectRaw($columns)->with([
             'product.thread:id,name,denier',
             'product.color:id,name,code'
-        ])->groupBy('product_id', 'product_type')->orderBy('available_count');
+        ])->groupBy('product_id', 'product_type')->orderBy('remaining_count');
 
         return datatables()->of($stocks)->make(true);
     }
