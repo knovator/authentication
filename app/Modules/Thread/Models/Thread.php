@@ -4,6 +4,7 @@ namespace App\Modules\Thread\Models;
 
 
 use App\Modules\Design\Models\DesignBeam;
+use App\Modules\Purchase\Models\PurchaseOrderThread;
 use App\Modules\Recipe\Models\RecipeFiddle;
 use App\Modules\Wastage\Models\WastageOrder;
 use App\Modules\Yarn\Models\YarnOrderThread;
@@ -97,6 +98,15 @@ class Thread extends Model
      */
     public function yarnPurchases() {
         return $this->hasManyThrough(YarnOrderThread::class, ThreadColor::class, 'thread_id',
+            'thread_color_id', 'id', 'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function purchaseOrders() {
+        return $this->hasManyThrough(PurchaseOrderThread::class, ThreadColor::class, 'thread_id',
             'thread_color_id', 'id', 'id');
     }
 
