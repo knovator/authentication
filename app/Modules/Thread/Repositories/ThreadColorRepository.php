@@ -109,16 +109,4 @@ class ThreadColorRepository extends BaseRepository
         ];
     }
 
-    /**
-     * @param $threadColorId
-     * @param $poCancel
-     * @return mixed
-     */
-    public function stockCount($threadColorId) {
-
-        $threadColors = $this->model->with($this->commonRelations())
-                                    ->find($threadColorId);
-
-        return $threadColors;
-    }
 }
