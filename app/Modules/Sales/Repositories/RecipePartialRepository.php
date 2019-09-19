@@ -60,4 +60,13 @@ class RecipePartialRepository extends BaseRepository
     }
 
 
+    /**
+     * @param $deliveryId
+     * @return
+     */
+    public function index($deliveryId) {
+        return $this->model->where('delivery_id', $deliveryId)->with(['machine', 'assignedMachine'])->get();
+    }
+
+
 }

@@ -3,6 +3,7 @@
 namespace App\Modules\Machine\Models;
 
 
+use App\Modules\Sales\Models\PartialMachine;
 use App\Modules\Sales\Models\RecipePartialOrder;
 use App\Modules\Thread\Models\ThreadColor;
 use Illuminate\Database\Eloquent\Model;
@@ -50,5 +51,13 @@ class Machine extends Model
      */
     public function soPartialOrders() {
         return $this->hasMany(RecipePartialOrder::class, 'machine_id', 'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function orderCopiedMachines() {
+        return $this->hasOne(PartialMachine::class, 'machine_id', 'id');
     }
 }
