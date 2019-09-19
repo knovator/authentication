@@ -19,5 +19,6 @@ class DatabaseSeeder extends Seeder
         $this->call(UniqueIdSeeder::class);
 //        $this->call(StateSeeder::class);
 //        $this->call(ManufacturingCompanySeeder::class);
+        $this->call(MachineChangeSeeder::class);
     }
 }

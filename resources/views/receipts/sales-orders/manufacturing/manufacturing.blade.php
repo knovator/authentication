@@ -92,7 +92,8 @@
               <span
                   class="color-preview -block -no-color"
                   style="background-color: aquamarine"
-              >({{$fiddle->thread->denier}})</span>{{$fiddle->thread->name}} <br>({{$fiddle->color->name}})</td>
+              >({{$fiddle->thread->denier}})</span>{{$fiddle->thread->name}} <br>({{$fiddle->color->name}})
+                            </td>
                         @endforeach
 
                         <td class="total-mtr text-center">{{ ($machine->panno !== 1) ? ($soPartialOrder->total_meters / $machine->panno) : $soPartialOrder->total_meters}}</td>
