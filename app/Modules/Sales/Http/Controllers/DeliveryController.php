@@ -583,6 +583,7 @@ class DeliveryController extends Controller
                 }
             }
             $this->storeMachineDetails($delivery);
+
             return $this->updateStatus($delivery, MasterConstant::SO_MANUFACTURING, $input);
         } catch (Exception $exception) {
             Log::error($exception);
@@ -609,7 +610,8 @@ class DeliveryController extends Controller
                 'machine_id' => $partialOrder->machine_id,
             ];
         }
-        $delivery->salesOrder->assignMachines->createMany($machines);
+        /** @var SalesOrder $delivery ->salesOrder */
+        $delivery->salesOrder->assignMachines()->createMany($machines);
     }
 
 
