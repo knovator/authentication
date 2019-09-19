@@ -443,8 +443,6 @@ class DeliveryController extends Controller
 
         /** @var ImageWrapper $pdf */
         return $pdf->download($delivery->delivery_no . '-accounting' . ".pdf");
-//        return view('receipts.sales-orders.accounting.accounting',
-//            compact('salesOrder', 'delivery'));
     }
 
     /**
@@ -597,10 +595,11 @@ class DeliveryController extends Controller
         foreach ($delivery->partialOrders as $partialOrder) {
             /** @var RecipePartialOrder $partialOrder */
             $machines[] = [
-                'name'       => $partialOrder->machine->name,
-                'reed'       => $partialOrder->machine->reed,
-                'panno'      => $partialOrder->machine->panno,
-                'machine_id' => $partialOrder->machine_id,
+                'name'             => $partialOrder->machine->name,
+                'reed'             => $partialOrder->machine->reed,
+                'panno'            => $partialOrder->machine->panno,
+                'machine_id'       => $partialOrder->machine_id,
+                'partial_order_id' => $partialOrder->id,
             ];
         }
         /** @var SalesOrder $delivery ->salesOrder */
