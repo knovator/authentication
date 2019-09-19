@@ -108,4 +108,20 @@ class StockRepository extends BaseRepository
     }
 
 
+    /**
+     * @param $threadColorId
+     * @param $usedCount
+     * @return mixed
+     * @throws Exception
+     */
+    public function stockCount($threadColorId, $usedCount) {
+        $columns = $this->setStockCountColumn($usedCount, 'product_id,product_type');
+
+        return $this->model->selectRaw($columns)->with([
+            'product.thread:id,name,denier',
+            'product.color:id,name,code'
+        ])->where('product_id', $threadColorId)->first();
+    }
+
+
 }

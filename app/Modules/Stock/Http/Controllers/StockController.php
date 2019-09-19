@@ -51,12 +51,35 @@ class StockController extends Controller
      * @throws Exception
      */
     public function index(Request $request) {
+        $filter = $this->statusFilters();
+        $usedCount = $filter['userCount'];
+        $usedCount['remaining_count'] = array_column([
+            $filter['statuses'][Master::PO_DELIVERED],
+            $filter['statuses'][Master::SO_MANUFACTURING],
+            $filter['statuses'][Master::SO_DELIVERED],
+            $filter['statuses'][Master::PO_PENDING],
+            $filter['statuses'][Master::SO_PENDING],
+        ], 'id');
+
+        $stocks = $this->stockRepository->getStockOverview($usedCount);
+
+        return $this->sendResponse($stocks,
+            __('messages.retrieved', ['module' => 'Stocks']),
+            HTTPCode::OK);
+    }
+
+    /**
+     * @return array
+     */
+    private function statusFilters() {
         $statuses = $this->getMasterByCodes([
             Master::PO_PENDING,
             Master::SO_PENDING,
             Master::SO_MANUFACTURING,
             Master::SO_DELIVERED,
             Master::PO_DELIVERED,
+            Master::WASTAGE_PENDING,
+            Master::WASTAGE_DELIVERED,
         ]);
         $usedCount = Arr::except($statuses, [Master::PO_DELIVERED]);
 
@@ -66,19 +89,7 @@ class StockController extends Controller
             $statuses[Master::SO_DELIVERED]
         ], 'id');
 
-        $usedCount['remaining_count'] = array_column([
-            $statuses[Master::PO_DELIVERED],
-            $statuses[Master::SO_MANUFACTURING],
-            $statuses[Master::SO_DELIVERED],
-            $statuses[Master::PO_PENDING],
-            $statuses[Master::SO_PENDING],
-        ], 'id');
-
-        $stocks = $this->stockRepository->getStockOverview($usedCount);
-
-        return $this->sendResponse($stocks,
-            __('messages.retrieved', ['module' => 'Stocks']),
-            HTTPCode::OK);
+        return ['statuses' => $statuses, 'userCount' => $usedCount];
     }
 
     /**
@@ -96,9 +107,10 @@ class StockController extends Controller
      */
     public function threadCount(ThreadColor $threadColor) {
         try {
-            $stocks = $this->threadColorRepository->stockCount($threadColor->id);
+            $stock = $this->stockRepository->stockCount($threadColor->id,
+                $this->statusFilters()['userCount']);
 
-            return $this->sendResponse($stocks,
+            return $this->sendResponse($stock,
                 __('messages.retrieved', ['module' => 'Stocks']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
