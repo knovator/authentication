@@ -54,16 +54,15 @@ class DeliveryRepository extends BaseRepository
         $this->applyCriteria();
         $deliveries = datatables()->of($this->model->where('sales_order_id', $salesOrderId)
                                                    ->with($this->commonRelations()))
-                                  ->editColumn('partial_orders', function ($partialOrders) {
-
+                                  ->editColumn('partial_orders', function ($delivery) {
                                       /** @var Collection $partialOrders */
-                                      $partialOrders->map(function ($partialOrder) {
+                                      $delivery->partialOrders->map(function ($partialOrder) {
                                           if (!is_null($partialOrder->assignedMachine)) {
                                               $partialOrder->machine = $partialOrder->assignedMachine;
                                               unset($partialOrder->assignedMachine);
                                           }
                                       });
-
+                                      return $delivery->partialOrders->toArray();
                                   })->make(true);
         $this->resetModel();
 
