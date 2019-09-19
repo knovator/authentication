@@ -44,8 +44,8 @@ class MachineRepository extends BaseRepository
         $this->applyCriteria();
         $machines = datatables()->of($this->model->select('machines.*')->with([
             'threadColor.thread',
-            'threadColor.color:id,name,code'
-        ]))->make(true);
+            'threadColor.color:id,name,code',
+        ]))->withCount('soPartialOrders as associated_count')->make(true);
         $this->resetModel();
 
         return $machines;
@@ -65,7 +65,7 @@ class MachineRepository extends BaseRepository
             /** @var Builder $machines */
             $machines = $machines->where([
 //                'thread_color_id' => $input['sales_order']->designBeam->thread_color_id,
-                'reed'            => $input['sales_order']->design->detail->reed
+'reed' => $input['sales_order']->design->detail->reed
             ]);
         }
         $machines = $machines->get();
