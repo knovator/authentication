@@ -59,7 +59,6 @@ class DeliveryRepository extends BaseRepository
                                       /** @var Collection $partialOrders */
                                       $delivery->partialOrders->map(function ($partialOrder) {
 
-                                          dd($partialOrder->assignedMachine);
                                           if (!is_null($partialOrder->assignedMachine)) {
                                               $partialOrder->machine = $partialOrder->assignedMachine;
                                           }
