@@ -401,7 +401,7 @@ class DeliveryController extends Controller
      * @return Response
      */
     public function exportManufacturing(SalesOrder $salesOrder, Delivery $delivery) {
-        $salesOrder->load(['design.detail', 'design.fiddlePicks','customer']);
+        $salesOrder->load(['design.detail', 'design.fiddlePicks', 'customer']);
         $machineRepo = new MachineRepository(new Container());
         $machines = $machineRepo->manufacturingReceipts($delivery->id);
 
@@ -582,7 +582,7 @@ class DeliveryController extends Controller
                         HTTPCode::UNPROCESSABLE_ENTITY);
                 }
             }
-
+            $this->storeMachineDetails($delivery);
             return $this->updateStatus($delivery, MasterConstant::SO_MANUFACTURING, $input);
         } catch (Exception $exception) {
             Log::error($exception);
@@ -591,6 +591,25 @@ class DeliveryController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
 
+    }
+
+
+    /**
+     * @param $delivery
+     */
+    private function storeMachineDetails(Delivery $delivery) {
+        $delivery->load(['partialOrders.machine:id,name,reed,panno', 'salesOrder:id']);
+        $machines = [];
+        foreach ($delivery->partialOrders as $partialOrder) {
+            /** @var RecipePartialOrder $partialOrder */
+            $machines[] = [
+                'name'       => $partialOrder->machine->name,
+                'reed'       => $partialOrder->machine->reed,
+                'panno'      => $partialOrder->machine->panno,
+                'machine_id' => $partialOrder->machine_id,
+            ];
+        }
+        $delivery->salesOrder->assignMachines->createMany($machines);
     }
 
 

@@ -2,6 +2,7 @@
 
 namespace App\Modules\Sales\Models;
 
+use App\Constants\Master as MasterConstant;
 use App\Exceptions\UnloadedRelationException;
 use App\Models\Master;
 use App\Modules\Customer\Models\Customer;
@@ -12,7 +13,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Knovators\Support\Traits\HasModelEvent;
-use App\Constants\Master as MasterConstant;
 
 /**
  * Class SalesOrder
@@ -55,6 +55,8 @@ class SalesOrder extends Model
                 $orderRecipe->partialOrders()->delete();
             });
             $salesOrder->orderRecipes()->delete();
+            $salesOrder->assignMachines()->delete();
+            $salesOrder->deliveries()->delete();
             $salesOrder->orderStocks()->delete();
         });
         self::deletedEvent();
@@ -72,11 +74,30 @@ class SalesOrder extends Model
     /**
      * @return mixed
      */
+    public function assignMachines() {
+        return $this->hasMany(PartialMachine::class, 'sales_order_id', 'id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function deliveries() {
+        return $this->hasMany(Delivery::class, 'sales_order_id', 'id');
+    }
+
+    /**
+     * @return mixed
+     */
     public function orderStocks() {
         return $this->morphMany(Stock::class, 'order', 'order_type', 'order_id', 'id');
     }
 
-
+    /**
+     * @return mixed
+     */
+    public function quantity() {
+        return $this->recipeMeters();
+    }
 
     /**
      * @return mixed
@@ -85,14 +106,6 @@ class SalesOrder extends Model
         return $this->hasOne(SalesOrderRecipe::class, 'sales_order_id',
             'id')->selectRaw('SUM(total_meters) as total,sales_order_id')
                     ->groupBy('sales_order_id');
-    }
-
-
-    /**
-     * @return mixed
-     */
-    public function quantity() {
-        return $this->recipeMeters();
     }
 
     /**
@@ -117,13 +130,6 @@ class SalesOrder extends Model
      */
     public function deliveredTotalMeters() {
         return $this->totalMeters();
-    }
-
-    /**
-     * @return mixed
-     */
-    public function deliveries() {
-        return $this->hasMany(Delivery::class, 'sales_order_id', 'id');
     }
 
     /**
