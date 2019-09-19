@@ -20,12 +20,12 @@ class Delivery extends JsonResource
      */
     public function toArray($request) {
 
-        $this->partialOrders->map(function ($partialOrder) {
-            if (!is_null($partialOrder->assignedMachine)) {
-                $partialOrder->machine = $partialOrder->assignedMachine;
-                unset($partialOrder->assignedMachine);
-            }
-        });
+//        $this->partialOrders->map(function ($partialOrder) {
+//            if (!is_null($partialOrder->assignedMachine)) {
+//                $partialOrder->machine = $partialOrder->assignedMachine;
+//                unset($partialOrder->assignedMachine);
+//            }
+//        });
 
         return [
             'id'             => $this->id,
