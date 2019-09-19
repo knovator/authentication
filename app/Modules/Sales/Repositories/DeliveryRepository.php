@@ -69,7 +69,8 @@ class DeliveryRepository extends BaseRepository
             'status:id,name,code',
             'partialOrders' => function ($partialOrders) {
                 $partialOrders->with([
-                    'machine',
+                    'machine:id,name,panno,reed',
+                    'assignedMachine:id,name,panno,reed',
                     'orderRecipe.recipe.fiddles.thread:id,name,denier',
                     'orderRecipe.recipe.fiddles.color:id,name,code'
                 ]);

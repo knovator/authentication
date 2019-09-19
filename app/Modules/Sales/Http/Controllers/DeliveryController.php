@@ -11,11 +11,11 @@ use App\Modules\Machine\Repositories\MachineRepository;
 use App\Modules\Sales\Http\Requests\Delivery\CreateRequest;
 use App\Modules\Sales\Http\Requests\Delivery\StatusRequest;
 use App\Modules\Sales\Http\Requests\Delivery\UpdateRequest;
+use App\Modules\Sales\Http\Resources\Delivery as DeliveryResource;
 use App\Modules\Sales\Models\Delivery;
 use App\Modules\Sales\Models\RecipePartialOrder;
 use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Sales\Repositories\DeliveryRepository;
-use App\Modules\Sales\Repositories\RecipePartialRepository;
 use App\Modules\Sales\Repositories\SalesRecipeRepository;
 use App\Modules\Stock\Repositories\StockRepository;
 use App\Modules\Thread\Constants\ThreadType;
@@ -365,7 +365,7 @@ class DeliveryController extends Controller
         try {
             $deliveries = $this->deliveryRepository->getDeliveryList($salesOrder->id);
 
-            return $this->sendResponse($deliveries,
+            return $this->sendResponse(DeliveryResource::collection($deliveries),
                 __('messages.retrieved', ['module' => 'Delivery']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
