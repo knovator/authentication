@@ -55,6 +55,7 @@ class DeliveryRepository extends BaseRepository
         ($this->commonRelations()))->make(true);
         $this->resetModel();
 
+        dd($deliveries);
         return $deliveries;
 
 
