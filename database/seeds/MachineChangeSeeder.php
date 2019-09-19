@@ -1,9 +1,11 @@
 <?php
 
-use App\Modules\Machine\Repositories\MachineRepository;
-use App\Modules\Purchase\Models\PurchaseOrder;
+use App\Constants\Master;
+use App\Modules\Sales\Models\RecipePartialOrder;
 use App\Modules\Sales\Repositories\RecipePartialRepository;
 use App\Repositories\MasterRepository;
+use App\Support\FetchMaster;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Seeder;
 use Prettus\Repository\Exceptions\RepositoryException;
 
@@ -13,9 +15,9 @@ use Prettus\Repository\Exceptions\RepositoryException;
 class MachineChangeSeeder extends Seeder
 {
 
-    protected $recipePartialRepository;
+    use FetchMaster;
 
-    protected $machineRepository;
+    protected $recipePartialRepository;
 
     protected $masterRepository;
 
@@ -23,16 +25,13 @@ class MachineChangeSeeder extends Seeder
     /**
      * PurchaseController constructor
      * @param RecipePartialRepository $recipePartialRepository
-     * @param MachineRepository       $machineRepository
      * @param MasterRepository        $masterRepository
      */
     public function __construct(
         RecipePartialRepository $recipePartialRepository,
-        MachineRepository $machineRepository,
         MasterRepository $masterRepository
     ) {
         $this->recipePartialRepository = $recipePartialRepository;
-        $this->machineRepository = $machineRepository;
         $this->masterRepository = $masterRepository;
     }
 
@@ -43,17 +42,28 @@ class MachineChangeSeeder extends Seeder
      * @throws RepositoryException
      */
     public function run() {
-        $partialOrders = $this->recipePartialRepository->makeModel()->doesntHave('');
-        foreach ($purchaseOrders as $purchaseOrder) {
-            /** @var PurchaseOrder $purchaseOrder */
-            $purchaseOrder->orderStocks()->delete();
-            $this->storeStockOrders($purchaseOrder);
+        $statusIds = $this->findMasterByCode([Master::SO_MANUFACTURING, Master::SO_DELIVERED]);
+        $partialOrders = $this->recipePartialRepository->makeModel()->newQuery()
+                                                       ->whereHas('delivery',
+                                                           function ($delivery) use ($statusIds) {
+                                                               /** @var Builder $delivery */
+                                                               $delivery->whereIn('status_id',
+                                                                   $statusIds);
+                                                           })->doesntHave('assignedMachine')
+                                                       ->with('machine')
+                                                       ->with('delivery')
+                                                       ->get();
+        foreach ($partialOrders as $partialOrder) {
+            /** @var RecipePartialOrder $partialOrder */
+            $partialOrder->assignedMachine()->create([
+                'name'           => $partialOrder->machine->name,
+                'reed'           => $partialOrder->machine->reed,
+                'panno'          => $partialOrder->machine->panno,
+                'machine_id'     => $partialOrder->machine_id,
+                'sales_order_id' => $partialOrder->delivery->sales_order_id
+            ]);
         }
-        $removedPurchases = $this->purchaseOrderRepository->makeModel()
-                                                          ->onlyTrashed()
-                                                          ->pluck('id')->toArray();
-        $this->stockRepository->makeModel()->whereIn('order_id', $removedPurchases)
-                              ->where('order_type', 'purchase')->delete();
+
 
     }
 
