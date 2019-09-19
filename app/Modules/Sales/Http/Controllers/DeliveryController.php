@@ -365,7 +365,7 @@ class DeliveryController extends Controller
         try {
             $deliveries = $this->deliveryRepository->getDeliveryList($salesOrder->id);
 
-            return $this->sendResponse(DeliveryResource::collection($deliveries),
+            return $this->sendResponse($deliveries,
                 __('messages.retrieved', ['module' => 'Delivery']),
                 HTTPCode::OK);
         } catch (Exception $exception) {

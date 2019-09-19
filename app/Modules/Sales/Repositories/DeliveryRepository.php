@@ -5,6 +5,7 @@ namespace App\Modules\Sales\Repositories;
 use App\Modules\Sales\Models\Delivery;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
 use Prettus\Repository\Exceptions\RepositoryException;
@@ -51,11 +52,21 @@ class DeliveryRepository extends BaseRepository
      */
     public function getDeliveryList($salesOrderId) {
         $this->applyCriteria();
-        $deliveries = datatables()->of($this->model->where('sales_order_id', $salesOrderId)->with
-        ($this->commonRelations()))->make(true);
+        $deliveries = datatables()->of($this->model->where('sales_order_id', $salesOrderId)
+                                                   ->with($this->commonRelations()))
+                                  ->editColumn('partial_orders', function ($partialOrders) {
+
+                                      /** @var Collection $partialOrders */
+                                      $partialOrders->map(function ($partialOrder) {
+                                          if (!is_null($partialOrder->assignedMachine)) {
+                                              $partialOrder->machine = $partialOrder->assignedMachine;
+                                              unset($partialOrder->assignedMachine);
+                                          }
+                                      });
+
+                                  })->make(true);
         $this->resetModel();
 
-        dd($deliveries);
         return $deliveries;
 
 
