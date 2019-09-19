@@ -13,14 +13,19 @@
 <body>
 
 @foreach($machines as $machine)
+
+    @php
+    $machineData  = $machine->orderCopiedMachines ?? $machine;
+    @endphp
+
     <div class="{{(!$loop->last) ? 'page':''}}">
         <main class="without-border">
             <div class="text-center">
                 Manufacturing Receipt
             </div>
-            <div class="receipt-heading text-center">{{$machine->name}}</div>
+            <div class="receipt-heading text-center">{{$machineData->name}}</div>
             <div class="text-center">
-                <small>Panno : {{$machine->panno}}</small>
+                <small>Panno : {{$machineData->panno}}</small>
             </div>
             <br/>
             <div class="details-box">
@@ -96,7 +101,7 @@
                             </td>
                         @endforeach
 
-                        <td class="total-mtr text-center">{{ ($machine->panno !== 1) ? ($soPartialOrder->total_meters / $machine->panno) : $soPartialOrder->total_meters}}</td>
+                        <td class="total-mtr text-center">{{ ($machineData->panno !== 1) ? ($soPartialOrder->total_meters / $machineData->panno) : $soPartialOrder->total_meters}}</td>
                     </tr>
                 @endforeach
 

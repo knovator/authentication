@@ -15,6 +15,7 @@ use App\Modules\Sales\Models\Delivery;
 use App\Modules\Sales\Models\RecipePartialOrder;
 use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Sales\Repositories\DeliveryRepository;
+use App\Modules\Sales\Repositories\RecipePartialRepository;
 use App\Modules\Sales\Repositories\SalesRecipeRepository;
 use App\Modules\Stock\Repositories\StockRepository;
 use App\Modules\Thread\Constants\ThreadType;
@@ -404,19 +405,11 @@ class DeliveryController extends Controller
         $salesOrder->load(['design.detail', 'design.fiddlePicks', 'customer']);
         $machineRepo = new MachineRepository(new Container());
         $machines = $machineRepo->manufacturingReceipts($delivery->id);
-
-        if ($machines->isEmpty()) {
-            return $this->sendResponse(null, __('messages.partial_order_not_present'),
-                HTTPCode::UNPROCESSABLE_ENTITY);
-        }
-
         $pdf = SnappyPdf::loadView('receipts.sales-orders.manufacturing.manufacturing',
             compact('machines', 'salesOrder', 'delivery'));
 
         /** @var ImageWrapper $pdf */
         return $pdf->download($delivery->delivery_no . '-manufacturing' . ".pdf");
-        /*return view('receipts.sales-orders.manufacturing.manufacturing',
-            compact('machines', 'salesOrder', 'delivery'));*/
     }
 
     /**

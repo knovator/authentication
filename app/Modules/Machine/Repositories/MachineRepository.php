@@ -3,6 +3,7 @@
 namespace App\Modules\Machine\Repositories;
 
 use App\Modules\Machine\Models\Machine;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -37,7 +38,7 @@ class MachineRepository extends BaseRepository
     /**
      * @return mixed
      * @throws RepositoryException
-     * @throws \Exception
+     * @throws Exception
      */
     public function getMachineList() {
         $this->applyCriteria();
@@ -76,7 +77,7 @@ class MachineRepository extends BaseRepository
 
     /**
      * @param $deliveryId
-     * @return Builder[]|Collection|Model[]
+     * @return
      */
     public function manufacturingReceipts($deliveryId) {
         $machines = $this->model->with([
@@ -93,15 +94,29 @@ class MachineRepository extends BaseRepository
                 },
             'threadColor.thread',
             'threadColor.color'
-        ])->whereHas(
-            'soPartialOrders',
+        ])->whereHas('soPartialOrders',
             function ($soPartialOrders) use ($deliveryId) {
                 /** @var Builder $soPartialOrders */
                 $soPartialOrders->where('delivery_id', $deliveryId);
             }
-        );
+        )->get();
 
-        return $machines->get();
+
+        $partialIds = [];
+
+        $machines->each(function ($machine) use (&$partialIds) {
+            $partialIds = array_merge($partialIds,
+                $machine->soPartialOrders->pluck('id')->toArray());
+        });
+        $machines->load([
+            'orderCopiedMachines' => function ($orderCopiedMachines) use ($partialIds) {
+                /** @var Builder $orderCopiedMachines */
+                $orderCopiedMachines->whereIn('partial_order_id', $partialIds);
+            }
+        ]);
+
+
+        return $machines;
 
 
     }
