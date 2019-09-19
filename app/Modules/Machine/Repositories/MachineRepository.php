@@ -64,7 +64,7 @@ class MachineRepository extends BaseRepository
         if (isset($input['sales_order'])) {
             /** @var Builder $machines */
             $machines = $machines->where([
-                'thread_color_id' => $input['sales_order']->designBeam->thread_color_id,
+//                'thread_color_id' => $input['sales_order']->designBeam->thread_color_id,
                 'reed'            => $input['sales_order']->design->detail->reed
             ]);
         }
