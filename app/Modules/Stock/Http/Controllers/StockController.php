@@ -57,6 +57,7 @@ class StockController extends Controller
             $filter['statuses'][Master::PO_DELIVERED],
             $filter['statuses'][Master::SO_MANUFACTURING],
             $filter['statuses'][Master::SO_DELIVERED],
+            $filter['statuses'][Master::WASTAGE_DELIVERED],
             $filter['statuses'][Master::PO_PENDING],
             $filter['statuses'][Master::SO_PENDING],
         ], 'id');
@@ -86,7 +87,8 @@ class StockController extends Controller
         $usedCount['available_count'] = array_column([
             $statuses[Master::PO_DELIVERED],
             $statuses[Master::SO_MANUFACTURING],
-            $statuses[Master::SO_DELIVERED]
+            $statuses[Master::SO_DELIVERED],
+            $statuses[Master::WASTAGE_DELIVERED]
         ], 'id');
 
         return ['statuses' => $statuses, 'userCount' => $usedCount];
