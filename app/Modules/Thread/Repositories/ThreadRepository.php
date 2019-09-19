@@ -43,10 +43,12 @@ class ThreadRepository extends BaseRepository
             'fiddles',
             'beams',
             'wastage',
-            'yarnPurchases as yarns_count'
+            'yarnPurchases as yarns_count',
+            'purchaseOrders as purchase_count',
         ]))
                                ->addColumn('beams_count', function (Thread $thread) {
-                                   if ($thread->beams_count || $thread->wastage_count || $thread->yarns_count) {
+                                   if ($thread->beams_count || $thread->wastage_count ||
+                                       $thread->yarns_count || $thread->purchase_count) {
                                        return 1;
                                    }
 

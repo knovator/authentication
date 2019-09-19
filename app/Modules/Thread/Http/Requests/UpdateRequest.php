@@ -49,8 +49,8 @@ class UpdateRequest extends FormRequest
      */
     public function messages() {
         return [
-
-
+            'type_id.required'   => 'Type must be required',
+            'color_ids.required' => 'Colors must be required',
         ];
     }
 }

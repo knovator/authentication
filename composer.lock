@@ -1493,11 +1493,11 @@
         },
         {
             "name": "knovators/support",
-            "version": "v1.1",
+            "version": "v1.2",
             "source": {
                 "type": "git",
                 "url": "git@git.knovator.in:knovators/support.git",
-                "reference": "b96a78e467771c6eeca85a435b505b8679840531"
+                "reference": "6e4b872986ef18ad7f7d9fd6fb3f6c3d83cf96af"
             },
             "type": "library",
             "autoload": {
@@ -1514,7 +1514,7 @@
                 }
             },
             "description": "Support helpers",
-            "time": "2019-05-23T12:20:26+00:00"
+            "time": "2019-09-13T12:03:31+00:00"
         },
         {
             "name": "knplabs/knp-snappy",

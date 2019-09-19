@@ -32,7 +32,7 @@ class UpdateRequest extends FormRequest
         return [
             'total_fiddles'                                      => 'required|integer',
             'design_id'                                          => 'required|exists:designs,id,deleted_at,NULL',
-            'fiddle_picks'                                       => 'required|array',
+            'fiddle_picks'                                       => 'required|array|size:' . $this->total_fiddles,
             'fiddle_picks.*.pick'                                => 'required|integer',
             'fiddle_picks.*.fiddle_no'                           => 'required|integer',
             'beam_id'                                            => 'required|exists:threads_colors,id,deleted_at,NULL',
@@ -48,15 +48,24 @@ class UpdateRequest extends FormRequest
         ];
     }
 
-
     /**
      * Get custom messages for validator errors.
      *
      * @return array
      */
     public function messages() {
-        return [
 
+        return [
+            'fiddle_picks.required'                              => 'Feeders must be required',
+            'fiddle_picks.size'                                  => 'Please enter all feeders picks',
+            'fiddle_picks.*.pick'                                => 'Feeders pick must be required',
+            'design_id.required'                                 => 'Design must be required',
+            'beam_id.required'                                   => 'Recipe beam must be required',
+            'order_recipes.required'                             => 'At least one recipe must be required',
+            'order_recipes.*.name.required'                      => 'Recipe name must be required',
+            'order_recipes.*.total_fiddles.required'             => 'Recipe feeder must be required',
+            'order_recipes.*.thread_color_ids.required'          => 'Please fill all the selected feeders.',
+            'order_recipes.*.thread_color_ids.*.thread_color_id' => 'Please fill all the selected feeders.',
         ];
 
     }

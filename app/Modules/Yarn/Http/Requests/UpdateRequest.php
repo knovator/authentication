@@ -47,13 +47,14 @@ class UpdateRequest extends FormRequest
      */
     public function messages() {
         return [
-            'threads.required'                   => 'Please select at least one thread.',
-            'threads.*.thread_color_id.required' => 'Please fill all the selected Threads and Quantity.',
-            'threads.*.kg_qty.required'          => 'Please fill all the selected Threads and Quantity.',
-            'threads.*.kg_qty.numeric'           => 'Quantity must be numeric value.',
-            'threads.*.kg_qty.rate'              => 'Rate must be numeric value.',
+            'customer_id.required'              => 'Customer must be required',
+            'manufacturing_company_id.required' => 'Manufacturing company must be required',
+            'threads.required'                  => 'Please select at least one thread.',
+            'threads.*.kg_qty.required'         => 'Please fill all selected threads quantity.',
+            'threads.*.rate.required'           => 'Please fill all selected threads rate.',
+            'threads.*.kg_qty.numeric'          => 'Quantity must be numeric value.',
+            'threads.*.rate.numeric'            => 'Rate must be numeric value.',
         ];
-
     }
 
 
