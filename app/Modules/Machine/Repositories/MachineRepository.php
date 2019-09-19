@@ -45,7 +45,7 @@ class MachineRepository extends BaseRepository
         $machines = datatables()->of($this->model->select('machines.*')->with([
             'threadColor.thread',
             'threadColor.color:id,name,code',
-        ]))->withCount('soPartialOrders as associated_count')->make(true);
+        ])->withCount('soPartialOrders as associated_count'))->make(true);
         $this->resetModel();
 
         return $machines;
