@@ -55,11 +55,10 @@ class DeliveryRepository extends BaseRepository
         $deliveries = datatables()->of($this->model->where('sales_order_id', $salesOrderId)
                                                    ->with($this->commonRelations()))
                                   ->editColumn('partial_orders', function ($delivery) {
-
                                       /** @var Collection $partialOrders */
                                       $delivery->partialOrders->map(function ($partialOrder) {
-
                                           if (!is_null($partialOrder->assignedMachine)) {
+                                              unset($partialOrder->machine);
                                               $partialOrder->machine = $partialOrder->assignedMachine;
                                           }
                                           unset($partialOrder->assignedMachine);
@@ -84,7 +83,7 @@ class DeliveryRepository extends BaseRepository
             'partialOrders' => function ($partialOrders) {
                 $partialOrders->with([
                     'machine:id,name,panno,reed',
-                    'assignedMachine:id,name,panno,reed,partial_order_id',
+                    'assignedMachine',
                     'orderRecipe.recipe.fiddles.thread:id,name,denier',
                     'orderRecipe.recipe.fiddles.color:id,name,code'
                 ]);
