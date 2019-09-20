@@ -36,16 +36,25 @@ class MachineRepository extends BaseRepository
 
 
     /**
+     * @param $statusId
      * @return mixed
      * @throws RepositoryException
      * @throws Exception
      */
-    public function getMachineList() {
+    public function getMachineList($statusId) {
         $this->applyCriteria();
         $machines = datatables()->of($this->model->select('machines.*')->with([
             'threadColor.thread',
             'threadColor.color:id,name,code',
-        ])->withCount('soPartialOrders as associated_count'))->make(true);
+        ])->withCount([
+            'soPartialOrders as associated_count' => function ($soPartialOrders) use ($statusId) {
+                /** @var Builder $soPartialOrders */
+                $soPartialOrders->whereHas('delivery', function ($delivery) use ($statusId) {
+                    /** @var Builder $delivery */
+                    $delivery->where('status_id', '=', $statusId);
+                });
+            }
+        ]))->make(true);
         $this->resetModel();
 
         return $machines;
@@ -64,8 +73,8 @@ class MachineRepository extends BaseRepository
         if (isset($input['sales_order'])) {
             /** @var Builder $machines */
             $machines = $machines->where([
-//                'thread_color_id' => $input['sales_order']->designBeam->thread_color_id,
-'reed' => $input['sales_order']->design->detail->reed
+                'reed' => $input['sales_order']->design->detail->reed
+                //                'thread_color_id' => $input['sales_order']->designBeam->thread_color_id,
             ]);
         }
         $machines = $machines->get();
