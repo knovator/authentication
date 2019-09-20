@@ -106,4 +106,16 @@ class WastageOrderRepository extends BaseRepository
     }
 
 
+    /**
+     * @param WastageOrder $wastageOrder
+     * @return
+     */
+    public function usedStocks(WastageOrder $wastageOrder) {
+        return $wastageOrder->orderStocks()
+                            ->selectRaw('product_id,product_type,SUM(kg_qty) as used_stock')
+                            ->groupBy('product_id', 'product_type')->get()->keyBy('product_id')
+                            ->toArray();
+    }
+
+
 }
