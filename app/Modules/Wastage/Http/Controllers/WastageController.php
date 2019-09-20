@@ -447,7 +447,12 @@ class WastageController extends Controller
         try {
             $wastageOrder->update($input);
 
-            return $this->sendResponse($this->makeResource($wastageOrder->fresh()),
+            return $this->sendResponse($this->makeResource($wastageOrder->fresh([
+                'customer.state:id,name,code,gst_code',
+                'status:id,name,code',
+                'design:id,design_no,quality_name',
+                'manufacturingCompany:id,name',
+            ])),
                 __('messages.updated', ['module' => 'Status']),
                 HTTPCode::OK);
         } catch (Exception $exception) {

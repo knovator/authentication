@@ -7,7 +7,8 @@
 <body>
 <main>
     <div
-        class="receipt-heading text-center">TAX INVOICE{{(!is_null($wastageOrder->challan_no))? ' ('.$wastageOrder->challan_no.')':''}}</div>
+        class="receipt-heading text-center">TAX
+        INVOICE{{(!is_null($wastageOrder->challan_no))? ' ('.$wastageOrder->challan_no.')':''}}</div>
     <div class="text-center">
         <small>(Invoice For supply of goods u/s 31 of GST Act, 2017 read with Rule 6 of tax invoice rules 2017)
         </small>
@@ -22,10 +23,10 @@
 "
             >
                 <div class="preview-box">
-                    <img
-                        alt="design name"
-                        class="preview"
-                        src="{{$wastageOrder->design->mainImage->file->url}}"
+                    <img style="max-width: 250px;max-height: 250px"
+                         alt="design name"
+                         class="preview"
+                         src="{{$wastageOrder->design->mainImage->file->url}}"
                     />
                 </div>
             </td>

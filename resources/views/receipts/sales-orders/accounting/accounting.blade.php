@@ -17,7 +17,7 @@ fontSize: 100% / (totalFiddle * 7)  <= 14 && 100% / (totalFiddle * 7) >= 10
         Accounting Receipt
     </div>
     <div class="receipt-heading text-center">{{\Carbon\Carbon::parse($delivery->delivery_date)->format('d M Y')}}
-        {{ (!is_null($delivery->delivery_no)) ? '('.$delivery->bill_no.')':'' }}
+        {{ (!is_null($delivery->bill_no)) ? '('.$delivery->bill_no.')':'' }}
     </div>
     <br/>
     <table>
