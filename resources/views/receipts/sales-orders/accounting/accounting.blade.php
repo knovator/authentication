@@ -27,7 +27,7 @@ fontSize: 100% / (totalFiddle * 7)  <= 14 && 100% / (totalFiddle * 7) >= 10
     border-bottom: 0;
 ">
                 <div class="preview-box">
-                    <img alt="design name" class="preview"
+                    <img alt="design name" class="preview" style="max-width: 250px;max-height: 250px"
                          src="{{$salesOrder->design->mainImage->file->url}}"
                 </div>
             </td>
