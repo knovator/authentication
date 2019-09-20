@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Design\Repositories\DesignDetailRepository;
 use App\Modules\Recipe\Repositories\RecipeRepository;
 use App\Modules\Thread\Constants\ThreadType;
+use App\Modules\Thread\Repositories\ThreadColorRepository;
 use App\Modules\Wastage\Http\Exports\WastageOrder as ExportWastageOrder;
 use App\Modules\Wastage\Http\Requests\CreateRequest;
 use App\Modules\Wastage\Http\Requests\StatusRequest;
@@ -56,6 +57,8 @@ class WastageController extends Controller
 
     protected $wastageOrderRecipeRepo;
 
+    protected $threadColorRepository;
+
     /**
      * WastageController constructor
      * @param WastageOrderRepository       $wastageOrderRepository
@@ -63,19 +66,22 @@ class WastageController extends Controller
      * @param RecipeRepository             $recipeRepository
      * @param DesignDetailRepository       $designDetailRepository
      * @param WastageOrderRecipeRepository $wastageOrderRecipeRepo
+     * @param ThreadColorRepository        $threadColorRepository
      */
     public function __construct(
         WastageOrderRepository $wastageOrderRepository,
         MasterRepository $masterRepository,
         RecipeRepository $recipeRepository,
         DesignDetailRepository $designDetailRepository,
-        WastageOrderRecipeRepository $wastageOrderRecipeRepo
+        WastageOrderRecipeRepository $wastageOrderRecipeRepo,
+        ThreadColorRepository $threadColorRepository
     ) {
         $this->wastageOrderRepository = $wastageOrderRepository;
         $this->masterRepository = $masterRepository;
         $this->recipeRepository = $recipeRepository;
         $this->designDetailRepository = $designDetailRepository;
         $this->wastageOrderRecipeRepo = $wastageOrderRecipeRepo;
+        $this->threadColorRepository = $threadColorRepository;
     }
 
     /**
@@ -215,6 +221,14 @@ class WastageController extends Controller
     }
 
     /**
+     * @param $wastageOrder
+     * @return WastageOrderResource
+     */
+    private function makeResource($wastageOrder) {
+        return new WastageOrderResource($wastageOrder);
+    }
+
+    /**
      * @param WastageOrder $wastageOrder
      * @return Response
      */
@@ -265,14 +279,6 @@ class WastageController extends Controller
         return $this->sendResponse($this->makeResource($wastageOrder),
             __('messages.retrieved', ['module' => 'Wastage Order']),
             HTTPCode::OK);
-    }
-
-    /**
-     * @param $wastageOrder
-     * @return WastageOrderResource
-     */
-    private function makeResource($wastageOrder) {
-        return new WastageOrderResource($wastageOrder);
     }
 
     /**
@@ -441,7 +447,12 @@ class WastageController extends Controller
         try {
             $wastageOrder->update($input);
 
-            return $this->sendResponse($this->makeResource($wastageOrder->fresh()),
+            return $this->sendResponse($this->makeResource($wastageOrder->fresh([
+                'customer.state:id,name,code,gst_code',
+                'status:id,name,code',
+                'design:id,design_no,quality_name',
+                'manufacturingCompany:id,name',
+            ])),
                 __('messages.updated', ['module' => 'Status']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -458,6 +469,25 @@ class WastageController extends Controller
      * @throws Exception
      */
     private function updateWASTAGEDELIVEREDStatus(WastageOrder $wastageOrder, $input) {
+        $wastageStocks = $this->wastageOrderRepository->usedStocks($wastageOrder);
+        $threadColors = $this->threadColorRepository->findWithAvailableQty(array_keys($wastageStocks));
+        foreach ($threadColors as $thread) {
+            if (!is_null($thread->availableStock)) {
+                $newQty = $thread->availableStock->available_qty +
+                    $wastageStocks[$thread->id]['used_stock'];
+            } else {
+                $newQty = $wastageStocks[$thread->id]['used_stock'];
+            }
+            if ($newQty < 0) {
+                $newQty = ceil(str_replace('-', '', $newQty));
+
+                return $this->sendResponse(null,
+                    "You need to purchase {$thread->thread->denier}-{$thread->thread->name}-{$thread->color->name} ({$newQty} KG) for deliver this order.",
+                    HTTPCode::UNPROCESSABLE_ENTITY);
+            }
+        }
+
+
         $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::WASTAGE_DELIVERED)->id;
         $wastageOrder->orderStocks()->update(['status_id' => $input['status_id']]);
 

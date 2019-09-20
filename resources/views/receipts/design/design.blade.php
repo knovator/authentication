@@ -10,7 +10,7 @@
         <tbody style="width: 100%;">
             <tr>
                 <td class="preview-box" style="border-bottom: 0">
-               <img alt="design name" class="preview" src="{{$design->mainImage->file->url}}"/>
+               <img style="max-width: 250px;max-height: 250px" alt="design name" class="preview" src="{{$design->mainImage->file->url}}"/>
            </td>
                 <td class="details-box" style="border-bottom: 0">
                <div class="detail-row design-name">{{$design->quality_name}}
