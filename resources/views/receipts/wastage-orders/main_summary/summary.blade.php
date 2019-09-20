@@ -23,7 +23,7 @@
 "
             >
                 <div class="preview-box">
-                    <img
+                    <img style="max-width: 250px;max-height: 250px"
                          alt="design name"
                          class="preview"
                          src="{{$wastageOrder->design->mainImage->file->url}}"
