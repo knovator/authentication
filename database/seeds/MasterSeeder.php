@@ -133,7 +133,12 @@ class MasterSeeder extends Seeder
                         'name'      => 'Delivered',
                         'code'      => 'SO_DELIVERED',
                         'is_active' => true,
-                    ]
+                    ],
+                    4 => [
+                        'name'      => 'Completed',
+                        'code'      => 'SO_COMPLETED',
+                        'is_active' => true,
+                    ],
                 ]
             ],
             4 => [
