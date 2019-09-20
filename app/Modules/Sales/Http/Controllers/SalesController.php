@@ -393,6 +393,7 @@ class SalesController extends Controller
             __('messages.retrieved', ['module' => 'Sales Order']),
             HTTPCode::OK);
     }
+
     /**
      * @return JsonResponse
      */
@@ -422,7 +423,10 @@ class SalesController extends Controller
         $statuses = $this->totalMeterStatuses();
         try {
             $orders = $this->salesOrderRepository->getSalesOrderList($statuses[Master::SO_DELIVERED]['id'],
-                $statuses[Master::SO_MANUFACTURING]['id'], $request->all());
+                [
+                    $statuses[Master::SO_MANUFACTURING]['id'],
+                    $statuses[Master::SO_COMPLETED]['id']
+                ], $request->all());
 
             return $this->sendResponse($orders,
                 __('messages.retrieved', ['module' => 'Sales Orders']),
@@ -440,7 +444,7 @@ class SalesController extends Controller
      */
     private function totalMeterStatuses() {
         return $this->masterRepository->findWhereIn('code',
-            [Master::SO_DELIVERED, Master::SO_MANUFACTURING], ['id', 'code'])
+            [Master::SO_DELIVERED, Master::SO_MANUFACTURING, Master::SO_COMPLETED], ['id', 'code'])
                                       ->keyBy('code')
                                       ->all();
     }
@@ -536,7 +540,10 @@ class SalesController extends Controller
         $statuses = $this->totalMeterStatuses();
         try {
             $sales = $this->salesOrderRepository->getSalesOrderList($statuses[Master::SO_DELIVERED]['id'],
-                $statuses[Master::SO_MANUFACTURING]['id'], $request->all(), true);
+                [
+                    $statuses[Master::SO_MANUFACTURING]['id'],
+                    $statuses[Master::SO_COMPLETED]['id']
+                ], $request->all(), true);
 
             if (($sales = collect($sales->getData()->data))->isEmpty()) {
                 return $this->sendResponse(null,

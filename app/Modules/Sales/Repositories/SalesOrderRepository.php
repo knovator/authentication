@@ -33,13 +33,13 @@ class SalesOrderRepository extends BaseRepository
 
     /**
      * @param      $deliveredId
-     * @param      $manufacturingId
+     * @param      $manufacturingIds
      * @param      $input
      * @param bool $export
      * @return mixed
      * @throws RepositoryException
      */
-    public function getSalesOrderList($deliveredId, $manufacturingId, $input, $export = false) {
+    public function getSalesOrderList($deliveredId, $manufacturingIds, $input, $export = false) {
         $this->applyCriteria();
 
         $orders = $this->model->with([
@@ -49,9 +49,9 @@ class SalesOrderRepository extends BaseRepository
             'deliveries:id,delivery_no,delivery_date,sales_order_id',
             'recipeMeters',
         ])->with([
-            'manufacturingTotalMeters' => function ($manufacturing) use ($manufacturingId) {
+            'manufacturingTotalMeters' => function ($manufacturing) use ($manufacturingIds) {
                 /** @var Builder $manufacturing */
-                $manufacturing->where('deliveries.status_id', $manufacturingId);
+                $manufacturing->whereIn('deliveries.status_id', $manufacturingIds);
             },
             'deliveredTotalMeters'     => function ($delivered) use ($deliveredId) {
                 /** @var Builder $delivered */
