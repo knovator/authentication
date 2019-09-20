@@ -30,11 +30,11 @@ class CreateRequest extends FormRequest
      */
     public function rules() {
         return [
-            'delivery_date'                     => 'required|date_format:Y-m-d|after_or_equal:'
-                . $this->purchase->order_date,
-            'bill_no'                           => 'required|string',
             'orders'                            => 'required|array',
             'orders.*.purchase_order_thread_id' => 'required|integer|exists:purchase_order_threads,id,purchase_order_id,' . $this->purchase->id,
+            'bill_no'                           => 'required|string',
+            'delivery_date'                     => 'required|date_format:Y-m-d|after_or_equal:'
+                . $this->purchase->order_date,
             'orders.*.kg_qty'                   => 'required|numeric',
         ];
     }
