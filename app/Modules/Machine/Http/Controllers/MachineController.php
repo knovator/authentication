@@ -14,6 +14,7 @@ use App\Modules\Sales\Repositories\SalesOrderRepository;
 use App\Repositories\MasterRepository;
 use DB;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Knovators\Support\Helpers\HTTPCode;
@@ -91,12 +92,19 @@ class MachineController extends Controller
      * @return JsonResponse
      */
     public function show(Machine $machine) {
-
+        $statusId = $this->masterRepository->findByCode(Master::SO_PENDING)->id;
         $machine->load([
             'threadColor.thread',
             'threadColor.color'
+        ])->loadCount([
+            'soPartialOrders as associated_count' => function ($soPartialOrders) use ($statusId) {
+                /** @var Builder $soPartialOrders */
+                $soPartialOrders->whereHas('delivery', function ($delivery) use ($statusId) {
+                    /** @var Builder $delivery */
+                    $delivery->where('status_id', '=', $statusId);
+                });
+            }
         ]);
-
 
         return $this->sendResponse($this->makeResource($machine),
             __('messages.retrieved', ['module' => 'Machine']),
