@@ -472,11 +472,13 @@ class DeliveryController extends Controller
      */
     private function updateStatus(Delivery $delivery, $code, $input) {
         $status = $this->findMasterIdByCode($code);
+        /** @var Master $status */
+        $input['status_id'] = $status->id;
         try {
-            /** @var Master $status */
-            $input['status_id'] = $status->id;
             DB::beginTransaction();
-            $delivery->orderStocks()->update(['status_id' => $status->id]);
+            if ($code !== MasterConstant::SO_COMPLETED) {
+                $delivery->orderStocks()->update(['status_id' => $status->id]);
+            }
             $delivery->update($input);
             DB::commit();
 
@@ -540,6 +542,24 @@ class DeliveryController extends Controller
     private function updateSODELIVEREDStatus(Delivery $delivery, $input) {
         try {
             return $this->updateStatus($delivery, MasterConstant::SO_DELIVERED, $input);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+
+    }
+
+
+    /**
+     * @param Delivery $delivery
+     * @param          $input
+     * @return JsonResponse
+     */
+    private function updateSoCompletedStatus(Delivery $delivery, $input) {
+        try {
+            return $this->updateStatus($delivery, MasterConstant::SO_COMPLETED, $input);
         } catch (Exception $exception) {
             Log::error($exception);
 
