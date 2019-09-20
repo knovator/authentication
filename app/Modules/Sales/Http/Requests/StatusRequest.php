@@ -55,10 +55,6 @@ class StatusRequest extends FormRequest
                 $currentStatusId = $this->retrieveMasterId(MasterConstant::SO_PENDING);
 
                 return $this->customValidation($currentStatusId);
-            case MasterConstant::SO_COMPLETED:
-                $currentStatusId = $this->retrieveMasterId(MasterConstant::SO_MANUFACTURING);
-
-                return $this->customValidation($currentStatusId);
 
             case MasterConstant::SO_DELIVERED:
                 $currentStatusId = $this->retrieveMasterId(MasterConstant::SO_MANUFACTURING);
