@@ -25,21 +25,22 @@ class WastageOrder extends JsonResource
      */
     public function toArray($request) {
         return [
-            'id'                   => $this->id,
-            'order_no'             => $this->order_no,
-            'order_date'           => $this->order_date,
-            'delivery_date'        => $this->delivery_date,
-            'challan_no'           => $this->challan_no,
-            'total_fiddles'        => $this->total_fiddles,
-            'customer_po_number'   => $this->customer_po_number,
-            'cost_per_meter'       => $this->cost_per_meter,
-            'beam'                 => new ThreadColor($this->whenLoaded('beam')),
-            'status'               => new MasterResource($this->whenLoaded('status')),
-            'customer'             => new CustomerResource($this->whenLoaded('customer')),
-            'design'               => new DesignResource($this->whenLoaded('design')),
-            'manufacturingCompany' => new ManufacturingCompany($this->whenLoaded('manufacturingCompany')),
-            'fiddlePicks'          => WastageFiddle::collection($this->whenLoaded('fiddlePicks')),
-            'orderRecipes'         => WastageOrderRecipe::collection($this->whenLoaded('orderRecipes')),
+            'id'                       => $this->id,
+            'order_no'                 => $this->order_no,
+            'order_date'               => $this->order_date,
+            'delivery_date'            => $this->delivery_date,
+            'challan_no'               => $this->challan_no,
+            'total_fiddles'            => $this->total_fiddles,
+            'customer_po_number'       => $this->customer_po_number,
+            'cost_per_meter'           => $this->cost_per_meter,
+            'manufacturing_company_id' => $this->manufacturing_company_id,
+            'beam'                     => new ThreadColor($this->whenLoaded('beam')),
+            'status'                   => new MasterResource($this->whenLoaded('status')),
+            'customer'                 => new CustomerResource($this->whenLoaded('customer')),
+            'design'                   => new DesignResource($this->whenLoaded('design')),
+            'manufacturingCompany'     => new ManufacturingCompany($this->whenLoaded('manufacturingCompany')),
+            'fiddlePicks'              => WastageFiddle::collection($this->whenLoaded('fiddlePicks')),
+            'orderRecipes'             => WastageOrderRecipe::collection($this->whenLoaded('orderRecipes')),
         ];
     }
 }
