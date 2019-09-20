@@ -393,6 +393,26 @@ class SalesController extends Controller
             __('messages.retrieved', ['module' => 'Sales Order']),
             HTTPCode::OK);
     }
+    /**
+     * @return JsonResponse
+     */
+    public function statuses() {
+        $statuses = $this->masterRepository->with([
+            'childMasters' => function ($childMasters) {
+                /** @var Builder $childMasters */
+                $childMasters->where('code', '<>', MasterConstant::SO_COMPLETED)->select([
+                    'id',
+                    'name',
+                    'code',
+                    'parent_id'
+                ]);
+            }
+        ])->findByCode(MasterConstant::SALES_STATUS);
+
+        return $this->sendResponse($statuses->childMasters,
+            __('messages.retrieved', ['module' => 'Statuses']),
+            HTTPCode::OK);
+    }
 
     /**
      * @param Request $request
