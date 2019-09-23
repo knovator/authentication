@@ -407,7 +407,7 @@ class DeliveryController extends Controller
             'design.fiddlePicks',
             'customer',
             'designBeam.threadColor.thread',
-            'designBeam.threadColor.color:id,name,code',
+            'designBeam.threadColor.color:id,name',
         ]);
         $machineRepo = new MachineRepository(new Container());
         $machines = $machineRepo->manufacturingReceipts($delivery->id);

@@ -43,7 +43,10 @@ class MachineRepository extends BaseRepository
      */
     public function getMachineList($statusId) {
         $this->applyCriteria();
-        $machines = datatables()->of($this->model->select('machines.*')->withCount([
+        $machines = datatables()->of($this->model->select('machines.*')->with([
+            'threadColor.thread',
+            'threadColor.color:id,name,code',
+        ])->withCount([
             'soPartialOrders as associated_count' => function ($soPartialOrders) use ($statusId) {
                 /** @var Builder $soPartialOrders */
                 $soPartialOrders->whereHas('delivery', function ($delivery) use ($statusId) {
@@ -98,8 +101,6 @@ class MachineRepository extends BaseRepository
                     ])->where('delivery_id',
                         $deliveryId);
                 },
-            'threadColor.thread',
-            'threadColor.color'
         ])->whereHas('soPartialOrders',
             function ($soPartialOrders) use ($deliveryId) {
                 /** @var Builder $soPartialOrders */
