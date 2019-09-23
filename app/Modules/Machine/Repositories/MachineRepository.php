@@ -101,8 +101,6 @@ class MachineRepository extends BaseRepository
                     ])->where('delivery_id',
                         $deliveryId);
                 },
-            'threadColor.thread',
-            'threadColor.color'
         ])->whereHas('soPartialOrders',
             function ($soPartialOrders) use ($deliveryId) {
                 /** @var Builder $soPartialOrders */
