@@ -402,7 +402,13 @@ class DeliveryController extends Controller
      * @return Response
      */
     public function exportManufacturing(SalesOrder $salesOrder, Delivery $delivery) {
-        $salesOrder->load(['design.detail', 'design.fiddlePicks', 'customer']);
+        $salesOrder->load([
+            'design.detail',
+            'design.fiddlePicks',
+            'customer',
+            'designBeam.threadColor.thread',
+            'designBeam.threadColor.color:id,name,code',
+        ]);
         $machineRepo = new MachineRepository(new Container());
         $machines = $machineRepo->manufacturingReceipts($delivery->id);
         $pdf = SnappyPdf::loadView('receipts.sales-orders.manufacturing.manufacturing',
@@ -533,7 +539,6 @@ class DeliveryController extends Controller
 
 
     }
-
 
 
     /**
