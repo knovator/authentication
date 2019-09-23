@@ -69,6 +69,14 @@ class RecipePartialOrder extends Model
             'id');
     }
 
+
+    /**
+     * @return mixed
+     */
+    public function assignedMachine() {
+        return $this->hasOne(PartialMachine::class, 'partial_order_id', 'id');
+    }
+
     /**
      * @return mixed
      */

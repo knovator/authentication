@@ -20,7 +20,7 @@ class Machine extends JsonResource
      * @return array
      */
     public function toArray($request) {
-        return [
+        $machine = [
             'id'          => $this->id,
             'name'        => $this->name,
             'reed'        => $this->reed,
@@ -28,5 +28,12 @@ class Machine extends JsonResource
             'panno'       => $this->panno,
             'is_active'   => $this->is_active,
         ];
+
+
+        if (isset($this->associated_count)) {
+            $machine['associated_count'] = $this->associated_count;
+        }
+
+        return $machine;
     }
 }

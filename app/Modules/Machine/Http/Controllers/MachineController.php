@@ -2,6 +2,7 @@
 
 namespace App\Modules\Machine\Http\Controllers;
 
+use App\Constants\Master;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PartiallyUpdateRequest;
 use App\Modules\Machine\Http\Requests\CreateRequest;
@@ -10,8 +11,10 @@ use App\Modules\Machine\Http\Resources\Machine as MachineResource;
 use App\Modules\Machine\Models\Machine;
 use App\Modules\Machine\Repositories\MachineRepository;
 use App\Modules\Sales\Repositories\SalesOrderRepository;
+use App\Repositories\MasterRepository;
 use DB;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Knovators\Support\Helpers\HTTPCode;
@@ -31,17 +34,22 @@ class MachineController extends Controller
 
     protected $salesOrderRepository;
 
+    protected $masterRepository;
+
     /**
      * MachineController constructor.
      * @param MachineRepository    $machineRepository
      * @param SalesOrderRepository $salesOrderRepository
+     * @param MasterRepository     $masterRepository
      */
     public function __construct(
         MachineRepository $machineRepository,
-        SalesOrderRepository $salesOrderRepository
+        SalesOrderRepository $salesOrderRepository,
+        MasterRepository $masterRepository
     ) {
         $this->machineRepository = $machineRepository;
         $this->salesOrderRepository = $salesOrderRepository;
+        $this->masterRepository = $masterRepository;
     }
 
     /**
@@ -84,12 +92,19 @@ class MachineController extends Controller
      * @return JsonResponse
      */
     public function show(Machine $machine) {
-
+        $statusId = $this->masterRepository->findByCode(Master::SO_PENDING)->id;
         $machine->load([
             'threadColor.thread',
             'threadColor.color'
+        ])->loadCount([
+            'soPartialOrders as associated_count' => function ($soPartialOrders) use ($statusId) {
+                /** @var Builder $soPartialOrders */
+                $soPartialOrders->whereHas('delivery', function ($delivery) use ($statusId) {
+                    /** @var Builder $delivery */
+                    $delivery->where('status_id', '=', $statusId);
+                });
+            }
         ]);
-
 
         return $this->sendResponse($this->makeResource($machine),
             __('messages.retrieved', ['module' => 'Machine']),
@@ -167,7 +182,8 @@ class MachineController extends Controller
      */
     public function index() {
         try {
-            $machines = $this->machineRepository->getMachineList();
+            $statusId = $this->masterRepository->findByCode(Master::SO_PENDING)->id;
+            $machines = $this->machineRepository->getMachineList($statusId);
 
             return $this->sendResponse($machines,
                 __('messages.retrieved', ['module' => 'Machines']),
@@ -188,10 +204,14 @@ class MachineController extends Controller
         $input = $request->all();
         try {
             if (isset($input['sales_order_id'])) {
-                $input['sales_order'] = $this->salesOrderRepository->with(['design.detail','designBeam'])
+                $input['sales_order'] = $this->salesOrderRepository->with([
+                    'design.detail',
+                    'designBeam'
+                ])
                                                                    ->find($input['sales_order_id']);
             }
             $machines = $this->machineRepository->getActiveMachines($input);
+
             return $this->sendResponse($machines,
                 __('messages.retrieved', ['module' => 'Machines']),
                 HTTPCode::OK);

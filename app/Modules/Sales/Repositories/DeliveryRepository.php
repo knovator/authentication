@@ -5,6 +5,7 @@ namespace App\Modules\Sales\Repositories;
 use App\Modules\Sales\Models\Delivery;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
 use Prettus\Repository\Exceptions\RepositoryException;
@@ -51,8 +52,20 @@ class DeliveryRepository extends BaseRepository
      */
     public function getDeliveryList($salesOrderId) {
         $this->applyCriteria();
-        $deliveries = datatables()->of($this->model->where('sales_order_id', $salesOrderId)->with
-        ($this->commonRelations()))->make(true);
+        $deliveries = datatables()->of($this->model->where('sales_order_id', $salesOrderId)
+                                                   ->with($this->commonRelations()))
+                                  ->editColumn('partial_orders', function ($delivery) {
+                                      /** @var Collection $partialOrders */
+                                      $delivery->partialOrders->map(function ($partialOrder) {
+                                          if (!is_null($partialOrder->assignedMachine)) {
+                                              unset($partialOrder->machine);
+                                              $partialOrder->machine = $partialOrder->assignedMachine;
+                                          }
+                                          unset($partialOrder->assignedMachine);
+                                      });
+
+                                      return $delivery->partialOrders->toArray();
+                                  })->make(true);
         $this->resetModel();
 
         return $deliveries;
@@ -69,7 +82,8 @@ class DeliveryRepository extends BaseRepository
             'status:id,name,code',
             'partialOrders' => function ($partialOrders) {
                 $partialOrders->with([
-                    'machine',
+                    'machine:id,name,panno,reed',
+                    'assignedMachine',
                     'orderRecipe.recipe.fiddles.thread:id,name,denier',
                     'orderRecipe.recipe.fiddles.color:id,name,code'
                 ]);

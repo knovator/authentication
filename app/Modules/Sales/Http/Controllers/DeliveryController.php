@@ -11,6 +11,7 @@ use App\Modules\Machine\Repositories\MachineRepository;
 use App\Modules\Sales\Http\Requests\Delivery\CreateRequest;
 use App\Modules\Sales\Http\Requests\Delivery\StatusRequest;
 use App\Modules\Sales\Http\Requests\Delivery\UpdateRequest;
+use App\Modules\Sales\Http\Resources\Delivery as DeliveryResource;
 use App\Modules\Sales\Models\Delivery;
 use App\Modules\Sales\Models\RecipePartialOrder;
 use App\Modules\Sales\Models\SalesOrder;
@@ -401,22 +402,20 @@ class DeliveryController extends Controller
      * @return Response
      */
     public function exportManufacturing(SalesOrder $salesOrder, Delivery $delivery) {
-        $salesOrder->load(['design.detail', 'design.fiddlePicks','customer']);
+        $salesOrder->load([
+            'design.detail',
+            'design.fiddlePicks',
+            'customer',
+            'designBeam.threadColor.thread',
+            'designBeam.threadColor.color:id,name',
+        ]);
         $machineRepo = new MachineRepository(new Container());
         $machines = $machineRepo->manufacturingReceipts($delivery->id);
-
-        if ($machines->isEmpty()) {
-            return $this->sendResponse(null, __('messages.partial_order_not_present'),
-                HTTPCode::UNPROCESSABLE_ENTITY);
-        }
-
         $pdf = SnappyPdf::loadView('receipts.sales-orders.manufacturing.manufacturing',
             compact('machines', 'salesOrder', 'delivery'));
 
         /** @var ImageWrapper $pdf */
         return $pdf->download($delivery->delivery_no . '-manufacturing' . ".pdf");
-        /*return view('receipts.sales-orders.manufacturing.manufacturing',
-            compact('machines', 'salesOrder', 'delivery'));*/
     }
 
     /**
@@ -450,8 +449,6 @@ class DeliveryController extends Controller
 
         /** @var ImageWrapper $pdf */
         return $pdf->download($delivery->delivery_no . '-accounting' . ".pdf");
-//        return view('receipts.sales-orders.accounting.accounting',
-//            compact('salesOrder', 'delivery'));
     }
 
     /**
@@ -481,11 +478,13 @@ class DeliveryController extends Controller
      */
     private function updateStatus(Delivery $delivery, $code, $input) {
         $status = $this->findMasterIdByCode($code);
+        /** @var Master $status */
+        $input['status_id'] = $status->id;
         try {
-            /** @var Master $status */
-            $input['status_id'] = $status->id;
             DB::beginTransaction();
-            $delivery->orderStocks()->update(['status_id' => $status->id]);
+            if ($code !== MasterConstant::SO_COMPLETED) {
+                $delivery->orderStocks()->update(['status_id' => $status->id]);
+            }
             $delivery->update($input);
             DB::commit();
 
@@ -541,6 +540,7 @@ class DeliveryController extends Controller
 
     }
 
+
     /**
      * @param Delivery $delivery
      * @param          $input
@@ -549,6 +549,24 @@ class DeliveryController extends Controller
     private function updateSODELIVEREDStatus(Delivery $delivery, $input) {
         try {
             return $this->updateStatus($delivery, MasterConstant::SO_DELIVERED, $input);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+
+    }
+
+
+    /**
+     * @param Delivery $delivery
+     * @param          $input
+     * @return JsonResponse
+     */
+    private function updateSoCompletedStatus(Delivery $delivery, $input) {
+        try {
+            return $this->updateStatus($delivery, MasterConstant::SO_COMPLETED, $input);
         } catch (Exception $exception) {
             Log::error($exception);
 
@@ -582,6 +600,7 @@ class DeliveryController extends Controller
                         HTTPCode::UNPROCESSABLE_ENTITY);
                 }
             }
+            $this->storeMachineDetails($delivery);
 
             return $this->updateStatus($delivery, MasterConstant::SO_MANUFACTURING, $input);
         } catch (Exception $exception) {
@@ -591,6 +610,27 @@ class DeliveryController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
 
+    }
+
+
+    /**
+     * @param $delivery
+     */
+    private function storeMachineDetails(Delivery $delivery) {
+        $delivery->load(['partialOrders.machine:id,name,reed,panno', 'salesOrder:id']);
+        $machines = [];
+        foreach ($delivery->partialOrders as $partialOrder) {
+            /** @var RecipePartialOrder $partialOrder */
+            $machines[] = [
+                'name'             => $partialOrder->machine->name,
+                'reed'             => $partialOrder->machine->reed,
+                'panno'            => $partialOrder->machine->panno,
+                'machine_id'       => $partialOrder->machine_id,
+                'partial_order_id' => $partialOrder->id,
+            ];
+        }
+        /** @var SalesOrder $delivery ->salesOrder */
+        $delivery->salesOrder->assignMachines()->createMany($machines);
     }
 
 

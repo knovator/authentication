@@ -17,7 +17,7 @@ fontSize: 100% / (totalFiddle * 7)  <= 14 && 100% / (totalFiddle * 7) >= 10
         Accounting Receipt
     </div>
     <div class="receipt-heading text-center">{{\Carbon\Carbon::parse($delivery->delivery_date)->format('d M Y')}}
-        {{ (!is_null($delivery->delivery_no)) ? '('.$delivery->bill_no.')':'' }}
+        {{ (!empty($delivery->bill_no)) ? '('.$delivery->bill_no.')':'' }}
     </div>
     <br/>
     <table>
@@ -27,7 +27,7 @@ fontSize: 100% / (totalFiddle * 7)  <= 14 && 100% / (totalFiddle * 7) >= 10
     border-bottom: 0;
 ">
                 <div class="preview-box">
-                    <img alt="design name" class="preview"
+                    <img alt="design name" class="preview" style="max-width: 250px;max-height: 250px"
                          src="{{$salesOrder->design->mainImage->file->url}}"
                 </div>
             </td>

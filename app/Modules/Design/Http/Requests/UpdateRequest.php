@@ -47,7 +47,7 @@ class UpdateRequest extends FormRequest
             'images.*.type'             => 'required|in:MAIN,SUB',
 
             // design fiddle picks
-            'fiddle_picks'              => 'required|array',
+            'fiddle_picks'              => 'required|array|size:' . $this->fiddles,
             'fiddle_picks.*.id'         => 'sometimes|required|integer',
             'fiddle_picks.*.pick'       => 'required|integer',
             'fiddle_picks.*.fiddle_no'  => 'required|integer',
@@ -62,5 +62,21 @@ class UpdateRequest extends FormRequest
         ];
     }
 
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array
+     */
+    public function messages() {
+
+        return [
+            'fiddles.required'                   => 'Total feeders are required.',
+            'fiddle_picks.required'              => 'Feeder picks are required.',
+            'fiddle_picks.*.pick.required'       => 'Feeder picks are required.',
+            'fiddle_picks.size'                  => 'Please fill all the selected feeders.',
+            'design_beams.required'              => 'At least one beam must be required.',
+            'design_beams.*.recipes_id.required' => 'At least one recipe must be required for beam.',
+        ];
+    }
 
 }

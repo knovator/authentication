@@ -111,7 +111,8 @@ class ThreadColor extends Model
                         $master->whereIn('code', [
                             MasterConstant::PO_DELIVERED,
                             MasterConstant::SO_MANUFACTURING,
-                            MasterConstant::SO_DELIVERED
+                            MasterConstant::SO_DELIVERED,
+                            MasterConstant::WASTAGE_DELIVERED,
                         ]);
                     })
                     ->selectRaw('product_id,product_type,sum(kg_qty) as available_qty')

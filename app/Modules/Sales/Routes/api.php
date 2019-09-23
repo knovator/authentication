@@ -38,6 +38,9 @@ Route::group([
 
         Route::post('send-mail-to-customer/{sale}', 'SalesController@sendMailToCustomer');
 
+        Route::get('sales-statuses', 'SalesController@statuses')
+             ->name('sales.statuses');
+
     });
 
 Route::group([

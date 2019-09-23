@@ -4,6 +4,7 @@ namespace App\Modules\Customer\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PartiallyUpdateRequest;
+use App\Modules\Customer\Http\Exports\Ledger as ExportLedger;
 use App\Modules\Customer\Http\Requests\CreateRequest;
 use App\Modules\Customer\Http\Requests\LedgerRequest;
 use App\Modules\Customer\Http\Requests\UpdateRequest;
@@ -20,10 +21,12 @@ use Illuminate\Http\JsonResponse;
 use Knovators\Support\Helpers\HTTPCode;
 use App\Support\DestroyObject;
 use Log;
+use Maatwebsite\Excel\Facades\Excel;
 use Prettus\Repository\Exceptions\RepositoryException;
 use Prettus\Validator\Exceptions\ValidatorException;
 use App\Constants\Customer as CustomerConstant;
 use Str;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
@@ -246,18 +249,18 @@ class CustomerController extends Controller
             Log::error($exception);
 
             return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY,$exception);
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
     }
 
-
     /**
-     * @param $customer
-     * @param $input
+     * @param      $customer
+     * @param      $input
+     * @param bool $export
      * @return array
      * @throws Exception
      */
-    private function orderList($customer, $input) {
+    private function orderList($customer, $input, $export = false) {
         switch ($input['order_type']) {
             case CustomerConstant::LEDGER_PURCHASE:
                 $orders = $this->purchaseOrderRepository->customerOrders($customer->id, $input);
@@ -279,10 +282,38 @@ class CustomerController extends Controller
                 throw new UnprocessableEntityHttpException('Invalid order type');
 
         }
-        $orders = datatables()->of($orders)->make(true);
+        $orders = datatables()->of($orders);
 
-        return $orders;
+        if ($export) {
+            $orders = $orders->skipPaging();
+        }
 
+        return $orders->make(true);
+
+    }
+
+    /**
+     * @param Customer      $customer
+     * @param LedgerRequest $request
+     * @return JsonResponse|BinaryFileResponse
+     */
+    public function exportLedger(Customer $customer, LedgerRequest $request) {
+        $input = $request->all();
+        try {
+            $orders = $this->orderList($customer, $input, true);
+            if (($orders = collect($orders->getData()->data))->isEmpty()) {
+                return $this->sendResponse(null,
+                    __('messages.can_not_export', ['module' => 'Orders']),
+                    HTTPCode::OK);
+            }
+
+            return Excel::download(new ExportLedger($orders,$customer, $input['order_type']), 'ledger.xlsx');
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
     }
 
 

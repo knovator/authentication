@@ -34,7 +34,7 @@ class WastageOrderRecipeRepository extends BaseRepository
      * @return mixed
      */
     public function deleteRecipeById($ids) {
-        return $this->model->whereIn('id', $ids)->delele();
+        return $this->model->whereIn('id', $ids)->delete();
     }
 
 }

@@ -36,8 +36,8 @@ class UpdateRequest extends FormRequest
             'orders.*.id'                    => 'sometimes|required|integer|exists:recipes_partial_orders,id',
             'orders.*.sales_order_recipe_id' => 'required|integer|exists:sales_orders_recipes,id',
             'orders.*.machine_id'            => 'required|integer',
-            'orders.*.meters'                => 'required|integer',
-            'orders.*.pcs'                   => 'required|integer',
+            'orders.*.meters'                => 'required|integer|gte:1',
+            'orders.*.pcs'                   => 'required|integer|gte:1',
             'orders.*.total_meters'          => 'required|integer',
             'removed_partial_orders'         => 'sometimes|required|array',
 
@@ -53,7 +53,13 @@ class UpdateRequest extends FormRequest
     public function messages() {
 
         return [
-            'delivery_date.after_or_equal' => 'Delivery date must be an after or equal to order date'
+            'delivery_date.after_or_equal' => 'Delivery date must be an after or equal to order date.',
+            'orders.required'              => 'At least one recipe must be required.',
+            'orders.*.machine_id.required' => 'Machine must be required.',
+            'orders.*.meters.required'     => 'Meters must be required.',
+            'orders.*.meters.gte'          => "Meters must be greater than or equal to 1.",
+            'orders.*.pcs.gte'             => 'Pcs must be greater than or equal to 1.',
+            'orders.*.pcs.required'                 => 'Pcs must be required.',
         ];
 
     }

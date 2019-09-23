@@ -26,11 +26,11 @@ return [
 
     'order_has_deliveries_not_delete'   => 'This Order has deliveries, so you can not delete.',
     'order_has_deliveries_not_cancel'   => 'This Order has deliveries, so you can not cancel this order.',
-    'purchase_deliveries_must_complete' => 'To complete this order, all partial order must be completed.',
+    'purchase_deliveries_must_complete' => 'To complete this order,make sure all threads must be delivered.',
 
 
     // Sales order Messages
-    'not_delete_order'            => 'This Order is in :status state, so you can not delete it.',
+    'not_delete_order'                  => 'This Order is in :status state, so you can not delete it.',
     'delivery_can_not_delete'           => 'This Delivery is in :status state, so you can not delete it.',
     'complete_order'                    => 'To complete this order, all partial order must be completed or canceled .',
     'must_partial_delivery'             => 'To Complete this order, you have to create partial delivery.',

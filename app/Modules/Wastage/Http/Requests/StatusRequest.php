@@ -45,13 +45,13 @@ class StatusRequest extends FormRequest
             case MasterConstant::WASTAGE_DELIVERED:
                 $currentStatusId = $this->retrieveMasterId(MasterConstant::WASTAGE_PENDING);
                 $validation = [
+                    'challan_no'               => 'required|string',
+                    'customer_id'              => 'required|exists:customers,id,deleted_at,NULL',
+                    'customer_po_number'       => 'nullable|string',
+                    'cost_per_meter'           => 'required|numeric',
+                    'manufacturing_company_id' => 'required',
                     'order_date'               => 'required|date_format:Y-m-d',
                     'delivery_date'            => 'required|date_format:Y-m-d|after_or_equal:order_date',
-                    'cost_per_meter'           => 'required|numeric',
-                    'customer_po_number'       => 'nullable|string',
-                    'customer_id'              => 'required|exists:customers,id,deleted_at,NULL',
-                    'challan_no'               => 'required|string',
-                    'manufacturing_company_id' => 'required',
                 ];
 
                 return array_merge($validation, $this->customValidation($currentStatusId));
@@ -97,8 +97,11 @@ class StatusRequest extends FormRequest
     public function messages() {
 
         return [
-            'code.not_in'           => 'This Order is delivered or canceled,you can not change.',
-            'sales_order_id.exists' => 'Please select valid status.'
+            'delivery_date.after_or_equal'      => 'Delivery date must be an after or equal to order date',
+            'customer_id.required'              => 'Customer must be required',
+            'manufacturing_company_id.required' => 'Manufacturing company must be required',
+            'code.not_in'                       => 'This Order is delivered or canceled,you can not change.',
+            'sales_order_id.exists'             => 'Please select valid status.'
         ];
     }
 

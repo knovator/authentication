@@ -19,9 +19,20 @@ class Delivery extends JsonResource
      * @return array
      */
     public function toArray($request) {
+
+
+
         return [
-            'id'            => $this->id,
-            'delivery_date' => $this->delivery_date,
+            'id'             => $this->id,
+            'bill_no'        => $this->bill_no,
+            'delivery_date'  => $this->delivery_date,
+            'delivery_no'    => $this->delivery_no,
+            'partial_orders' => $this->partialOrders,
+            'sales_order_id' => $this->sales_order_id,
+            'status'         => $this->status,
+            'status_id'      => $this->status_id,
         ];
+
+
     }
 }

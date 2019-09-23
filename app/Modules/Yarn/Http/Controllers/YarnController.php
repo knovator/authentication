@@ -259,7 +259,10 @@ class YarnController extends Controller
         $statuses = $this->masterRepository->with([
             'childMasters' => function ($childMasters) {
                 /** @var Builder $childMasters */
-                $childMasters->where('code', '<>', MasterConstant::SO_MANUFACTURING)->select([
+                $childMasters->whereNotIn('code', [
+                    MasterConstant::SO_MANUFACTURING,
+                    MasterConstant::SO_COMPLETED
+                ])->select([
                     'id',
                     'name',
                     'code',

@@ -44,6 +44,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Prettus\Repository\Exceptions\RepositoryException;
 use Str;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * Class SalesController
@@ -97,13 +98,15 @@ class SalesController extends Controller
         $this->deliveryRepository = $deliveryRepository;
     }
 
-
     /**
      * @param CreateRequest $request
      * @return mixed
      * @throws Exception
      */
     public function store(CreateRequest $request) {
+        if ($response = $this->uniqueCustomerPoNumber($request)) {
+            return $response;
+        }
         $input = $request->all();
         try {
             DB::beginTransaction();
@@ -123,6 +126,30 @@ class SalesController extends Controller
             return $this->sendResponse(null, __('messages.something_wrong'),
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
+    }
+
+    /**
+     * @param Request $request
+     * @param         $ignoreId
+     * @return bool|JsonResponse
+     * @throws RepositoryException
+     */
+    private function uniqueCustomerPoNumber(Request $request, $ignoreId = false) {
+        if ($request->has('customer_po_number') && !empty($request->get('customer_po_number'))) {
+            $oldOrder = $this->salesOrderRepository->makeModel()->where('customer_po_number',
+                $request->get('customer_po_number'));
+            /** @var Builder $oldOrder */
+            if ($ignoreId) {
+                $oldOrder = $oldOrder->whereKeyNot($ignoreId);
+            }
+            if ($oldOrder = $oldOrder->first()) {
+                return $this->sendResponse(null,
+                    'Customer po number is already exist in order no ' . $oldOrder->order_no,
+                    HTTPCode::UNPROCESSABLE_ENTITY);
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -277,6 +304,9 @@ class SalesController extends Controller
      * @throws Exception
      */
     public function update(SalesOrder $salesOrder, UpdateRequest $request) {
+        if ($response = $this->uniqueCustomerPoNumber($request, $salesOrder->id)) {
+            return $response;
+        }
         $input = $request->all();
         try {
             DB::beginTransaction();
@@ -365,6 +395,27 @@ class SalesController extends Controller
     }
 
     /**
+     * @return JsonResponse
+     */
+    public function statuses() {
+        $statuses = $this->masterRepository->with([
+            'childMasters' => function ($childMasters) {
+                /** @var Builder $childMasters */
+                $childMasters->where('code', '<>', MasterConstant::SO_COMPLETED)->select([
+                    'id',
+                    'name',
+                    'code',
+                    'parent_id'
+                ]);
+            }
+        ])->findByCode(MasterConstant::SALES_STATUS);
+
+        return $this->sendResponse($statuses->childMasters,
+            __('messages.retrieved', ['module' => 'Statuses']),
+            HTTPCode::OK);
+    }
+
+    /**
      * @param Request $request
      * @return JsonResponse
      */
@@ -372,7 +423,10 @@ class SalesController extends Controller
         $statuses = $this->totalMeterStatuses();
         try {
             $orders = $this->salesOrderRepository->getSalesOrderList($statuses[Master::SO_DELIVERED]['id'],
-                $statuses[Master::SO_MANUFACTURING]['id'], $request->all());
+                [
+                    $statuses[Master::SO_MANUFACTURING]['id'],
+                    $statuses[Master::SO_COMPLETED]['id']
+                ], $request->all());
 
             return $this->sendResponse($orders,
                 __('messages.retrieved', ['module' => 'Sales Orders']),
@@ -390,7 +444,7 @@ class SalesController extends Controller
      */
     private function totalMeterStatuses() {
         return $this->masterRepository->findWhereIn('code',
-            [Master::SO_DELIVERED, Master::SO_MANUFACTURING], ['id', 'code'])
+            [Master::SO_DELIVERED, Master::SO_MANUFACTURING, Master::SO_COMPLETED], ['id', 'code'])
                                       ->keyBy('code')
                                       ->all();
     }
@@ -486,7 +540,10 @@ class SalesController extends Controller
         $statuses = $this->totalMeterStatuses();
         try {
             $sales = $this->salesOrderRepository->getSalesOrderList($statuses[Master::SO_DELIVERED]['id'],
-                $statuses[Master::SO_MANUFACTURING]['id'], $request->all(), true);
+                [
+                    $statuses[Master::SO_MANUFACTURING]['id'],
+                    $statuses[Master::SO_COMPLETED]['id']
+                ], $request->all(), true);
 
             if (($sales = collect($sales->getData()->data))->isEmpty()) {
                 return $this->sendResponse(null,

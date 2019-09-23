@@ -21,7 +21,7 @@
 "
             >
                 <div class="preview-box">
-                    <img
+                    <img style="max-width: 250px;max-height: 250px"
                         alt="design name"
                         class="preview"
                         src="{{$salesOrder->design->mainImage->file->url}}"
