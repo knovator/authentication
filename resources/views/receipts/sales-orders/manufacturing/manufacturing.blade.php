@@ -45,9 +45,9 @@
                                 <span
                                     class="color-preview -block -no-color"
                                     style="display:inline; background-color: dodgerblue"
-                                >({{$machine->threadColor->thread->denier}})</span
+                                >({{$salesOrder->designBeam->threadColor->thread->denier}})</span
                                 >
-                                {{$machine->threadColor->thread->name}} ({{$machine->threadColor->color->name}})
+                                {{$salesOrder->designBeam->threadColor->thread->name}} ({{$salesOrder->designBeam->threadColor->color->name}})
                             </td>
                             <td class="text-left label">Design Name</td>
                             <td>: {{$salesOrder->design->quality_name}}</td>
