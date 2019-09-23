@@ -109,4 +109,14 @@ class YarnOrderRepository extends BaseRepository
         return $orders->orderByDesc('id');
     }
 
+    /**
+     * @param $input
+     * @param $statusIds
+     * @return
+     */
+    public function getOrderAnalysis($input, $statusIds) {
+        return $this->model->selectRaw('status_id,count(*) as total')->groupBy('status_id')
+                           ->whereIn('status_id', $statusIds)->get()->keyBy('status_id');
+    }
+
 }

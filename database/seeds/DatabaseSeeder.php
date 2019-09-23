@@ -15,10 +15,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run() {
 //        $this->call(RoleSeeder::class);
-        $this->call(MasterSeeder::class);
+//        $this->call(MasterSeeder::class);
 //        $this->call(UniqueIdSeeder::class);
 //        $this->call(StateSeeder::class);
 //        $this->call(ManufacturingCompanySeeder::class);
-        $this->call(MachineChangeSeeder::class);
+//        $this->call(MachineChangeSeeder::class);
     }
 }

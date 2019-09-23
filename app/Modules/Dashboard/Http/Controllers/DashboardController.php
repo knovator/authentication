@@ -5,10 +5,15 @@ namespace App\Modules\Dashboard\Http\Controllers;
 use App\Constants\Order as OrderConstant;
 use App\Http\Controllers\Controller;
 use App\Modules\Dashboard\Http\Requests\AnalysisRequest;
+use App\Modules\Purchase\Repositories\PurchaseOrderRepository;
 use App\Modules\Sales\Repositories\SalesOrderRepository;
+use App\Modules\Wastage\Repositories\WastageOrderRepository;
+use App\Modules\Yarn\Repositories\YarnOrderRepository;
 use App\Repositories\MasterRepository;
 use App\Support\DestroyObject;
+use DB;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Knovators\Support\Helpers\HTTPCode;
 use Log;
@@ -25,19 +30,34 @@ class DashboardController extends Controller
 
     protected $salesOrderRepository;
 
+    protected $yarnOrderRepository;
+
+    protected $wastageOrderRepository;
+
+    protected $purchaseOrderRepository;
+
     protected $masterRepository;
 
 
     /**
      * DashboardController constructor.
-     * @param SalesOrderRepository $salesOrderRepository
-     * @param MasterRepository     $masterRepository
+     * @param SalesOrderRepository    $salesOrderRepository
+     * @param YarnOrderRepository     $yarnOrderRepository
+     * @param WastageOrderRepository  $wastageOrderRepository
+     * @param PurchaseOrderRepository $purchaseOrderRepository
+     * @param MasterRepository        $masterRepository
      */
     public function __construct(
         SalesOrderRepository $salesOrderRepository,
+        YarnOrderRepository $yarnOrderRepository,
+        WastageOrderRepository $wastageOrderRepository,
+        PurchaseOrderRepository $purchaseOrderRepository,
         MasterRepository $masterRepository
     ) {
         $this->salesOrderRepository = $salesOrderRepository;
+        $this->yarnOrderRepository = $yarnOrderRepository;
+        $this->wastageOrderRepository = $wastageOrderRepository;
+        $this->purchaseOrderRepository = $purchaseOrderRepository;
         $this->masterRepository = $masterRepository;
     }
 
@@ -67,32 +87,36 @@ class DashboardController extends Controller
         $orders = [];
         $statuses = $this->orderStatuses();
         if (in_array($orderType = OrderConstant::FABRIC_ORDER, $input['types'])) {
-            $orders = $this->salesOrderRepository->getOrderAnalysis($input, [
-                $statuses[MasterConstant::SO_PENDING]['id'],
-                $statuses[MasterConstant::SO_MANUFACTURING]['id'],
-                $statuses[MasterConstant::SO_DELIVERED]['id'],
-            ]);
-
-//            $orders[$orderType]['total_order'] = $this->salesOrderRepository->count();
-//            $orders[$orderType]['pending_order'] = '';
-//            $orders[$orderType]['manufacturing_order'] = '';
-//            $orders[$orderType]['delivered_order'] = '';
+            $orders[$orderType] = $this->commonOrderReport($input, 'salesOrderRepository', [
+                MasterConstant::SO_PENDING,
+                MasterConstant::SO_MANUFACTURING,
+                MasterConstant::SO_DELIVERED,
+            ], $statuses);
+        }
+        if (in_array($orderType = OrderConstant::YARN_ORDER, $input['types'])) {
+            $orders[$orderType] = $this->commonOrderReport($input, 'yarnOrderRepository', [
+                MasterConstant::SO_PENDING,
+                MasterConstant::SO_DELIVERED,
+            ], $statuses);
         }
 
-//        if (in_array($orderType = OrderConstant::YARN_ORDER, $input['types'])) {
-//            $orders[$orderType] = '';
-//        }
-//
-//        if (in_array($orderType = OrderConstant::PURCHASE_ORDER, $input['types'])) {
-//            $orders[$orderType] = '';
-//        }
-//
-//        if (in_array($orderType = OrderConstant::WASTAGE_ORDER, $input['types'])) {
-//            $orders[$orderType] = '';
-//        }
+
+        if (in_array($orderType = OrderConstant::WASTAGE_ORDER, $input['types'])) {
+            $orders[$orderType] = $this->commonOrderReport($input, 'wastageOrderRepository', [
+                MasterConstant::WASTAGE_PENDING,
+                MasterConstant::WASTAGE_DELIVERED,
+            ], $statuses);
+        }
+
+
+        if (in_array($orderType = OrderConstant::PURCHASE_ORDER, $input['types'])) {
+            $orders[$orderType] = $this->commonOrderReport($input, 'purchaseOrderRepository', [
+                MasterConstant::PO_PENDING,
+                MasterConstant::PO_DELIVERED,
+            ], $statuses);
+        }
 
         return $orders;
-
     }
 
     /**
@@ -102,16 +126,37 @@ class DashboardController extends Controller
     private function orderStatuses() {
         $codes = [
             MasterConstant::PO_PENDING,
+            MasterConstant::PO_DELIVERED,
             MasterConstant::SO_PENDING,
             MasterConstant::SO_MANUFACTURING,
             MasterConstant::SO_DELIVERED,
-            MasterConstant::PO_DELIVERED,
             MasterConstant::WASTAGE_PENDING,
             MasterConstant::WASTAGE_DELIVERED,
         ];
 
         return $this->masterRepository->findWhereIn('code',
-            $codes, ['id', 'code'])->keyBy('code')->toArray();
+            $codes, ['id', 'code'])->keyBy('code');
+    }
+
+    /**
+     * @param                      $input
+     * @param string               $repository
+     * @param                      $statusCodes
+     * @param                      $statuses
+     * @return mixed
+     */
+    private function commonOrderReport($input, $repository, $statusCodes, $statuses) {
+        /** @var \Illuminate\Support\Collection $statuses */
+        $statusIds = $statuses->whereIn('code', $statusCodes)->pluck('id')->toArray();
+        $totalOrders = $this->{$repository}->getOrderAnalysis($input, $statusIds);
+        /** @var Collection $totalOrders */
+        $orders['count']['total'] = $totalOrders->sum('total');
+        foreach ($statusCodes as $statusCode) {
+            $orders['count'][strtolower($statusCode)] = isset($totalOrders[$statuses[$statusCode]['id']]) ?
+                $totalOrders[$statuses[$statusCode]['id']]['total'] : 0;
+        }
+
+        return $orders;
     }
 }
 
