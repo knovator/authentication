@@ -119,14 +119,12 @@ class SalesOrderRepository extends BaseRepository
 
     /**
      * @param $input
+     * @param $statusIds
+     * @return
      */
-    public function getOrderAnalysis($input){
-
-
-        return
-
-
-
+    public function getOrderAnalysis($input, $statusIds) {
+        return $this->model->selectRaw('status_id,count(*) as total')->groupBy('status_id')
+                           ->whereIn('status_id', $statusIds)->get();
 
     }
 

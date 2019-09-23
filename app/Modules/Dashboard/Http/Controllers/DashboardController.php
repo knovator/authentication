@@ -79,17 +79,17 @@ class DashboardController extends Controller
 //            $orders[$orderType]['delivered_order'] = '';
         }
 
-        if (in_array($orderType = OrderConstant::YARN_ORDER, $types)) {
-            $orders[$orderType] = '';
-        }
-
-        if (in_array($orderType = OrderConstant::PURCHASE_ORDER, $types)) {
-            $orders[$orderType] = '';
-        }
-
-        if (in_array($orderType = OrderConstant::WASTAGE_ORDER, $types)) {
-            $orders[$orderType] = '';
-        }
+//        if (in_array($orderType = OrderConstant::YARN_ORDER, $input['types'])) {
+//            $orders[$orderType] = '';
+//        }
+//
+//        if (in_array($orderType = OrderConstant::PURCHASE_ORDER, $input['types'])) {
+//            $orders[$orderType] = '';
+//        }
+//
+//        if (in_array($orderType = OrderConstant::WASTAGE_ORDER, $input['types'])) {
+//            $orders[$orderType] = '';
+//        }
 
         return $orders;
 
