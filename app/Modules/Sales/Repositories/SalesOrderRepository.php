@@ -117,5 +117,18 @@ class SalesOrderRepository extends BaseRepository
         return $orders->orderByDesc('id');
     }
 
+    /**
+     * @param $input
+     */
+    public function getOrderAnalysis($input){
+
+
+        return
+
+
+
+
+    }
+
 
 }
