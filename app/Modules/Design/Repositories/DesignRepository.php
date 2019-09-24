@@ -51,6 +51,7 @@ class DesignRepository extends BaseRepository
                                    if ($design->sales_count || $design->wastage_count) {
                                        return 1;
                                    }
+
                                    return 0;
                                })->removeColumn('sales_count', 'wastage_count')->make(true);
         $this->resetModel();
@@ -72,6 +73,14 @@ class DesignRepository extends BaseRepository
         $this->resetModel();
 
         return $designs;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function designCount() {
+        return $this->model->selectRaw('COUNT(*) as total,COUNT(IF(is_approved = 1,id,null)) as approved,COUNT(IF(is_approved = 0,id,null)) as not_approved')
+                           ->first();
     }
 
 }
