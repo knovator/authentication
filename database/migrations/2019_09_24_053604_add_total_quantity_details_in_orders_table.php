@@ -15,9 +15,9 @@ class AddTotalQuantityDetailsInOrdersTable extends Migration
      * @return void
      */
     public function up() {
-//        Schema::table('sales_orders', function (Blueprint $table) {
-//            $table->decimal('total_meters')->nullable()->after('cost_per_meter');
-//        });
+        Schema::table('sales_orders', function (Blueprint $table) {
+            $table->decimal('total_meters')->nullable()->after('cost_per_meter');
+        });
         Schema::table('wastage_orders', function (Blueprint $table) {
             $table->decimal('total_meters')->nullable()->after('cost_per_meter');
         });
