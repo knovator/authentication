@@ -104,10 +104,10 @@ class SalesController extends Controller
      * @throws Exception
      */
     public function store(CreateRequest $request) {
-        if ($response = $this->uniqueCustomerPoNumber($request)) {
+        $input = $request->all();
+        if ($response = $this->uniqueCustomerPoNumber($input)) {
             return $response;
         }
-        $input = $request->all();
         try {
             DB::beginTransaction();
             $input['order_no'] = $this->generateUniqueId(GenerateNumber::SALES);
@@ -129,22 +129,26 @@ class SalesController extends Controller
     }
 
     /**
-     * @param Request $request
-     * @param         $ignoreId
+     * @param      $input
+     * @param bool $ignoreId
      * @return bool|JsonResponse
      * @throws RepositoryException
      */
-    private function uniqueCustomerPoNumber(Request $request, $ignoreId = false) {
-        if ($request->has('customer_po_number') && !empty($request->get('customer_po_number'))) {
-            $oldOrder = $this->salesOrderRepository->makeModel()->where('customer_po_number',
-                $request->get('customer_po_number'));
+    private function uniqueCustomerPoNumber($input, $ignoreId = false) {
+        if (isset($input['customer_po_number']) && !empty($input['customer_po_number'])) {
+
+            $oldOrder = $this->salesOrderRepository->makeModel()->where([
+                'customer_po_number' => $input['customer_po_number'],
+                'customer_id'        => $input['customer_id']
+            ]);
+
             /** @var Builder $oldOrder */
             if ($ignoreId) {
                 $oldOrder = $oldOrder->whereKeyNot($ignoreId);
             }
             if ($oldOrder = $oldOrder->first()) {
                 return $this->sendResponse(null,
-                    'Customer po number is already exist in order no ' . $oldOrder->order_no,
+                    'Customer po number is already exist in order no ' . $oldOrder->order_no . ' for selected customer.',
                     HTTPCode::UNPROCESSABLE_ENTITY);
             }
         }
@@ -304,10 +308,10 @@ class SalesController extends Controller
      * @throws Exception
      */
     public function update(SalesOrder $salesOrder, UpdateRequest $request) {
-        if ($response = $this->uniqueCustomerPoNumber($request, $salesOrder->id)) {
+        $input = $request->all();
+        if ($response = $this->uniqueCustomerPoNumber($input, $salesOrder->id)) {
             return $response;
         }
-        $input = $request->all();
         try {
             DB::beginTransaction();
             $salesOrder->update($input);
