@@ -108,21 +108,6 @@ class StockRepository extends BaseRepository
     }
 
 
-    /**
-     * @param $input
-     * @param $statuses
-     * @return
-     */
-    public function getOrderAnalysisReport($input, $type, $statuses) {
-        $columns = 'order_type,SUM(kg_qty) AS total';
-        foreach ($statuses as $status) {
-            $alias = strtolower($status->code);
-            $columns .= ",SUM(IF(status_id = {$status->id}, kg_qty, 0)) AS {$alias}";
-        }
-
-        return $this->model->selectRaw($columns)->where('order_type', $type)->first();
-
-    }
 
     /**
      * @param $threadColorId

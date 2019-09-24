@@ -108,15 +108,23 @@ class YarnOrderRepository extends BaseRepository
 
         return $orders->orderByDesc('id');
     }
-
     /**
      * @param $input
-     * @param $statusIds
+     * @param $statuses
      * @return
      */
-    public function getOrderAnalysis($input, $statusIds) {
-        return $this->model->selectRaw('status_id,count(*) as total')->groupBy('status_id')
-                           ->whereIn('status_id', $statusIds)->get()->keyBy('status_id');
+    public function getOrderAnalysis($input, $statuses) {
+        $columns = '';
+        $condition = '';
+        $lastKey = array_key_last($statuses);
+        foreach ($statuses as $statusKey => $status) {
+            $alias = strtolower($status->code);
+            $columns .= ",COUNT(IF(status_id = {$status->id},id,null)) as {$alias}_orders,SUM(IF(status_id = {$status->id},total_kg,0)) as {$alias}_meters";
+            $condition .= 'status_id = ' . $status->id . ($statusKey != $lastKey ? ' OR ' : '');
+        }
+
+        return $this->model->selectRaw("COUNT(IF({$condition},id,null)) as total_orders,SUM(IF({$condition},total_kg,0)) as total_kg" .
+            $columns)->first();
     }
 
 }

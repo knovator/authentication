@@ -14,7 +14,6 @@ use App\Modules\Yarn\Repositories\YarnOrderRepository;
 use App\Repositories\MasterRepository;
 use App\Support\DestroyObject;
 use Exception;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Knovators\Support\Helpers\HTTPCode;
 use Log;
@@ -89,25 +88,23 @@ class DashboardController extends Controller
      * @return array
      */
     private function orderAnalysis($input) {
-        $year = (2 > 3) ? date('Y') + 1 : (int) date('Y');
-        $input['startDate'] = ($year - 1) . '-04-01';
-        $input['endDate'] = ($year) . '-03-31';
+        $year = (date('Y') > 3) ? date('Y') + 1 : (int) date('Y');
+        $input['start'] = ($year - 1) . '-04-01';
+        $input['end'] = ($year) . '-03-31';
         $statuses = $this->orderStatuses();
         $orders = [];
+
         if (in_array($orderType = OrderConstant::SALES_ORDER, $input['types'])) {
-            $orders[$orderType]['order'] = $this->commonOrderReport($input,
-                OrderConstant::SALES_ORDER,
+            $orders[$orderType] = $this->commonOrderReport($input,
                 'salesOrderRepository', [
                     MasterConstant::SO_PENDING,
                     MasterConstant::SO_MANUFACTURING,
                     MasterConstant::SO_DELIVERED,
                 ], $statuses);
 
-
         }
         if (in_array($orderType = OrderConstant::YARN_ORDER, $input['types'])) {
-            $orders[$orderType]['order'] = $this->commonOrderReport($input,
-                OrderConstant::YARN_ORDER,
+            $orders[$orderType] = $this->commonOrderReport($input,
                 'yarnOrderRepository', [
                     MasterConstant::SO_PENDING,
                     MasterConstant::SO_DELIVERED,
@@ -115,8 +112,7 @@ class DashboardController extends Controller
         }
 
         if (in_array($orderType = OrderConstant::WASTAGE_ORDER, $input['types'])) {
-            $orders[$orderType]['order'] = $this->commonOrderReport($input,
-                OrderConstant::WASTAGE_ORDER,
+            $orders[$orderType] = $this->commonOrderReport($input,
                 'wastageOrderRepository', [
                     MasterConstant::WASTAGE_PENDING,
                     MasterConstant::WASTAGE_DELIVERED,
@@ -124,8 +120,7 @@ class DashboardController extends Controller
         }
 
         if (in_array($orderType = OrderConstant::PURCHASE_ORDER, $input['types'])) {
-            $orders[$orderType]['order'] = $this->commonOrderReport($input,
-                OrderConstant::PURCHASE_ORDER,
+            $orders[$orderType] = $this->commonOrderReport($input,
                 'purchaseOrderRepository', [
                     MasterConstant::PO_PENDING,
                     MasterConstant::PO_DELIVERED,
@@ -156,25 +151,16 @@ class DashboardController extends Controller
 
     /**
      * @param                      $input
-     * @param                      $type
      * @param string               $repository
      * @param                      $statusCodes
      * @param                      $allStatuses
      * @return mixed
      */
-    private function commonOrderReport($input, $type, $repository, $statusCodes, $allStatuses) {
+    private function commonOrderReport($input, $repository, $statusCodes, $allStatuses) {
         /** @var \Illuminate\Support\Collection $allStatuses */
         $statuses = $allStatuses->whereIn('code', $statusCodes)->all();
-        $totalOrders = $this->{$repository}->getOrderAnalysis($input,
-            array_column($statuses, 'id'));
-        /** @var Collection $totalOrders */
-        $orders['total'] = $totalOrders->sum('total');
-        foreach ($statusCodes as $statusCode) {
-            $orders[strtolower($statusCode)] = isset($totalOrders[$statuses[$statusCode]['id']]) ?
-                $totalOrders[$statuses[$statusCode]['id']]['total'] : 0;
-        }
 
-        return $orders;
+        return $this->{$repository}->getOrderAnalysis($input, $statuses);
     }
 }
 
