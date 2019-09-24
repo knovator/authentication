@@ -124,7 +124,8 @@ class YarnOrderRepository extends BaseRepository
         }
 
         return $this->model->selectRaw("COUNT(IF({$condition},id,null)) as total_orders,SUM(IF({$condition},total_kg,0)) as total_kg" .
-            $columns)->first();
+            $columns)->whereDate('order_date', '>=', $input['startDate'])
+                           ->whereDate('order_date', '<=', $input['endDate'])->first();
     }
 
 }

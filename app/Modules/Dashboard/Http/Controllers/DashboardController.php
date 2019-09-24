@@ -13,6 +13,7 @@ use App\Modules\Wastage\Repositories\WastageOrderRepository;
 use App\Modules\Yarn\Repositories\YarnOrderRepository;
 use App\Repositories\MasterRepository;
 use App\Support\DestroyObject;
+use DB;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Knovators\Support\Helpers\HTTPCode;
@@ -89,8 +90,8 @@ class DashboardController extends Controller
      */
     private function orderAnalysis($input) {
         $year = (date('Y') > 3) ? date('Y') + 1 : (int) date('Y');
-        $input['start'] = ($year - 1) . '-04-01';
-        $input['end'] = ($year) . '-03-31';
+        $input['startDate'] = ($year - 1) . '-04-01';
+        $input['endDate'] = ($year) . '-03-31';
         $statuses = $this->orderStatuses();
         $orders = [];
 

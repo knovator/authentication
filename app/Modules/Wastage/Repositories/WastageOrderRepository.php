@@ -118,7 +118,6 @@ class WastageOrderRepository extends BaseRepository
     }
 
 
-
     /**
      * @param $input
      * @param $statuses
@@ -135,7 +134,8 @@ class WastageOrderRepository extends BaseRepository
         }
 
         return $this->model->selectRaw("COUNT(IF({$condition},id,null)) as total_orders,SUM(IF({$condition},total_meters,0)) as total_meters" .
-            $columns)->first();
+            $columns)->whereDate('order_date', '>=', $input['startDate'])
+                           ->whereDate('order_date', '<=', $input['endDate'])->first();
     }
 
 }
