@@ -12,6 +12,7 @@ use App\Modules\Wastage\Repositories\WastageOrderRepository;
 use App\Modules\Yarn\Repositories\YarnOrderRepository;
 use App\Repositories\MasterRepository;
 use App\Support\DestroyObject;
+use Carbon\Carbon;
 use DB;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
@@ -90,8 +91,11 @@ class DashboardController extends Controller
      * @return array
      */
     private function orderAnalysis($input) {
-        $orders = [];
+        $year = (2 > 3) ? date('Y') + 1 : (int) date('Y');
+        $input['startDate'] = '01-04-' . ($year - 1);
+        $input['endDate'] = '31-03-' . ($year);
         $statuses = $this->orderStatuses();
+        $orders = [];
 
         if (in_array($orderType = OrderConstant::SALES_ORDER, $input['types'])) {
             $orders[$orderType] = $this->commonOrderReport($input, OrderConstant::SALES_ORDER,
@@ -100,6 +104,8 @@ class DashboardController extends Controller
                     MasterConstant::SO_MANUFACTURING,
                     MasterConstant::SO_DELIVERED,
                 ], $statuses);
+
+
         }
         if (in_array($orderType = OrderConstant::YARN_ORDER, $input['types'])) {
             $orders[$orderType] = $this->commonOrderReport($input, OrderConstant::YARN_ORDER,
@@ -158,7 +164,6 @@ class DashboardController extends Controller
     private function commonOrderReport($input, $type, $repository, $statusCodes, $allStatuses) {
         /** @var \Illuminate\Support\Collection $allStatuses */
         $statuses = $allStatuses->whereIn('code', $statusCodes)->all();
-        $stock = $this->stockRepository->getOrderAnalysisReport($input, $type, $statuses);
         $totalOrders = $this->{$repository}->getOrderAnalysis($input,
             array_column($statuses, 'id'));
         /** @var Collection $totalOrders */
@@ -167,7 +172,6 @@ class DashboardController extends Controller
             $orders['order'][strtolower($statusCode)] = isset($totalOrders[$statuses[$statusCode]['id']]) ?
                 $totalOrders[$statuses[$statusCode]['id']]['total'] : 0;
         }
-        $orders['meters'] = $stock;
 
         return $orders;
     }
