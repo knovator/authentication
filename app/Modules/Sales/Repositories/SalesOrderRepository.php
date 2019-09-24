@@ -124,8 +124,8 @@ class SalesOrderRepository extends BaseRepository
      */
     public function getOrderAnalysis($input, $statusIds) {
         return $this->model->selectRaw('status_id,count(*) as total')
-                           ->whereDate('order_date', '>=', $input['startDate'])
-                           ->whereDate('order_date', '<=', $input['endDate'])
+//                           ->whereBetween('order_date', $input['startDate'])
+//                           ->whereDate('order_date', '<=', $input['endDate'])
                            ->groupBy('status_id')
                            ->whereIn('status_id', $statusIds)->get()->keyBy('status_id');
     }
