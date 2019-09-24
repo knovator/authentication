@@ -308,10 +308,10 @@ class SalesController extends Controller
      * @throws Exception
      */
     public function update(SalesOrder $salesOrder, UpdateRequest $request) {
-        if ($response = $this->uniqueCustomerPoNumber($request, $salesOrder->id)) {
+        $input = $request->all();
+        if ($response = $this->uniqueCustomerPoNumber($input, $salesOrder->id)) {
             return $response;
         }
-        $input = $request->all();
         try {
             DB::beginTransaction();
             $salesOrder->update($input);
