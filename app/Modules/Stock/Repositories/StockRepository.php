@@ -108,6 +108,7 @@ class StockRepository extends BaseRepository
     }
 
 
+
     /**
      * @param $threadColorId
      * @param $usedCount

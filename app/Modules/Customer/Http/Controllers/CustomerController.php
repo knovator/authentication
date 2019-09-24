@@ -24,7 +24,7 @@ use Log;
 use Maatwebsite\Excel\Facades\Excel;
 use Prettus\Repository\Exceptions\RepositoryException;
 use Prettus\Validator\Exceptions\ValidatorException;
-use App\Constants\Customer as CustomerConstant;
+use App\Constants\Order as OrderConstant;
 use Str;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -262,19 +262,19 @@ class CustomerController extends Controller
      */
     private function orderList($customer, $input, $export = false) {
         switch ($input['order_type']) {
-            case CustomerConstant::LEDGER_PURCHASE:
+            case OrderConstant::PURCHASE_ORDER:
                 $orders = $this->purchaseOrderRepository->customerOrders($customer->id, $input);
                 break;
 
-            case CustomerConstant::LEDGER_FABRIC:
+            case OrderConstant::FABRIC_ORDER:
                 $orders = $this->salesOrderRepository->customerOrders($customer->id, $input);
                 break;
 
-            case CustomerConstant::LEDGER_YARN:
+            case OrderConstant::YARN_ORDER:
                 $orders = $this->yarnOrderRepository->customerOrders($customer->id, $input);
                 break;
 
-            case CustomerConstant::LEDGER_WASTAGE:
+            case OrderConstant::WASTAGE_ORDER:
                 $orders = $this->wastageOrderRepository->customerOrders($customer->id, $input);
                 break;
 

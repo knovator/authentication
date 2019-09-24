@@ -91,6 +91,7 @@ class WastageController extends Controller
      */
     public function store(CreateRequest $request) {
         $input = $request->all();
+        $input['total_meters'] = collect($input['order_recipes'])->sum('total_meters');
         $input['order_no'] = $this->generateUniqueId(GenerateNumber::WASTAGE);
         $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::WASTAGE_PENDING)->id;
         try {
@@ -289,6 +290,7 @@ class WastageController extends Controller
      */
     public function update(WastageOrder $wastageOrder, UpdateRequest $request) {
         $input = $request->all();
+        $input['total_meters'] = collect($input['order_recipes'])->sum('total_meters');
         try {
             DB::beginTransaction();
             $this->findRecipeByFiddle($input['order_recipes']);

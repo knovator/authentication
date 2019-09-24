@@ -1,16 +1,15 @@
 <?php
 
-namespace App\Modules\Customer\Http\Requests;
+namespace App\Modules\Dashboard\Http\Requests;
 
-use App\Constants\Order;
 use Illuminate\Foundation\Http\FormRequest;
 use Knovators\Support\Traits\APIResponse;
 
 /**
- * Class LedgerRequest
- * @package App\Modules\Customer\Http\Requests
+ * Class AnalysisRequest
+ * @package App\Modules\Dashboard\Http\Requests
  */
-class LedgerRequest extends FormRequest
+class AnalysisRequest extends FormRequest
 {
 
     use APIResponse;
@@ -31,8 +30,7 @@ class LedgerRequest extends FormRequest
      */
     public function rules() {
         return [
-            'order_type' => 'required|string|in:' . Order::FABRIC_ORDER . ',' . Order::YARN_ORDER . ','
-                . Order::WASTAGE_ORDER . ',' . Order::PURCHASE_ORDER
+            'types' => 'required|array',
         ];
     }
 

@@ -3,6 +3,7 @@
 namespace App\Modules\Sales\Repositories;
 
 use App\Modules\Sales\Models\SalesOrder;
+use DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Knovators\Support\Criteria\OrderByDescId;
@@ -115,6 +116,26 @@ class SalesOrderRepository extends BaseRepository
         }
 
         return $orders->orderByDesc('id');
+    }
+
+    /**
+     * @param $input
+     * @param $statuses
+     * @return
+     */
+    public function getOrderAnalysis($input, $statuses) {
+        $columns = '';
+        $condition = '';
+        $lastKey = array_key_last($statuses);
+        foreach ($statuses as $statusKey => $status) {
+            $alias = strtolower($status->code);
+            $columns .= ",COUNT(IF(status_id = {$status->id},id,null)) as {$alias}_orders,SUM(IF(status_id = {$status->id},total_meters,0)) as {$alias}_meters";
+            $condition .= 'status_id = ' . $status->id . ($statusKey != $lastKey ? ' OR ' : '');
+        }
+
+        return $this->model->selectRaw("COUNT(IF({$condition},id,null)) as total_orders,SUM(IF({$condition},total_meters,0)) as total_meters" .
+            $columns)->whereDate('order_date', '>=', $input['startDate'])
+                           ->whereDate('order_date', '<=', $input['endDate'])->first();
     }
 
 

@@ -39,6 +39,9 @@ class UpdateRequest extends FormRequest
             'order_recipes'                                      => 'required|array',
             'order_recipes.*.name'                               => 'required|string|max:60',
             'order_recipes.*.total_fiddles'                      => 'required|integer',
+            'order_recipes.*.pcs'                                => 'required|integer|gte:1',
+            'order_recipes.*.meters'                             => 'required|integer|gte:1',
+            'order_recipes.*.total_meters'                       => 'required|integer',
             'order_recipes.*.thread_color_ids'                   => 'required|array',
             'order_recipes.*.thread_color_ids.*.thread_color_id' => 'required|integer',
             'order_recipes.*.thread_color_ids.*.fiddle_no'       => 'required|integer',
@@ -66,6 +69,10 @@ class UpdateRequest extends FormRequest
             'order_recipes.*.total_fiddles.required'             => 'Recipe feeder must be required',
             'order_recipes.*.thread_color_ids.required'          => 'Please fill all the selected feeders.',
             'order_recipes.*.thread_color_ids.*.thread_color_id' => 'Please fill all the selected feeders.',
+            'order_recipes.*.pcs.required'                       => 'Pcs must be required',
+            'order_recipes.*.meters.required'                    => 'Meters must be required',
+            'order_recipes.*.pcs.gte'                            => 'Pcs must be greater than or equal to 1.',
+            'order_recipes.*.meters.gte'                         => "Meters must be greater than or equal to 1.",
         ];
 
     }

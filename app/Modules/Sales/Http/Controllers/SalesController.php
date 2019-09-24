@@ -108,6 +108,7 @@ class SalesController extends Controller
         if ($response = $this->uniqueCustomerPoNumber($input)) {
             return $response;
         }
+        $input['total_meters'] = collect($input['order_recipes'])->sum('total_meters');
         try {
             DB::beginTransaction();
             $input['order_no'] = $this->generateUniqueId(GenerateNumber::SALES);
@@ -312,6 +313,7 @@ class SalesController extends Controller
         if ($response = $this->uniqueCustomerPoNumber($input, $salesOrder->id)) {
             return $response;
         }
+        $input['total_meters'] = collect($input['order_recipes'])->sum('total_meters');
         try {
             DB::beginTransaction();
             $salesOrder->update($input);

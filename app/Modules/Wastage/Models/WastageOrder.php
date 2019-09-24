@@ -37,6 +37,7 @@ class WastageOrder extends Model
         'created_by',
         'deleted_by',
         'cost_per_meter',
+        'total_meters',
         'design_id',
     ];
 

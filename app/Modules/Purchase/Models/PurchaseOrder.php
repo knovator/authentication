@@ -27,7 +27,8 @@ class PurchaseOrder extends Model
         'status_id',
         'created_by',
         'deleted_by',
-        'challan_no'
+        'challan_no',
+        'total_kg',
     ];
 
 

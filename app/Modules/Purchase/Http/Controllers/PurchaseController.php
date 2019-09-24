@@ -65,6 +65,7 @@ class PurchaseController extends Controller
      */
     public function store(CreateRequest $request) {
         $input = $request->all();
+        $input['total_kg'] = collect($input['threads'])->sum('kg_qty');
         try {
             DB::beginTransaction();
             $input['order_no'] = $this->generateUniqueId(GenerateNumber::PURCHASE);
@@ -134,7 +135,7 @@ class PurchaseController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
         $input = $request->all();
-
+        $input['total_kg'] = collect($input['threads'])->sum('kg_qty');
         try {
             DB::beginTransaction();
             $purchaseOrder->update($input);
