@@ -6,6 +6,7 @@ use App\Constants\Master as MasterConstant;
 use App\Constants\Order as OrderConstant;
 use App\Http\Controllers\Controller;
 use App\Modules\Dashboard\Http\Requests\AnalysisRequest;
+use App\Modules\Design\Repositories\DesignRepository;
 use App\Modules\Purchase\Repositories\PurchaseOrderRepository;
 use App\Modules\Sales\Repositories\SalesOrderRepository;
 use App\Modules\Stock\Repositories\StockRepository;
@@ -40,6 +41,8 @@ class DashboardController extends Controller
 
     protected $masterRepository;
 
+    protected $designRepository;
+
 
     /**
      * DashboardController constructor.
@@ -49,6 +52,7 @@ class DashboardController extends Controller
      * @param PurchaseOrderRepository $purchaseOrderRepository
      * @param StockRepository         $stockRepository
      * @param MasterRepository        $masterRepository
+     * @param DesignRepository        $designRepository
      */
     public function __construct(
         SalesOrderRepository $salesOrderRepository,
@@ -56,7 +60,8 @@ class DashboardController extends Controller
         WastageOrderRepository $wastageOrderRepository,
         PurchaseOrderRepository $purchaseOrderRepository,
         StockRepository $stockRepository,
-        MasterRepository $masterRepository
+        MasterRepository $masterRepository,
+        DesignRepository $designRepository
     ) {
         $this->salesOrderRepository = $salesOrderRepository;
         $this->yarnOrderRepository = $yarnOrderRepository;
@@ -64,16 +69,34 @@ class DashboardController extends Controller
         $this->purchaseOrderRepository = $purchaseOrderRepository;
         $this->stockRepository = $stockRepository;
         $this->masterRepository = $masterRepository;
+        $this->designRepository = $designRepository;
     }
 
     /**
      * @param AnalysisRequest $request
      * @return JsonResponse
      */
-    public function analysis(AnalysisRequest $request) {
+    public function orderAnalysis(AnalysisRequest $request) {
         $input = $request->all();
         try {
-            return $this->sendResponse($this->orderAnalysis($input),
+            return $this->sendResponse($this->orderTypeAnalysis($input),
+                __('messages.retrieved', ['module' => 'Order analysis']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
+
+    /**
+     * @param AnalysisRequest $request
+     * @return JsonResponse
+     */
+    public function designAnalysis() {
+        try {
+            return $this->sendResponse($this->designRepository->designCount(),
                 __('messages.retrieved', ['module' => 'Order analysis']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -88,7 +111,7 @@ class DashboardController extends Controller
      * @param $input
      * @return array
      */
-    private function orderAnalysis($input) {
+    private function orderTypeAnalysis($input) {
         $year = (date('Y') > 3) ? date('Y') + 1 : (int) date('Y');
         $input['startDate'] = ($year - 1) . '-04-01';
         $input['endDate'] = ($year) . '-03-31';
