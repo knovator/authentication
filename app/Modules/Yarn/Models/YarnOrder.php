@@ -27,6 +27,7 @@ class YarnOrder extends Model
         'customer_id',
         'status_id',
         'challan_no',
+        'total_kg',
         'created_by',
         'deleted_by',
         'manufacturing_company_id'

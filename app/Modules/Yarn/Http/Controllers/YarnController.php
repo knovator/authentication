@@ -64,6 +64,7 @@ class YarnController extends Controller
      */
     public function store(CreateRequest $request) {
         $input = $request->all();
+        $input['total_kg'] = collect($input['threads'])->sum('kg_qty');
         try {
             DB::beginTransaction();
             $input['order_no'] = $this->generateUniqueId(GenerateNumber::YARN_SALES);
@@ -131,6 +132,7 @@ class YarnController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
         $input = $request->all();
+        $input['total_kg'] = collect($input['threads'])->sum('kg_qty');
         try {
             DB::beginTransaction();
             $yarnOrder->update($input);
