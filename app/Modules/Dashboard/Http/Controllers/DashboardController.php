@@ -185,12 +185,32 @@ class DashboardController extends Controller
     }
 
     /**
-     * @param AnalysisRequest $request
      * @return JsonResponse
      */
     public function designAnalysis() {
         try {
             return $this->sendResponse($this->designRepository->designCount(),
+                __('messages.retrieved', ['module' => 'Design analysis']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
+
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function mostUsedDesign(Request $request) {
+        $input = $request->all();
+        try {
+            $designs = $this->salesOrderRepository->mostUsedDesignReport($input);
+
+            return $this->sendResponse($designs,
                 __('messages.retrieved', ['module' => 'Design analysis']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
@@ -245,6 +265,7 @@ class DashboardController extends Controller
         ], 'id');
         try {
             $threads = $this->stockRepository->leastUsedReportChart($input, $usedCount);
+
             return $this->sendResponse($threads,
                 __('messages.retrieved', ['module' => 'Threads']),
                 HTTPCode::OK);

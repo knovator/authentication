@@ -17,4 +17,7 @@ Route::group([
 
         Route::get('least-used-thread/chart', 'DashboardController@leastUsedThreadChart')
              ->name('dashboard.least-used-thread-chart');
+
+        Route::get('most-used-designs', 'DashboardController@mostUsedDesign')
+             ->name('dashboard.most-used-designs');
     });
