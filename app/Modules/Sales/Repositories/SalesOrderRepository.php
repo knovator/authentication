@@ -139,4 +139,19 @@ class SalesOrderRepository extends BaseRepository
     }
 
 
+    /**
+     * @param $input
+     * @return
+     */
+    public function topCustomerReportChart($input) {
+
+        return $this->model->selectRaw('customer_id,SUM(total_meters) as meters,COUNT(id) as orders')
+                           ->whereDate('order_date', '>=', $input['startDate'])
+                           ->whereDate('order_date', '<=', $input['endDate'])
+                           ->with('customer:id,first_name,last_name,email,phone')
+                           ->groupBy('customer_id')->orderByRaw('meters DESC')
+                           ->take($input['length'])->get();
+    }
+
+
 }
