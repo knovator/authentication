@@ -3,9 +3,11 @@
 namespace App\Modules\Dashboard\Http\Controllers;
 
 use App\Constants\Master as MasterConstant;
+use App\Constants\Master;
 use App\Constants\Order as OrderConstant;
 use App\Http\Controllers\Controller;
 use App\Modules\Dashboard\Http\Requests\AnalysisRequest;
+use App\Modules\Dashboard\Http\Resources\LeastThread;
 use App\Modules\Dashboard\Http\Resources\TopCustomer;
 use App\Modules\Design\Repositories\DesignRepository;
 use App\Modules\Purchase\Repositories\PurchaseOrderRepository;
@@ -15,6 +17,8 @@ use App\Modules\Wastage\Repositories\WastageOrderRepository;
 use App\Modules\Yarn\Repositories\YarnOrderRepository;
 use App\Repositories\MasterRepository;
 use App\Support\DestroyObject;
+use Arr;
+use Carbon\Carbon;
 use DB;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -216,6 +220,49 @@ class DashboardController extends Controller
             return $this->sendResponse(null, __('messages.something_wrong'),
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function leastUsedThreadChart(Request $request) {
+        $input = $request->all();
+        $statuses = $this->getMasterByCodes([
+            Master::PO_DELIVERED,
+            Master::SO_PENDING,
+            Master::SO_MANUFACTURING,
+            Master::SO_DELIVERED,
+            Master::WASTAGE_DELIVERED,
+        ]);
+//        $usedCount = Arr::only($statuses, [Master::SO_PENDING, Master::SO_MANUFACTURING]);
+
+        $usedCount['available_count'] = array_column([
+            $statuses[Master::PO_DELIVERED],
+            $statuses[Master::SO_MANUFACTURING],
+            $statuses[Master::SO_DELIVERED],
+            $statuses[Master::WASTAGE_DELIVERED]
+        ], 'id');
+        try {
+            $threads = $this->stockRepository->leastUsedReportChart($input, $usedCount);
+            return $this->sendResponse($threads,
+                __('messages.retrieved', ['module' => 'Threads']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
+
+    /**
+     * @param $codes
+     * @return mixed
+     */
+    private function getMasterByCodes($codes) {
+        return $this->masterRepository->findWhereIn('code',
+            $codes, ['id', 'code'])->keyBy('code')->toArray();
     }
 
 

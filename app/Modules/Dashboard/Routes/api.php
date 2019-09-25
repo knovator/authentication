@@ -14,4 +14,7 @@ Route::group([
 
         Route::get('top-customer/chart', 'DashboardController@topCustomerChart')
              ->name('dashboard.top-customer-chart');
+
+        Route::get('least-used-thread/chart', 'DashboardController@leastUsedThreadChart')
+             ->name('dashboard.least-used-thread-chart');
     });
