@@ -11,4 +11,7 @@ Route::group([
 
         Route::get('design-analysis', 'DashboardController@designAnalysis')
              ->name('dashboard.order-analysis');
+
+        Route::get('top-customer/chart', 'DashboardController@topCustomerChart')
+             ->name('dashboard.top-customer-chart');
     });

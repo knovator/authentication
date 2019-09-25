@@ -194,10 +194,6 @@ class SalesOrder extends Model
             return 0;
         }
 
-        if (!$this->relationLoaded('recipeMeters')) {
-            throw UnloadedRelationException::make($this, 'recipeMeters');
-        }
-
         if (!$this->relationLoaded('manufacturingTotalMeters')) {
             throw UnloadedRelationException::make($this, 'manufacturingTotalMeters');
         }
@@ -206,7 +202,7 @@ class SalesOrder extends Model
             throw UnloadedRelationException::make($this, 'deliveredTotalMeters');
         }
 
-        $total = $this->recipeMeters->total;
+        $total = $this->total_meters;
 
         if (!is_null($this->manufacturingTotalMeters)) {
             $total = $total - $this->manufacturingTotalMeters->total;
