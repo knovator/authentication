@@ -3,7 +3,9 @@
 namespace App\Modules\Sales\Repositories;
 
 use App\Modules\Sales\Models\SalesOrder;
+use Carbon\Carbon;
 use DB;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Knovators\Support\Criteria\OrderByDescId;
@@ -151,6 +153,27 @@ class SalesOrderRepository extends BaseRepository
                            ->with('customer:id,first_name,last_name,email,phone')
                            ->groupBy('customer_id')->orderByRaw('meters DESC')
                            ->take($input['length'])->get();
+    }
+
+    /**
+     * @param $input
+     * @return
+     * @throws Exception
+     */
+    public function mostUsedDesignReport($input) {
+        $now = Carbon::now();
+        $input['endDate'] = $now->format('Y-m-d');
+        $input['startDate'] = $now->subMonths(6)->format('Y-m-d');
+
+        return datatables()->of($this->model->selectRaw('design_id,COUNT(id) as design_count')
+                                            ->whereDate('order_date', '>=', $input['startDate'])
+                                            ->whereDate('order_date', '<=', $input['endDate'])
+                                            ->with([
+                                                'design.detail:design_id,designer_no,avg_pick,reed',
+                                                'design.mainImage.file:id,uri'
+                                            ])->groupBy('design_id')
+                                            ->orderByDesc('design_count'))->make(true);
+
     }
 
 
