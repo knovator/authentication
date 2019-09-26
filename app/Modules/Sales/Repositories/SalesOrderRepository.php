@@ -142,17 +142,27 @@ class SalesOrderRepository extends BaseRepository
 
 
     /**
-     * @param $input
+     * @param      $input
+     * @param bool $chart
      * @return
+     * @throws Exception
      */
-    public function topCustomerReportChart($input) {
+    public function topCustomerReport($input, $chart = false) {
 
-        return $this->model->selectRaw('customer_id,SUM(total_meters) as meters,COUNT(id) as orders')
-                           ->whereDate('order_date', '>=', $input['startDate'])
-                           ->whereDate('order_date', '<=', $input['endDate'])
-                           ->with('customer:id,first_name,last_name,email,phone')
-                           ->groupBy('customer_id')->orderByRaw('meters DESC')
-                           ->take($input['length'])->get();
+        $orders = $this->model->selectRaw('customer_id,SUM(total_meters) as meters,COUNT(id) as orders')
+                              ->with('customer:id,first_name,last_name,email,phone')
+                              ->groupBy('customer_id')->orderByRaw('meters DESC');
+
+        if (isset($input['startDate'])) {
+            $orders = $orders->whereDate('order_date', '>=', $input['startDate'])
+                             ->whereDate('order_date', '<=', $input['endDate'])->take($input['length']);
+        }
+
+        if ($chart) {
+            return $orders->get();
+        }
+
+        return datatables()->of($orders)->make(true);
     }
 
     /**

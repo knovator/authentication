@@ -3,11 +3,10 @@
 namespace App\Modules\Dashboard\Http\Controllers;
 
 use App\Constants\Master as MasterConstant;
-use App\Constants\Master;
 use App\Constants\Order as OrderConstant;
 use App\Http\Controllers\Controller;
 use App\Modules\Dashboard\Http\Requests\AnalysisRequest;
-use App\Modules\Dashboard\Http\Resources\LeastThread;
+use App\Modules\Dashboard\Http\Requests\TopCustomerRequest;
 use App\Modules\Dashboard\Http\Resources\TopCustomer;
 use App\Modules\Design\Repositories\DesignRepository;
 use App\Modules\Purchase\Repositories\PurchaseOrderRepository;
@@ -16,10 +15,6 @@ use App\Modules\Stock\Repositories\StockRepository;
 use App\Modules\Wastage\Repositories\WastageOrderRepository;
 use App\Modules\Yarn\Repositories\YarnOrderRepository;
 use App\Repositories\MasterRepository;
-use App\Support\DestroyObject;
-use Arr;
-use Carbon\Carbon;
-use DB;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -33,8 +28,6 @@ use Log;
  */
 class DashboardController extends Controller
 {
-
-    use DestroyObject;
 
     protected $salesOrderRepository;
 
@@ -222,14 +215,16 @@ class DashboardController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param TopCustomerRequest $request
      * @return JsonResponse
      */
-    public function topCustomerChart(Request $request) {
+    public function topCustomerChart(TopCustomerRequest $request) {
         $input = $request->all();
-        $this->financialYear($input);
+        if ($input['type'] == 'dashboard') {
+            $this->financialYear($input);
+        }
         try {
-            $customers = $this->salesOrderRepository->topCustomerReportChart($input);
+            $customers = $this->salesOrderRepository->topCustomerReport($input, true);
 
             return $this->sendResponse(TopCustomer::collection($customers),
                 __('messages.retrieved', ['module' => 'Customers']),
@@ -249,19 +244,19 @@ class DashboardController extends Controller
     public function leastUsedThreadChart(Request $request) {
         $input = $request->all();
         $statuses = $this->getMasterByCodes([
-            Master::PO_DELIVERED,
-            Master::SO_PENDING,
-            Master::SO_MANUFACTURING,
-            Master::SO_DELIVERED,
-            Master::WASTAGE_DELIVERED,
+            MasterConstant::PO_DELIVERED,
+            MasterConstant::SO_PENDING,
+            MasterConstant::SO_MANUFACTURING,
+            MasterConstant::SO_DELIVERED,
+            MasterConstant::WASTAGE_DELIVERED,
         ]);
-//        $usedCount = Arr::only($statuses, [Master::SO_PENDING, Master::SO_MANUFACTURING]);
+//        $usedCount = Arr::only($statuses, [MasterConstant::SO_PENDING, MasterConstant::SO_MANUFACTURING]);
 
         $usedCount['available_count'] = array_column([
-            $statuses[Master::PO_DELIVERED],
-            $statuses[Master::SO_MANUFACTURING],
-            $statuses[Master::SO_DELIVERED],
-            $statuses[Master::WASTAGE_DELIVERED]
+            $statuses[MasterConstant::PO_DELIVERED],
+            $statuses[MasterConstant::SO_MANUFACTURING],
+            $statuses[MasterConstant::SO_DELIVERED],
+            $statuses[MasterConstant::WASTAGE_DELIVERED]
         ], 'id');
         try {
             $threads = $this->stockRepository->leastUsedReportChart($input, $usedCount);
