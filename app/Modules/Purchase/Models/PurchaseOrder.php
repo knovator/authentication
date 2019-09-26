@@ -2,6 +2,7 @@
 
 namespace App\Modules\Purchase\Models;
 
+use App\Exceptions\UnloadedRelationException;
 use App\Modules\Customer\Models\Customer;
 use App\Modules\Stock\Models\Stock;
 use Illuminate\Database\Eloquent\Model;
@@ -101,5 +102,32 @@ class PurchaseOrder extends Model
      */
     public function deliveries() {
         return $this->hasMany(PurchaseDelivery::class, 'purchase_order_id', 'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function deliveredMeters() {
+        return $this->hasOne(PurchaseDelivery::class, 'purchase_order_id', 'id')
+                    ->selectRaw('SUM(total_kg) as total,purchase_order_id')
+                    ->groupBy('purchase_order_id');
+    }
+
+    /**
+     * @return UnloadedRelationException
+     */
+    public function getPendingKgAttribute() {
+
+        if (!$this->relationLoaded('deliveredMeters')) {
+            throw UnloadedRelationException::make(get_class($this), 'deliveredMeters');
+        }
+
+        $total = $this->total_kg;
+
+        if (!is_null($this->deliveredMeters)) {
+            $total = $total - $this->deliveredMeters->total;
+        }
+        return $total;
     }
 }

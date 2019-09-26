@@ -4,6 +4,7 @@ namespace App\Modules\Purchase\Repositories;
 
 use App\Modules\Purchase\Models\PurchaseOrder;
 use App\Support\OrderByUpdatedAt;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Knovators\Support\Criteria\OrderByDescId;
@@ -36,9 +37,9 @@ class PurchaseOrderRepository extends BaseRepository
     /**
      * @param array $input
      * @param bool  $export
-     * @param       $additionalRelations
      * @return mixed
      * @throws RepositoryException
+     * @throws Exception
      */
     public function getPurchaseOrderList($input, $export = false) {
         $this->applyCriteria();
@@ -72,13 +73,22 @@ class PurchaseOrderRepository extends BaseRepository
             $orders = $orders->whereDate('order_date', '<=', $input['end_date']);
         }
 
-        $orders = datatables()->of($orders);
+        if (isset($input['type']) && $input['type'] == 'dashboard') {
 
-        if ($export) {
-            $orders = $orders->skipPaging();
+            $orders = datatables()->of($orders->with('deliveredMeters'))
+                                  ->addColumn('pending_kg', function ($order) {
+                                      return $order->pending_kg;
+                                  });
+
+        } elseif ($export) {
+            $orders = datatables()->of($orders)->skipPaging();
+        } else {
+            $orders = datatables()->of($orders);
         }
 
+
         $orders = $orders->make(true);
+
         $this->resetModel();
 
         return $orders;
