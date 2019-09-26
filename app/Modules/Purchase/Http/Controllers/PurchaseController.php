@@ -273,7 +273,7 @@ class PurchaseController extends Controller
             Log::error($exception);
 
             return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY);
+                HTTPCode::UNPROCESSABLE_ENTITY,$exception);
         }
     }
 

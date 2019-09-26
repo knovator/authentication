@@ -187,7 +187,7 @@ class SalesOrder extends Model
      */
     public function getPendingMetersAttribute() {
         if (!$this->relationLoaded('status')) {
-            throw UnloadedRelationException::make($this, 'status');
+            throw UnloadedRelationException::make(get_class($this), 'status');
         }
 
         if ($this->status->code == MasterConstant::SO_CANCELED) {
@@ -195,15 +195,15 @@ class SalesOrder extends Model
         }
 
         if (!$this->relationLoaded('recipeMeters')) {
-            throw UnloadedRelationException::make($this, 'recipeMeters');
+            throw UnloadedRelationException::make(get_class($this), 'recipeMeters');
         }
 
         if (!$this->relationLoaded('manufacturingTotalMeters')) {
-            throw UnloadedRelationException::make($this, 'manufacturingTotalMeters');
+            throw UnloadedRelationException::make(get_class($this), 'manufacturingTotalMeters');
         }
 
         if (!$this->relationLoaded('deliveredTotalMeters')) {
-            throw UnloadedRelationException::make($this, 'deliveredTotalMeters');
+            throw UnloadedRelationException::make(get_class($this), 'deliveredTotalMeters');
         }
 
         $total = $this->recipeMeters->total;
