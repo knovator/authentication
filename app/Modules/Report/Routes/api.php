@@ -1,11 +1,9 @@
 <?php
 
-
 Route::group([
-    'prefix'     => 'admin/dashboard',
-    'middleware' => 'auth_active'
+    'prefix'     => 'admin/report',
 ],
     function () {
-        Route::get('top-customer/list', 'ReportController@topCustomerList')
-             ->name('report.top-customer-list');
+        Route::get('top-customer/export', 'ReportController@topCustomerExport')
+             ->name('report.top-customer-export');
     });

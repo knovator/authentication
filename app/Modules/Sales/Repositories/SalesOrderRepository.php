@@ -2,6 +2,7 @@
 
 namespace App\Modules\Sales\Repositories;
 
+use App\Modules\Dashboard\Http\Resources\TopCustomer;
 use App\Modules\Sales\Models\SalesOrder;
 use Carbon\Carbon;
 use DB;
@@ -147,19 +148,24 @@ class SalesOrderRepository extends BaseRepository
      * @return
      * @throws Exception
      */
-    public function topCustomerReport($input, $chart = false) {
+    public function topCustomerReport($input) {
 
         $orders = $this->model->selectRaw('customer_id,SUM(total_meters) as meters,COUNT(id) as orders')
                               ->with('customer:id,first_name,last_name,email,phone')
                               ->groupBy('customer_id')->orderByRaw('meters DESC');
 
-        if (isset($input['startDate'])) {
-            $orders = $orders->whereDate('order_date', '>=', $input['startDate'])
-                             ->whereDate('order_date', '<=', $input['endDate'])->take($input['length']);
-        }
+        if ($input['type'] == 'chart') {
 
-        if ($chart) {
-            return $orders->get();
+            if ($input['api'] == 'dashboard') {
+                $orders = $orders->whereDate('order_date', '>=', $input['startDate'])
+                                 ->whereDate('order_date', '<=', $input['endDate']);
+            }
+
+            return TopCustomer::collection($orders->take($input['length'])
+                                                  ->get());
+        }
+        if ($input['type'] == 'export') {
+            return datatables()->of($orders)->make(true);
         }
 
         return datatables()->of($orders)->make(true);

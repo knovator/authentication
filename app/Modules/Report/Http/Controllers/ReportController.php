@@ -31,25 +31,6 @@ class ReportController extends Controller
         $this->salesOrderRepository = $salesOrderRepository;
     }
 
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function topCustomerList(Request $request) {
-        $input = $request->all();
-        try {
-            $customers = $this->salesOrderRepository->topCustomerReport($input, false);
-
-            return $this->sendResponse($customers,
-                __('messages.retrieved', ['module' => 'Customers']),
-                HTTPCode::OK);
-        } catch (Exception $exception) {
-            Log::error($exception);
-
-            return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
-        }
-    }
 }
 
 

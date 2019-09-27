@@ -218,15 +218,15 @@ class DashboardController extends Controller
      * @param TopCustomerRequest $request
      * @return JsonResponse
      */
-    public function topCustomerChart(TopCustomerRequest $request) {
+    public function topCustomerReport(TopCustomerRequest $request) {
         $input = $request->all();
-        if ($input['type'] == 'dashboard') {
+        if ($input['api'] == 'dashboard' && $input['type'] == 'chart') {
             $this->financialYear($input);
         }
         try {
-            $customers = $this->salesOrderRepository->topCustomerReport($input, true);
+            $customers = $this->salesOrderRepository->topCustomerReport($input);
 
-            return $this->sendResponse(TopCustomer::collection($customers),
+            return $this->sendResponse($customers,
                 __('messages.retrieved', ['module' => 'Customers']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
