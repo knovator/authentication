@@ -73,19 +73,15 @@ class PurchaseOrderRepository extends BaseRepository
             $orders = $orders->whereDate('order_date', '<=', $input['end_date']);
         }
 
-        if (isset($input['type']) && $input['type'] == 'dashboard') {
+        if ($export) {
+            $orders = datatables()->of($orders)->skipPaging();
+        } else {
 
             $orders = datatables()->of($orders->with('deliveredMeters'))
                                   ->addColumn('pending_kg', function ($order) {
                                       return $order->pending_kg;
                                   });
-
-        } elseif ($export) {
-            $orders = datatables()->of($orders)->skipPaging();
-        } else {
-            $orders = datatables()->of($orders);
         }
-
 
         $orders = $orders->make(true);
 
