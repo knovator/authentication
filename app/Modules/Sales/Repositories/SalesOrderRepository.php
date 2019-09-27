@@ -9,6 +9,7 @@ use DB;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
 use Prettus\Repository\Exceptions\RepositoryException;
@@ -144,8 +145,7 @@ class SalesOrderRepository extends BaseRepository
 
     /**
      * @param      $input
-     * @param bool $chart
-     * @return
+     * @return AnonymousResourceCollection
      * @throws Exception
      */
     public function topCustomerReport($input) {
@@ -153,6 +153,11 @@ class SalesOrderRepository extends BaseRepository
         $orders = $this->model->selectRaw('customer_id,SUM(total_meters) as meters,COUNT(id) as orders')
                               ->with('customer:id,first_name,last_name,email,phone')
                               ->groupBy('customer_id')->orderByRaw('meters DESC');
+
+
+        if (isset($input['ids']) && (!empty($input['ids']))) {
+            $orders = $orders->whereIn('customer_id', $input['ids']);
+        }
 
         if ($input['type'] == 'chart') {
 
@@ -165,7 +170,7 @@ class SalesOrderRepository extends BaseRepository
                                                   ->get());
         }
         if ($input['type'] == 'export') {
-            return datatables()->of($orders)->make(true);
+            return datatables()->of($orders)->skipPaging()->make(true)->getData()->data;
         }
 
         return datatables()->of($orders)->make(true);
