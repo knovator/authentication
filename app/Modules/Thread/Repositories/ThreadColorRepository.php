@@ -3,10 +3,8 @@
 
 namespace App\Modules\Thread\Repositories;
 
-use App\Models\Master;
 use App\Modules\Thread\Models\ThreadColor;
 use Carbon\Carbon;
-use DB;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
