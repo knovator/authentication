@@ -7,6 +7,7 @@ use App\Modules\Dashboard\Http\Requests\TopCustomerRequest;
 use App\Modules\Sales\Repositories\SalesOrderRepository;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Knovators\Support\Helpers\HTTPCode;
 use Log;
 
@@ -34,7 +35,7 @@ class ReportController extends Controller
      * @param TopCustomerRequest $request
      * @return JsonResponse
      */
-    public function topCustomerList(TopCustomerRequest $request) {
+    public function topCustomerList(Request $request) {
         $input = $request->all();
         try {
             $customers = $this->salesOrderRepository->topCustomerReport($input, false);
