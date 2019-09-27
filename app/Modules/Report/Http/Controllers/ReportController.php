@@ -32,7 +32,7 @@ class ReportController extends Controller
     }
 
     /**
-     * @param TopCustomerRequest $request
+     * @param Request $request
      * @return JsonResponse
      */
     public function topCustomerList(Request $request) {
