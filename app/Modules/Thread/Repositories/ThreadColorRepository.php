@@ -3,9 +3,9 @@
 
 namespace App\Modules\Thread\Repositories;
 
-use App\Models\Master;
 use App\Modules\Thread\Models\ThreadColor;
-use DB;
+use Carbon\Carbon;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -78,7 +78,6 @@ class ThreadColorRepository extends BaseRepository
     }
 
     /**
-     * @param $statusIds
      * @return mixed
      * @throws RepositoryException
      */
@@ -94,7 +93,6 @@ class ThreadColorRepository extends BaseRepository
     }
 
     /**
-     * @param $statusIds
      * @return array
      */
     private function commonRelations() {
@@ -107,6 +105,43 @@ class ThreadColorRepository extends BaseRepository
             'manufacturingStock',
             'deliveredStock',
         ];
+    }
+
+
+    /**
+     * @param      $input
+     * @param      $soDeliveredId
+     * @param bool $export
+     * @return Model
+     * @throws Exception
+     */
+    public function leastUsedThreads($input, $soDeliveredId, $export = false) {
+
+        $now = Carbon::now();
+        $input['endDate'] = $now->format('Y-m-d');
+        $input['startDate'] = $now->subMonths(3)->format('Y-m-d');
+
+        $threads = $this->model->wherehas('stocks',
+            function ($stocks) use ($soDeliveredId, $input) {
+                /** @var Builder $stocks */
+                $stocks->where('status_id', '<>', $soDeliveredId);
+
+                if (isset($input['api']) && $input['api'] == 'dashboard') {
+                    $stocks->whereDate('created_at', '>=', $input['startDate'])
+                           ->whereDate('created_at', '<=', $input['endDate']);
+                }
+            })->with(['thread:id,name,denier', 'color:id,name,code', 'availableStock']);
+
+
+        $threads = datatables()->of($threads);
+
+
+        if ($export) {
+            return $threads->skipPaging()->make(true)->getData()->data;
+        }
+
+        return $threads->make(true);
+
     }
 
 }

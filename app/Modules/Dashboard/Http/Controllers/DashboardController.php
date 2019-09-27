@@ -6,12 +6,12 @@ use App\Constants\Master as MasterConstant;
 use App\Constants\Order as OrderConstant;
 use App\Http\Controllers\Controller;
 use App\Modules\Dashboard\Http\Requests\AnalysisRequest;
+use App\Modules\Dashboard\Http\Requests\LeastThreadRequest;
 use App\Modules\Dashboard\Http\Requests\TopCustomerRequest;
-use App\Modules\Dashboard\Http\Resources\TopCustomer;
 use App\Modules\Design\Repositories\DesignRepository;
 use App\Modules\Purchase\Repositories\PurchaseOrderRepository;
 use App\Modules\Sales\Repositories\SalesOrderRepository;
-use App\Modules\Stock\Repositories\StockRepository;
+use App\Modules\Thread\Repositories\ThreadColorRepository;
 use App\Modules\Wastage\Repositories\WastageOrderRepository;
 use App\Modules\Yarn\Repositories\YarnOrderRepository;
 use App\Repositories\MasterRepository;
@@ -37,7 +37,7 @@ class DashboardController extends Controller
 
     protected $purchaseOrderRepository;
 
-    protected $stockRepository;
+    protected $threadColorRepository;
 
     protected $masterRepository;
 
@@ -50,7 +50,7 @@ class DashboardController extends Controller
      * @param YarnOrderRepository     $yarnOrderRepository
      * @param WastageOrderRepository  $wastageOrderRepository
      * @param PurchaseOrderRepository $purchaseOrderRepository
-     * @param StockRepository         $stockRepository
+     * @param ThreadColorRepository   $threadColorRepository
      * @param MasterRepository        $masterRepository
      * @param DesignRepository        $designRepository
      */
@@ -59,7 +59,7 @@ class DashboardController extends Controller
         YarnOrderRepository $yarnOrderRepository,
         WastageOrderRepository $wastageOrderRepository,
         PurchaseOrderRepository $purchaseOrderRepository,
-        StockRepository $stockRepository,
+        ThreadColorRepository $threadColorRepository,
         MasterRepository $masterRepository,
         DesignRepository $designRepository
     ) {
@@ -67,7 +67,7 @@ class DashboardController extends Controller
         $this->yarnOrderRepository = $yarnOrderRepository;
         $this->wastageOrderRepository = $wastageOrderRepository;
         $this->purchaseOrderRepository = $purchaseOrderRepository;
-        $this->stockRepository = $stockRepository;
+        $this->threadColorRepository = $threadColorRepository;
         $this->masterRepository = $masterRepository;
         $this->designRepository = $designRepository;
     }
@@ -241,25 +241,11 @@ class DashboardController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function leastUsedThreadChart(Request $request) {
+    public function leastUsedThreadChart(LeastThreadRequest $request) {
         $input = $request->all();
-        $statuses = $this->getMasterByCodes([
-            MasterConstant::PO_DELIVERED,
-            MasterConstant::SO_PENDING,
-            MasterConstant::SO_MANUFACTURING,
-            MasterConstant::SO_DELIVERED,
-            MasterConstant::WASTAGE_DELIVERED,
-        ]);
-//        $usedCount = Arr::only($statuses, [MasterConstant::SO_PENDING, MasterConstant::SO_MANUFACTURING]);
-
-        $usedCount['available_count'] = array_column([
-            $statuses[MasterConstant::PO_DELIVERED],
-            $statuses[MasterConstant::SO_MANUFACTURING],
-            $statuses[MasterConstant::SO_DELIVERED],
-            $statuses[MasterConstant::WASTAGE_DELIVERED]
-        ], 'id');
         try {
-            $threads = $this->stockRepository->leastUsedReportChart($input, $usedCount);
+            $soDeliveredId = $this->masterRepository->findByCode(MasterConstant::SO_DELIVERED)->id;
+            $threads = $this->threadColorRepository->leastUsedThreads($input, $soDeliveredId);
 
             return $this->sendResponse($threads,
                 __('messages.retrieved', ['module' => 'Threads']),
@@ -270,15 +256,6 @@ class DashboardController extends Controller
             return $this->sendResponse(null, __('messages.something_wrong'),
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
-    }
-
-    /**
-     * @param $codes
-     * @return mixed
-     */
-    private function getMasterByCodes($codes) {
-        return $this->masterRepository->findWhereIn('code',
-            $codes, ['id', 'code'])->keyBy('code')->toArray();
     }
 
 

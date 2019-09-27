@@ -108,12 +108,7 @@ class ThreadColor extends Model
         return $this->morphOne(Stock::class, 'product', 'product_type', 'product_id')
                     ->whereHas('status', function ($master) {
                         /** @var Builder $master */
-                        $master->whereIn('code', [
-                            MasterConstant::PO_DELIVERED,
-                            MasterConstant::SO_MANUFACTURING,
-                            MasterConstant::SO_DELIVERED,
-                            MasterConstant::WASTAGE_DELIVERED,
-                        ]);
+                        $master->whereIn('code', Stock::AVAILABLE_STATUSES);
                     })
                     ->selectRaw('product_id,product_type,sum(kg_qty) as available_qty')
                     ->groupBy(['product_id', 'product_type']);
