@@ -11,6 +11,7 @@ use App\Modules\Dashboard\Http\Resources\TopCustomer;
 use App\Modules\Design\Repositories\DesignRepository;
 use App\Modules\Purchase\Repositories\PurchaseOrderRepository;
 use App\Modules\Sales\Repositories\SalesOrderRepository;
+use App\Modules\Stock\Models\Stock;
 use App\Modules\Stock\Repositories\StockRepository;
 use App\Modules\Wastage\Repositories\WastageOrderRepository;
 use App\Modules\Yarn\Repositories\YarnOrderRepository;
@@ -243,21 +244,7 @@ class DashboardController extends Controller
      */
     public function leastUsedThreadChart(Request $request) {
         $input = $request->all();
-        $statuses = $this->getMasterByCodes([
-            MasterConstant::PO_DELIVERED,
-            MasterConstant::SO_PENDING,
-            MasterConstant::SO_MANUFACTURING,
-            MasterConstant::SO_DELIVERED,
-            MasterConstant::WASTAGE_DELIVERED,
-        ]);
-//        $usedCount = Arr::only($statuses, [MasterConstant::SO_PENDING, MasterConstant::SO_MANUFACTURING]);
-
-        $usedCount['available_count'] = array_column([
-            $statuses[MasterConstant::PO_DELIVERED],
-            $statuses[MasterConstant::SO_MANUFACTURING],
-            $statuses[MasterConstant::SO_DELIVERED],
-            $statuses[MasterConstant::WASTAGE_DELIVERED]
-        ], 'id');
+        $usedCount['available_count'] = $this->getMasterByCodes(Stock::AVAILABLE_STATUSES);
         try {
             $threads = $this->stockRepository->leastUsedReportChart($input, $usedCount);
 
@@ -278,7 +265,7 @@ class DashboardController extends Controller
      */
     private function getMasterByCodes($codes) {
         return $this->masterRepository->findWhereIn('code',
-            $codes, ['id', 'code'])->keyBy('code')->toArray();
+            $codes, ['id', 'code'])->pluck('id')->toArray();
     }
 
 

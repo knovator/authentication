@@ -3,6 +3,7 @@
 namespace App\Modules\Stock\Models;
 
 
+use App\Constants\Master as MasterConstant;
 use App\Models\Master;
 use Illuminate\Database\Eloquent\Model;
 
@@ -13,8 +14,14 @@ use Illuminate\Database\Eloquent\Model;
 class Stock extends Model
 {
 
-    protected $table = 'stocks';
+    public const AVAILABLE_STATUSES = [
+        MasterConstant::PO_DELIVERED,
+        MasterConstant::SO_MANUFACTURING,
+        MasterConstant::SO_DELIVERED,
+        MasterConstant::WASTAGE_DELIVERED,
+    ];
 
+    protected $table = 'stocks';
     protected $fillable = [
         'product_type',
         'product_id',
@@ -28,7 +35,6 @@ class Stock extends Model
         'purchased_thread_id',
         'wastage_recipe_id',
     ];
-
 
     /**
      * @return mixed

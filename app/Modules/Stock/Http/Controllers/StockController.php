@@ -4,6 +4,7 @@ namespace App\Modules\Stock\Http\Controllers;
 
 use App\Constants\Master;
 use App\Http\Controllers\Controller;
+use App\Modules\Stock\Models\Stock;
 use App\Modules\Stock\Repositories\StockRepository;
 use App\Modules\Thread\Models\ThreadColor;
 use App\Modules\Thread\Repositories\ThreadColorRepository;
@@ -84,12 +85,9 @@ class StockController extends Controller
         ]);
         $usedCount = Arr::except($statuses, [Master::PO_DELIVERED]);
 
-        $usedCount['available_count'] = array_column([
-            $statuses[Master::PO_DELIVERED],
-            $statuses[Master::SO_MANUFACTURING],
-            $statuses[Master::SO_DELIVERED],
-            $statuses[Master::WASTAGE_DELIVERED]
-        ], 'id');
+        $usedCount['available_count'] = collect($statuses)
+            ->whereIn('code', Stock::AVAILABLE_STATUSES)->pluck('id')->toArray();
+
 
         return ['statuses' => $statuses, 'userCount' => $usedCount];
     }
