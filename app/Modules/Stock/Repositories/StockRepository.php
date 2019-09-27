@@ -124,32 +124,5 @@ class StockRepository extends BaseRepository
         ])->where('product_id', $threadColorId)->first();
     }
 
-    /**
-     * @param $input
-     * @param $usedCount
-     * @param $soDelivered
-     * @return
-     * @throws Exception
-     */
-    public function leastUsedReportChart($input, $usedCount) {
-        $now = Carbon::now();
-        $input['endDate'] = $now->format('Y-m-d');
-        $input['startDate'] = $now->subMonths(3)->format('Y-m-d');
-
-        $stocks = $this->model->selectRaw($this->setStockCountColumn($usedCount,
-            'product_id,product_type'))
-                              ->with([
-                                  'product.thread:id,name,denier',
-                                  'product.color:id,name,code'
-                              ])->groupBy('product_id', 'product_type');
-
-        if ($input['api'] == 'dashboard') {
-            $stocks = $stocks->whereDate('created_at', '>=', $input['startDate'])
-                             ->whereDate('created_at', '<=', $input['endDate']);
-        }
-
-        return datatables()->of($stocks)->make(true);
-    }
-
 
 }

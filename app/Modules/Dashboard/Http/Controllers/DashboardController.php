@@ -13,6 +13,7 @@ use App\Modules\Purchase\Repositories\PurchaseOrderRepository;
 use App\Modules\Sales\Repositories\SalesOrderRepository;
 use App\Modules\Stock\Models\Stock;
 use App\Modules\Stock\Repositories\StockRepository;
+use App\Modules\Thread\Repositories\ThreadColorRepository;
 use App\Modules\Wastage\Repositories\WastageOrderRepository;
 use App\Modules\Yarn\Repositories\YarnOrderRepository;
 use App\Repositories\MasterRepository;
@@ -38,7 +39,7 @@ class DashboardController extends Controller
 
     protected $purchaseOrderRepository;
 
-    protected $stockRepository;
+    protected $threadColorRepository;
 
     protected $masterRepository;
 
@@ -51,7 +52,7 @@ class DashboardController extends Controller
      * @param YarnOrderRepository     $yarnOrderRepository
      * @param WastageOrderRepository  $wastageOrderRepository
      * @param PurchaseOrderRepository $purchaseOrderRepository
-     * @param StockRepository         $stockRepository
+     * @param ThreadColorRepository   $threadColorRepository
      * @param MasterRepository        $masterRepository
      * @param DesignRepository        $designRepository
      */
@@ -60,7 +61,7 @@ class DashboardController extends Controller
         YarnOrderRepository $yarnOrderRepository,
         WastageOrderRepository $wastageOrderRepository,
         PurchaseOrderRepository $purchaseOrderRepository,
-        StockRepository $stockRepository,
+        ThreadColorRepository $threadColorRepository,
         MasterRepository $masterRepository,
         DesignRepository $designRepository
     ) {
@@ -68,7 +69,7 @@ class DashboardController extends Controller
         $this->yarnOrderRepository = $yarnOrderRepository;
         $this->wastageOrderRepository = $wastageOrderRepository;
         $this->purchaseOrderRepository = $purchaseOrderRepository;
-        $this->stockRepository = $stockRepository;
+        $this->threadColorRepository = $threadColorRepository;
         $this->masterRepository = $masterRepository;
         $this->designRepository = $designRepository;
     }
@@ -244,9 +245,9 @@ class DashboardController extends Controller
      */
     public function leastUsedThreadChart(Request $request) {
         $input = $request->all();
-        $usedCount['available_count'] = $this->getMasterByCodes(Stock::AVAILABLE_STATUSES);
         try {
-            $threads = $this->stockRepository->leastUsedReportChart($input, $usedCount);
+            $soDeliveredId = $this->masterRepository->findByCode(MasterConstant::SO_DELIVERED)->id;
+            $threads = $this->threadColorRepository->leastUsedThreads($input, $soDeliveredId);
 
             return $this->sendResponse($threads,
                 __('messages.retrieved', ['module' => 'Threads']),
@@ -257,15 +258,6 @@ class DashboardController extends Controller
             return $this->sendResponse(null, __('messages.something_wrong'),
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
-    }
-
-    /**
-     * @param $codes
-     * @return mixed
-     */
-    private function getMasterByCodes($codes) {
-        return $this->masterRepository->findWhereIn('code',
-            $codes, ['id', 'code'])->pluck('id')->toArray();
     }
 
 
