@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Modules\Report\Http\Exports\CustomerExport;
 use App\Modules\Report\Http\Exports\ThreadExport;
 use App\Modules\Sales\Repositories\SalesOrderRepository;
-use App\Modules\Stock\Models\Stock;
 use App\Modules\Stock\Repositories\StockRepository;
 use App\Modules\Thread\Repositories\ThreadColorRepository;
 use App\Repositories\MasterRepository;

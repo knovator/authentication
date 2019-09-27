@@ -6,13 +6,11 @@ use App\Constants\Master as MasterConstant;
 use App\Constants\Order as OrderConstant;
 use App\Http\Controllers\Controller;
 use App\Modules\Dashboard\Http\Requests\AnalysisRequest;
+use App\Modules\Dashboard\Http\Requests\LeastThreadRequest;
 use App\Modules\Dashboard\Http\Requests\TopCustomerRequest;
-use App\Modules\Dashboard\Http\Resources\TopCustomer;
 use App\Modules\Design\Repositories\DesignRepository;
 use App\Modules\Purchase\Repositories\PurchaseOrderRepository;
 use App\Modules\Sales\Repositories\SalesOrderRepository;
-use App\Modules\Stock\Models\Stock;
-use App\Modules\Stock\Repositories\StockRepository;
 use App\Modules\Thread\Repositories\ThreadColorRepository;
 use App\Modules\Wastage\Repositories\WastageOrderRepository;
 use App\Modules\Yarn\Repositories\YarnOrderRepository;
@@ -243,7 +241,7 @@ class DashboardController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function leastUsedThreadChart(Request $request) {
+    public function leastUsedThreadChart(LeastThreadRequest $request) {
         $input = $request->all();
         try {
             $soDeliveredId = $this->masterRepository->findByCode(MasterConstant::SO_DELIVERED)->id;
