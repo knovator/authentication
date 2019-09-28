@@ -2,6 +2,7 @@
 
 namespace App\Modules\Yarn\Repositories;
 
+use App\Modules\Sales\Support\CommonReportService;
 use App\Modules\Yarn\Models\YarnOrder;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
@@ -17,6 +18,7 @@ use Prettus\Repository\Exceptions\RepositoryException;
 class YarnOrderRepository extends BaseRepository
 {
 
+    use CommonReportService;
     /**
      * @throws RepositoryException
      */

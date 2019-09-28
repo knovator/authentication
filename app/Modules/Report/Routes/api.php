@@ -1,5 +1,16 @@
 <?php
 
+
+Route::group([
+    'prefix'     => 'admin/report',
+    'middleware' => 'auth_active'
+],
+    function () {
+        Route::get('overview', 'ReportController@orderViewReport')
+             ->name('report.overview');
+    });
+
+
 Route::group([
     'prefix' => 'admin/report',
 ],

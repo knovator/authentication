@@ -3,11 +3,11 @@
 namespace App\Modules\Purchase\Repositories;
 
 use App\Modules\Purchase\Models\PurchaseOrder;
+use App\Modules\Sales\Support\CommonReportService;
 use App\Support\OrderByUpdatedAt;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
 use Prettus\Repository\Exceptions\RepositoryException;
 
@@ -17,6 +17,7 @@ use Prettus\Repository\Exceptions\RepositoryException;
  */
 class PurchaseOrderRepository extends BaseRepository
 {
+    use CommonReportService;
 
     /**
      * @throws RepositoryException

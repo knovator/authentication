@@ -4,6 +4,7 @@ namespace App\Modules\Sales\Repositories;
 
 use App\Modules\Dashboard\Http\Resources\TopCustomer;
 use App\Modules\Sales\Models\SalesOrder;
+use App\Modules\Sales\Support\CommonReportService;
 use Carbon\Carbon;
 use DB;
 use Exception;
@@ -20,6 +21,8 @@ use Prettus\Repository\Exceptions\RepositoryException;
  */
 class SalesOrderRepository extends BaseRepository
 {
+
+    use CommonReportService;
 
     /**
      * @throws RepositoryException

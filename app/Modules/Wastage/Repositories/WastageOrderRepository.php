@@ -2,6 +2,7 @@
 
 namespace App\Modules\Wastage\Repositories;
 
+use App\Modules\Sales\Support\CommonReportService;
 use App\Modules\Wastage\Models\WastageOrder;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
@@ -16,7 +17,7 @@ use Prettus\Repository\Exceptions\RepositoryException;
  */
 class WastageOrderRepository extends BaseRepository
 {
-
+    use CommonReportService;
     /**
      * @throws RepositoryException
      */
