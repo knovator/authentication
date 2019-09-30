@@ -77,7 +77,7 @@ trait CommonReportService
             $newDate = $date->format('Y-m-d');
             if (isset($orders[$newDate])) {
                 $order = $orders[$newDate];
-                $dates[] = $this->formatDateResponse($order->start_date, $order->end_date,
+                $dates[] = $this->formatDateResponse($newDate, $newDate,
                     $order->total_orders, $order->{$quantityType}, $quantityType);
             } else {
                 $dates[] = $this->formatDateResponse($newDate, $newDate,
