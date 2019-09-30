@@ -31,9 +31,9 @@ class OverviewRequest extends FormRequest
     public function rules() {
         return [
             'group'                 => 'required|string|in:daily,monthly,weekly,yearly',
-            'date_range'            => 'sometimes|required|array',
-            'date_range.start_date' => 'sometimes|required|date_format:Y-m-d',
-            'date_range.end_date'   => 'sometimes|required|date_format:Y-m-d'
+            'date_range'            => 'required|array',
+            'date_range.start_date' => 'required|date_format:Y-m-d',
+            'date_range.end_date'   => 'required|date_format:Y-m-d'
         ];
     }
 
