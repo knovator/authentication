@@ -17,6 +17,7 @@ use Prettus\Repository\Exceptions\RepositoryException;
  */
 class PurchaseOrderRepository extends BaseRepository
 {
+
     use CommonReportService;
 
     /**
@@ -54,12 +55,17 @@ class PurchaseOrderRepository extends BaseRepository
 
         if ($export) {
             $orders = $orders->with([
-                'deliveries.partialOrders.purchasedThread.threadColor' =>
-                    function ($threadColor) {
-                        /** @var Builder $threadColor */
-                        $threadColor->with(['thread:id,name,denier', 'color:id,name']);
-                    }
-            ]);
+                'deliveries' => function ($deliveries) {
+                    /** @var Builder $deliveries */
+                    $deliveries->with([
+                        'partialOrders.purchasedThread.threadColor' =>
+                            function ($threadColor) {
+                                /** @var Builder $threadColor */
+                                $threadColor->with(['thread:id,name,denier', 'color:id,name']);
+                            }
+                    ]);
+                }
+            ])->withCount('partialOrders');
         }
 
         if (isset($input['ids']) && (!empty($input['ids']))) {

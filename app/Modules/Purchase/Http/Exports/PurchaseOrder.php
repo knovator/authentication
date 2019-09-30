@@ -65,7 +65,7 @@ class PurchaseOrder implements FromView, ShouldAutoSize, WithEvents
                 $mainBorderStyle,
                 $subBorderStyle
             ) {
-                $this->setBorderOnCell($event, $mainBorderStyle, $subBorderStyle);
+//                $this->setBorderOnCell($event, $mainBorderStyle, $subBorderStyle);
                 $this->createStyle($event, 'A1:G1', 11);
                 $event->sheet->styleCells(
                     'A1:G1',
