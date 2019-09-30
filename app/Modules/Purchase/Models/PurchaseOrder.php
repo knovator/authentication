@@ -108,6 +108,15 @@ class PurchaseOrder extends Model
     /**
      * @return mixed
      */
+    public function partialOrders() {
+        return $this->hasManyThrough(PurchasePartialOrder::class, PurchaseDelivery::class,
+            'purchase_order_id', 'delivery_id', 'id', 'id');
+    }
+
+
+    /**
+     * @return mixed
+     */
     public function deliveredMeters() {
         return $this->hasOne(PurchaseDelivery::class, 'purchase_order_id', 'id')
                     ->selectRaw('SUM(total_kg) as total,purchase_order_id')
@@ -128,6 +137,7 @@ class PurchaseOrder extends Model
         if (!is_null($this->deliveredMeters)) {
             $total = $total - $this->deliveredMeters->total;
         }
+
         return $total;
     }
 }

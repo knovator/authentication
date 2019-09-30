@@ -14,7 +14,7 @@
     @foreach($purchaseOrders as $orderKey => $order)
         @if($order->customer)
             @php
-                $rowSpan = count($order->threads);
+                $rowSpan = count($order->threads) + $order->partial_orders_count;
             @endphp
             <tr>
                 <td rowspan="{{$rowSpan}}">{{$orderKey + 1}}</td>
@@ -23,11 +23,6 @@
                 <td rowspan="{{$rowSpan}}">{{\Carbon\Carbon::parse($order->order_date)->format('d M Y')}}</td>
                 <td>{{'('.$order->threads[0]->thread_color->thread->denier.') '.$order->threads[0]->thread_color->thread->name.' ('.$order->threads[0]->thread_color->color->name.')'}}
                     : {{$order->threads[0]->kg_qty. ' KG'}}</td>
-
-                @if(!isset($order->deliveries[0]))
-                    <td rowspan="{{$rowSpan}}"></td>
-                    <td rowspan="{{$rowSpan}}">{{$order->challan_no}}</td>
-                @endif
 
             </tr>
             @php
@@ -43,20 +38,16 @@
             @endforeach
 
 
-            @if(!empty($order->deliveries))
+            @if($order->partial_orders_count)
                 @foreach($order->deliveries as $deliveryKey => $delivery)
                     @php
-                        $rowSpan = count($delivery->partial_orders);
+                        $newRowSpan = count($delivery->partial_orders);
                     @endphp
                     <tr>
-                        <td rowspan="{{$rowSpan}}"></td>
-                        <td rowspan="{{$rowSpan}}"></td>
-                        <td rowspan="{{$rowSpan}}"></td>
-                        <td rowspan="{{$rowSpan}}"></td>
                         <td>{{'('.$delivery->partial_orders[0]->purchased_thread->thread_color->thread->denier.') '.$delivery->partial_orders[0]->purchased_thread->thread_color->thread->name.' ('.$delivery->partial_orders[0]->purchased_thread->thread_color->color->name.')'}}
                             : {{$delivery->partial_orders[0]->kg_qty. ' KG'}}</td>
-                        <td rowspan="{{$rowSpan}}">{{\Carbon\Carbon::parse($delivery->delivery_date)->format('d M Y')}}</td>
-                        <td rowspan="{{$rowSpan}}">{{$delivery->bill_no}}</td>
+                        <td rowspan="{{$newRowSpan}}">{{\Carbon\Carbon::parse($delivery->delivery_date)->format('d M Y')}}</td>
+                        <td rowspan="{{$newRowSpan}}">{{$delivery->bill_no}}</td>
                     </tr>
 
                     @php
