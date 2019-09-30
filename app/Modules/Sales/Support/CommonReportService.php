@@ -38,7 +38,7 @@ trait CommonReportService
         switch ($input['group']) {
 
             case 'daily':
-                $orders = $orders->selectRaw('order_date as end_date')
+                $orders = $orders->selectRaw('DATE_FORMAT(order_date ,"%Y-%m-%d") as end_date')
                                  ->groupBy('order_date')->get()->keyBy('end_date');
 
                 return $this->generateDailyDateRange($orders, $from, $to, $field);
