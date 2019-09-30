@@ -56,6 +56,7 @@ class SalesOrderRepository extends BaseRepository
             'design:id,design_no,quality_name',
             'deliveries:id,delivery_no,delivery_date,sales_order_id',
             'recipeMeters',
+            'designBeam:id,thread_color_id',
         ])->with([
             'manufacturingTotalMeters' => function ($manufacturing) use ($manufacturingIds) {
                 /** @var Builder $manufacturing */
