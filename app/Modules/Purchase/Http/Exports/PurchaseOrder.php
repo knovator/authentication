@@ -42,7 +42,7 @@ class PurchaseOrder implements FromView, ShouldAutoSize, WithEvents
      * @return array
      */
     public function registerEvents() : array {
-        $mainBorderStyle = [
+        $subBorderStyle = [
             'borders' => [
                 'outline' => [
                     'borderStyle' => Border::BORDER_HAIR,
@@ -51,21 +51,8 @@ class PurchaseOrder implements FromView, ShouldAutoSize, WithEvents
             ],
         ];
 
-        $subBorderStyle = [
-            'borders' => [
-                'outline' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color'       => ['argb' => '75,0,130'],
-                ],
-            ],
-        ];
-
         return [
-            AfterSheet::class => function (AfterSheet $event) use (
-                $mainBorderStyle,
-                $subBorderStyle
-            ) {
-//                $this->setBorderOnCell($event, $mainBorderStyle, $subBorderStyle);
+            AfterSheet::class => function (AfterSheet $event) use ($subBorderStyle) {
                 $this->setBorderOnCell($event, $subBorderStyle);
                 $this->createStyle($event, 'A1:G1', 11);
                 $event->sheet->styleCells(
@@ -85,28 +72,8 @@ class PurchaseOrder implements FromView, ShouldAutoSize, WithEvents
 
     /**
      * @param $event
-     * @param $styleArray
      * @param $subBorderStyle
      */
-//    private function setBorderOnCell($event, $styleArray, $subBorderStyle) {
-//        $mainStart = 2;
-//        foreach ($this->orders as $orderKey => $order) {
-//            $deliveries = count($order->deliveries);
-//            $threads = count($order->threads) - 1;
-//            $mainEnd = $deliveries + $threads + $mainStart;
-//            $subStart = $mainStart + $threads + 1;
-//            $event->sheet->getDelegate()->getStyle("A{$mainStart}:G{$mainEnd}")
-//                         ->applyFromArray($styleArray);
-//            if ($deliveries) {
-//                $event->sheet->getDelegate()->getStyle("E{$subStart}:G{$mainEnd}")
-//                             ->applyFromArray($subBorderStyle);
-//
-//            }
-//            $mainStart = $mainEnd + 2;
-//        }
-//    }
-
-
     private function setBorderOnCell($event, $subBorderStyle) {
         $mainStart = 2;
         foreach ($this->orders as $orderKey => $order) {
@@ -118,7 +85,7 @@ class PurchaseOrder implements FromView, ShouldAutoSize, WithEvents
                              ->applyFromArray($subBorderStyle);
 
             }
-            $mainStart += 2;
+            $mainStart = $mainEnd + 2;
         }
     }
 
