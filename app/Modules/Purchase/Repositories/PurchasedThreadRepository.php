@@ -47,9 +47,6 @@ class PurchasedThreadRepository extends BaseRepository
             $purchasedThreads = $purchasedThreads->with([
                 'threadColor.thread',
                 'threadColor.color',
-                'purchaseOrder' => function ($purchaseOrder) {
-                    $purchaseOrder->select(['id','status_id'])->with('status:id,name,code');
-                },
             ]);
         }
 
