@@ -129,11 +129,11 @@ class ReportController extends Controller
     public function orderViewReport(OverviewRequest $request) {
         $input = $request->all();
         try {
-//            $result['fabric'] = $this->salesOrderRepository->getReportList($input, 'total_meters');
+            $result['fabric'] = $this->salesOrderRepository->getReportList($input, 'total_meters');
             $result['purchase'] = $this->purchaseOrderRepository->getReportList($input, 'total_kg');
-//            $result['yarn'] = $this->yarnOrderRepository->getReportList($input, 'total_kg');
-//            $result['wastage'] = $this->wastageOrderRepository->getReportList($input,
-//                'total_meters');
+            $result['yarn'] = $this->yarnOrderRepository->getReportList($input, 'total_kg');
+            $result['wastage'] = $this->wastageOrderRepository->getReportList($input,
+                'total_meters');
             return $this->sendResponse($result,
                 __('messages.retrieved', ['module' => 'Overview']),
                 HTTPCode::OK);
