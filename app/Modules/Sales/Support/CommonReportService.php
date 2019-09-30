@@ -136,7 +136,7 @@ trait CommonReportService
         for ($date = $from; $date->lte($to); $from->{'startOf' . $type}()->{'add' . $type}()) {
             $dateInt = $date->{$type};
             $startDate = $date->format('Y-m-d');
-            $endDate = $date->{'endOf'.$type    }();
+            $endDate = $date->{'endOf' . $type}();
 
             if ($endDate->gt($to)) {
                 $endDate = $to;
