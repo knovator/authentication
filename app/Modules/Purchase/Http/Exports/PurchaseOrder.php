@@ -66,6 +66,7 @@ class PurchaseOrder implements FromView, ShouldAutoSize, WithEvents
                 $subBorderStyle
             ) {
 //                $this->setBorderOnCell($event, $mainBorderStyle, $subBorderStyle);
+                $this->setBorderOnCell($event, $subBorderStyle);
                 $this->createStyle($event, 'A1:G1', 11);
                 $event->sheet->styleCells(
                     'A1:G1',
@@ -87,21 +88,37 @@ class PurchaseOrder implements FromView, ShouldAutoSize, WithEvents
      * @param $styleArray
      * @param $subBorderStyle
      */
-    private function setBorderOnCell($event, $styleArray, $subBorderStyle) {
+//    private function setBorderOnCell($event, $styleArray, $subBorderStyle) {
+//        $mainStart = 2;
+//        foreach ($this->orders as $orderKey => $order) {
+//            $deliveries = count($order->deliveries);
+//            $threads = count($order->threads) - 1;
+//            $mainEnd = $deliveries + $threads + $mainStart;
+//            $subStart = $mainStart + $threads + 1;
+//            $event->sheet->getDelegate()->getStyle("A{$mainStart}:G{$mainEnd}")
+//                         ->applyFromArray($styleArray);
+//            if ($deliveries) {
+//                $event->sheet->getDelegate()->getStyle("E{$subStart}:G{$mainEnd}")
+//                             ->applyFromArray($subBorderStyle);
+//
+//            }
+//            $mainStart = $mainEnd + 2;
+//        }
+//    }
+
+
+    private function setBorderOnCell($event, $subBorderStyle) {
         $mainStart = 2;
         foreach ($this->orders as $orderKey => $order) {
-            $deliveries = count($order->deliveries);
-            $threads = count($order->threads) - 1;
-            $mainEnd = $deliveries + $threads + $mainStart;
-            $subStart = $mainStart + $threads + 1;
-            $event->sheet->getDelegate()->getStyle("A{$mainStart}:G{$mainEnd}")
-                         ->applyFromArray($styleArray);
-            if ($deliveries) {
-                $event->sheet->getDelegate()->getStyle("E{$subStart}:G{$mainEnd}")
+            $threads = count($order->threads);
+            $mainStart += $threads;
+            $mainEnd = $mainStart + $order->partial_orders_count - 1;
+            if ($order->deliveries_count) {
+                $event->sheet->getDelegate()->getStyle("E{$mainStart}:G{$mainEnd}")
                              ->applyFromArray($subBorderStyle);
 
             }
-            $mainStart = $mainEnd + 2;
+            $mainStart += 2;
         }
     }
 
