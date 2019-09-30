@@ -73,17 +73,20 @@ trait CommonReportService
      */
     private function generateDailyDateRange($orders, Carbon $from, Carbon $to, $quantityType) {
         $dates = [];
-        for ($date = $from; $date->lte($to); $date->addDay()) {
-            $newDate = $date->format('Y-m-d');
-            if (isset($orders[$newDate])) {
-                $order = $orders[$newDate];
-                $dates[] = $this->formatDateResponse($newDate, $newDate,
-                    $order->total_orders, $order->{$quantityType}, $quantityType);
-            } else {
-                $dates[] = $this->formatDateResponse($newDate, $newDate,
-                    0, 0, $quantityType);
-            }
 
+        if ($orders->isNotEmpty()) {
+            for ($date = $from; $date->lte($to); $date->addDay()) {
+                $newDate = $date->format('Y-m-d');
+                if (isset($orders[$newDate])) {
+                    $order = $orders[$newDate];
+                    $dates[] = $this->formatDateResponse($newDate, $newDate,
+                        $order->total_orders, $order->{$quantityType}, $quantityType);
+                } else {
+                    $dates[] = $this->formatDateResponse($newDate, $newDate,
+                        0, 0, $quantityType);
+                }
+
+            }
         }
 
         return $dates;
@@ -133,24 +136,26 @@ trait CommonReportService
     ) {
 
         $dates = [];
-        for ($date = $from; $date->lte($to); $from->{'startOf' . $type}()->{'add' . $type}()) {
-            $dateInt = $date->{$type};
-            $startDate = $date->format('Y-m-d');
-            $endDate = $date->{'endOf' . $type}();
+        if ($orders->isNotEmpty()) {
+            for ($date = $from; $date->lte($to); $from->{'startOf' . $type}()->{'add' . $type}()) {
+                $dateInt = $date->{$type};
+                $startDate = $date->format('Y-m-d');
+                $endDate = $date->{'endOf' . $type}();
 
-            if ($endDate->gt($to)) {
-                $endDate = $to;
-            }
+                if ($endDate->gt($to)) {
+                    $endDate = $to;
+                }
 
-            if (isset($orders[$dateInt])) {
-                $order = $orders[$dateInt];
-                $dates[] = $this->formatDateResponse($startDate,
-                    $endDate->format('Y-m-d'),
-                    $order->total_orders, $order->{$quantityType}, $quantityType);
-            } else {
-                $dates[] = $this->formatDateResponse($startDate,
-                    $endDate->format('Y-m-d'),
-                    0, 0, $quantityType);
+                if (isset($orders[$dateInt])) {
+                    $order = $orders[$dateInt];
+                    $dates[] = $this->formatDateResponse($startDate,
+                        $endDate->format('Y-m-d'),
+                        $order->total_orders, $order->{$quantityType}, $quantityType);
+                } else {
+                    $dates[] = $this->formatDateResponse($startDate,
+                        $endDate->format('Y-m-d'),
+                        0, 0, $quantityType);
+                }
             }
         }
 
