@@ -30,7 +30,8 @@ class PartiallyUpdateRequest extends FormRequest
      */
     public function rules() {
         return [
-            'is_active' => 'required|boolean',
+            'is_active' => 'required_without:type|boolean',
+            'type'      => 'required_without:is_active|string',
         ];
     }
 
