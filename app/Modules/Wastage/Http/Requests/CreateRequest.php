@@ -33,7 +33,7 @@ class CreateRequest extends FormRequest
             'total_fiddles'                                      => 'required|integer',
             'design_id'                                          => 'required|exists:designs,id,deleted_at,NULL',
             'fiddle_picks'                                       => 'required|array|size:' . $this->total_fiddles,
-            'fiddle_picks.*.pick'                                => 'required|integer',
+            'fiddle_picks.*.pick'                                => 'required|integer|gte:1',
             'fiddle_picks.*.fiddle_no'                           => 'required|integer',
             'beam_id'                                            => 'required|exists:threads_colors,id,deleted_at,NULL',
             'order_recipes'                                      => 'required|array',
@@ -61,7 +61,8 @@ class CreateRequest extends FormRequest
         return [
             'fiddle_picks.required'                              => 'Feeders must be required',
             'fiddle_picks.size'                                  => 'Please enter all feeders picks',
-            'fiddle_picks.*.pick.required'                                => 'Feeders pick must be required',
+            'fiddle_picks.*.pick.required'                       => 'Feeders pick must be required',
+            'fiddle_picks.*.pick.gte'                            => "Feeders pick must be greater than or equal to 1.",
             'design_id.required'                                 => 'Design must be required',
             'beam_id.required'                                   => 'Recipe beam must be required',
             'order_recipes.required'                             => 'At least one recipe must be required',
