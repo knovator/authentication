@@ -5,14 +5,16 @@ namespace App\Modules\Purchase\Http\Controllers;
 use App\Constants\GenerateNumber;
 use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
+use App\Modules\Purchase\Http\Exports\PurchaseOrder as ExportPurchaseOrder;
 use App\Modules\Purchase\Http\Requests\CreateRequest;
 use App\Modules\Purchase\Http\Requests\StatusRequest;
 use App\Modules\Purchase\Http\Requests\UpdateRequest;
+use App\Modules\Purchase\Http\Resources\PurchaseOrder as PurchaseOrderResource;
 use App\Modules\Purchase\Http\Resources\PurchaseOrderThread;
 use App\Modules\Purchase\Models\PurchaseOrder;
 use App\Modules\Purchase\Repositories\PurchasedThreadRepository;
 use App\Modules\Purchase\Repositories\PurchaseOrderRepository;
-use App\Modules\Purchase\Http\Resources\PurchaseOrder as PurchaseOrderResource;
+use App\Support\DestroyObject;
 use App\Support\UniqueIdGenerator;
 use DB;
 use Exception;
@@ -20,11 +22,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Knovators\Masters\Repository\MasterRepository;
 use Knovators\Support\Helpers\HTTPCode;
-use App\Support\DestroyObject;
 use Log;
 use Maatwebsite\Excel\Facades\Excel;
 use Str;
-use App\Modules\Purchase\Http\Exports\PurchaseOrder as ExportPurchaseOrder;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
@@ -273,7 +273,7 @@ class PurchaseController extends Controller
             Log::error($exception);
 
             return $this->sendResponse(null, __('messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY,$exception);
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
     }
 
@@ -333,10 +333,10 @@ class PurchaseController extends Controller
      * @return JsonResponse
      * @throws Exception
      */
-    private function updatePOPENDINGStatus(PurchaseOrder $purchaseOrder, $input) {
-        return $this->updateStatus($purchaseOrder, $input);
-
-    }
+//    private function updatePOPENDINGStatus(PurchaseOrder $purchaseOrder, $input) {
+//        return $this->updateStatus($purchaseOrder, $input);
+//
+//    }
 
     /**
      * @param $purchaseOrder
@@ -344,12 +344,18 @@ class PurchaseController extends Controller
      * @return JsonResponse
      * @throws Exception
      */
-    private function updateStatus(PurchaseOrder $purchaseOrder, $input) {
+    private function updatePOCANCELEDStatus(PurchaseOrder $purchaseOrder, $input) {
+        $purchaseOrder->loadCount('deliveries');
+        if ($purchaseOrder->deliveries_count) {
+            return $this->sendResponse(null,
+                __('messages.order_has_deliveries_not_cancel'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
         $input['status_id'] = $this->masterRepository->findByCode($input['code'])->id;
         try {
             DB::beginTransaction();
             $purchaseOrder->update($input);
-            $purchaseOrder->orderStocks()->update(['status_id' => $input['status_id']]);
+            $purchaseOrder->orderStocks()->delete();
             DB::commit();
 
             return $this->sendResponse($this->makeResource($purchaseOrder->fresh([
@@ -363,7 +369,9 @@ class PurchaseController extends Controller
         } catch (Exception $exception) {
             DB::rollBack();
             Log::error($exception);
-            throw $exception;
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
         }
     }
 
@@ -374,43 +382,38 @@ class PurchaseController extends Controller
      * @throws Exception
      */
     private function updatePODELIVEREDStatus(PurchaseOrder $purchaseOrder, $input) {
-        $purchasedThreads = $this->purchasedThreadRepository->getPurchaseOrderList($purchaseOrder->id);
-        if ((int) $purchasedThreads->sum('remaining_kg_qty')) {
+        $purchaseOrder->loadCount('deliveries');
+        if (!$purchaseOrder->deliveries_count) {
             return $this->sendResponse(null,
                 __('messages.purchase_deliveries_must_complete'),
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
-/*        if (!isset($input['challan_no'])) {
-            return $this->sendResponse(null, 'Challan Number is must be required',
-                HTTPCode::UNPROCESSABLE_ENTITY);
-        }*/
-
+        $statuses = $this->masterRepository->findWhereIn('code', [$input['code'], MasterConstant::PO_PENDING])->keyBy('code');
+        $input['status_id'] = $statuses[$input['code']]->id;
         try {
-            return $this->updateStatus($purchaseOrder, $input);
+            DB::beginTransaction();
+            $purchaseOrder->orderStocks()->where([
+                'status_id' => $statuses[MasterConstant::PO_PENDING]->id
+            ])->delete();
+            $purchaseOrder->update($input);
+            DB::commit();
+
+            return $this->sendResponse($this->makeResource($purchaseOrder->fresh([
+                'threads.threadColor.thread',
+                'threads.threadColor.color',
+                'customer',
+                'status'
+            ])),
+                __('messages.updated', ['module' => 'Status']),
+                HTTPCode::OK);
         } catch (Exception $exception) {
+            DB::rollBack();
             Log::error($exception);
 
             return $this->sendResponse(null, __('messages.something_wrong'),
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
 
-    }
-
-    /**
-     * @param PurchaseOrder $purchaseOrder
-     * @param               $input
-     * @return JsonResponse
-     * @throws Exception
-     */
-    private function updatePOCANCELEDStatus(PurchaseOrder $purchaseOrder, $input) {
-        $purchaseOrder->loadCount('deliveries');
-        if ($purchaseOrder->deliveries_count) {
-            return $this->sendResponse(null,
-                __('messages.order_has_deliveries_not_cancel'),
-                HTTPCode::UNPROCESSABLE_ENTITY);
-        }
-
-        return $this->updateStatus($purchaseOrder, $input);
     }
 
 }
