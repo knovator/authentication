@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Knovators\Masters\Models\Master;
 use Knovators\Support\Traits\HasModelEvent;
+use App\Constants\Master as MasterConstant;
 
 /**
  * Class PurchaseOrder
@@ -124,9 +125,18 @@ class PurchaseOrder extends Model
     }
 
     /**
-     * @return UnloadedRelationException
+     * @return int
      */
     public function getPendingKgAttribute() {
+
+        if (!$this->relationLoaded('status')) {
+            throw UnloadedRelationException::make(get_class($this), 'status');
+        }
+
+        if (($this->status->code == MasterConstant::PO_DELIVERED) && ($this->status->code ==
+                MasterConstant::PO_CANCELED)) {
+            return 0;
+        }
 
         if (!$this->relationLoaded('deliveredMeters')) {
             throw UnloadedRelationException::make(get_class($this), 'deliveredMeters');
