@@ -191,10 +191,28 @@ class ThreadController extends Controller
      */
 
     public function partiallyUpdate(Thread $thread, PartiallyUpdateRequest $request) {
-        $thread->update($request->all());
-        $thread->fresh();
+        $thread->update(['is_active' => $request->get('is_active')]);
+        $thread->threadColors()->update(['is_active' => $request->get('is_active')]);
 
-        return $this->sendResponse($this->makeResource($thread->load('type')),
+        return $this->sendResponse($this->makeResource($thread->fresh('type')),
+            __('messages.updated', ['module' => 'Thread']),
+            HTTPCode::OK);
+    }
+
+
+    /**
+     * @param ThreadColor            $threadColor
+     * @param PartiallyUpdateRequest $request
+     * @return JsonResponse
+     */
+
+    public function colorPartiallyUpdate(
+        ThreadColor $threadColor,
+        PartiallyUpdateRequest $request
+    ) {
+        $threadColor->update(['is_active' => $request->get('is_active')]);
+
+        return $this->sendResponse($threadColor->fresh(),
             __('messages.updated', ['module' => 'Thread']),
             HTTPCode::OK);
     }
