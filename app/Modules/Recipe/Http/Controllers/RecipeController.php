@@ -140,9 +140,7 @@ class RecipeController extends Controller
 
     public function partiallyUpdate(Recipe $recipe, PartiallyUpdateRequest $request) {
         $recipe->update($request->all());
-        $recipe->refresh();
-
-        return $this->sendResponse($this->makeResource($recipe->load([
+        return $this->sendResponse($this->makeResource($recipe->fresh([
             'fiddles.thread',
             'fiddles.color'
         ])),

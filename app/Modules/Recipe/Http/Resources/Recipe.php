@@ -23,6 +23,7 @@ class Recipe extends JsonResource
         return [
             'id'            => $this->id,
             'name'          => $this->name,
+            'type'          => $this->type,
             'total_fiddles' => $this->total_fiddles,
             'is_active'     => $this->is_active,
             'fiddles'       => ThreadColor::collection($this->whenLoaded('fiddles')),
