@@ -348,7 +348,7 @@ class PurchaseController extends Controller
         $purchaseOrder->loadCount('deliveries');
         if ($purchaseOrder->deliveries_count) {
             return $this->sendResponse(null,
-                __('messages.purchase_deliveries_must_complete'),
+                __('messages.order_has_deliveries_not_cancel'),
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
         $input['status_id'] = $this->masterRepository->findByCode($input['code'])->id;
@@ -383,9 +383,9 @@ class PurchaseController extends Controller
      */
     private function updatePODELIVEREDStatus(PurchaseOrder $purchaseOrder, $input) {
         $purchaseOrder->loadCount('deliveries');
-        if ($purchaseOrder->deliveries_count) {
+        if (!$purchaseOrder->deliveries_count) {
             return $this->sendResponse(null,
-                __('messages.order_has_deliveries_not_cancel'),
+                __('messages.purchase_deliveries_must_complete'),
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
         $pendingStatusId = $this->masterRepository->findByCode(MasterConstant::PO_PENDING)->id;
