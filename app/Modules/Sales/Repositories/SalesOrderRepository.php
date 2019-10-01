@@ -98,17 +98,27 @@ class SalesOrderRepository extends BaseRepository
     }
 
     /**
+     * @param $deliveredId
+     * @param $manufacturingIds
      * @param $customerId
      * @param $input
+     * @param $export
      * @return Builder|Model|\Illuminate\Database\Query\Builder|mixed
+     * @throws Exception
      */
-    public function customerOrders($customerId, $input) {
+    public function customerOrders($deliveredId, $manufacturingIds, $customerId, $input, $export) {
 
         $orders = $this->model->with([
             'status:id,name,code',
-            'quantity'
-        ])->select(['id', 'order_no', 'order_date', 'status_id'])
-                              ->where('customer_id', '=', $customerId);
+            'quantity',
+        ])->select([
+            'id',
+            'order_no',
+            'order_date',
+            'status_id',
+            'customer_po_number',
+            'total_meters'
+        ])->where('customer_id', '=', $customerId)->orderByDesc('id');
 
 
         if (isset($input['ids']) && (!empty($input['ids']))) {
@@ -123,7 +133,25 @@ class SalesOrderRepository extends BaseRepository
             $orders = $orders->whereDate('order_date', '<=', $input['end_date']);
         }
 
-        return $orders->orderByDesc('id');
+
+        if ($export) {
+            $orders = datatables()->of($orders)->skipPaging();
+        } else {
+            $orders = datatables()->of($orders->with([
+                'manufacturingTotalMeters' => function ($manufacturing) use ($manufacturingIds) {
+                    /** @var Builder $manufacturing */
+                    $manufacturing->whereIn('deliveries.status_id', $manufacturingIds);
+                },
+                'deliveredTotalMeters'     => function ($delivered) use ($deliveredId) {
+                    /** @var Builder $delivered */
+                    $delivered->where('deliveries.status_id', $deliveredId);
+                }
+            ]))->addColumn('pending_meters', function (SalesOrder $salesOrder) {
+                return $salesOrder->pending_meters;
+            });
+        }
+
+        return $orders->make(true);
     }
 
     /**

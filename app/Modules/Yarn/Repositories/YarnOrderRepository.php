@@ -85,9 +85,11 @@ class YarnOrderRepository extends BaseRepository
     /**
      * @param $customerId
      * @param $input
+     * @param $export
      * @return Builder|Model|mixed
+     * @throws Exception
      */
-    public function customerOrders($customerId, $input) {
+    public function customerOrders($customerId, $input,$export) {
 
         $orders = $this->model->with([
             'status:id,name,code',
@@ -108,7 +110,13 @@ class YarnOrderRepository extends BaseRepository
             $orders = $orders->whereDate('order_date', '<=', $input['end_date']);
         }
 
-        return $orders->orderByDesc('id');
+        $orders = datatables()->of($orders->orderByDesc('id'));
+
+        if ($export) {
+            $orders = $orders->skipPaging();
+        }
+
+        return $orders->make(true);
     }
     /**
      * @param $input

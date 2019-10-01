@@ -2,11 +2,13 @@
 
 namespace App\Exceptions;
 
+use RuntimeException;
+
 /**
  * Class UnloadedRelationException
  * @package App\Exceptions
  */
-class UnloadedRelationException extends \RuntimeException
+class UnloadedRelationException extends RuntimeException
 {
 
     /**
@@ -15,7 +17,7 @@ class UnloadedRelationException extends \RuntimeException
      * @return UnloadedRelationException
      */
     public static function make($model, $relation) {
-        return new static('call to unloaded relationship on ' . $model);
+        return new static("call to unloaded relationship {$relation} on {$model}");
     }
 
 }

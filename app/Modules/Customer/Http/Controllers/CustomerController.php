@@ -2,6 +2,7 @@
 
 namespace App\Modules\Customer\Http\Controllers;
 
+use App\Constants\Master;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PartiallyUpdateRequest;
 use App\Modules\Customer\Http\Exports\Ledger as ExportLedger;
@@ -16,6 +17,7 @@ use App\Modules\Purchase\Repositories\PurchaseOrderRepository;
 use App\Modules\Sales\Repositories\SalesOrderRepository;
 use App\Modules\Wastage\Repositories\WastageOrderRepository;
 use App\Modules\Yarn\Repositories\YarnOrderRepository;
+use App\Repositories\MasterRepository;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Knovators\Support\Helpers\HTTPCode;
@@ -50,6 +52,8 @@ class CustomerController extends Controller
 
     protected $agentRepository;
 
+    protected $masterRepository;
+
     /**
      * CustomerController constructor.
      * @param CustomerRepository      $customerRepository
@@ -58,6 +62,7 @@ class CustomerController extends Controller
      * @param YarnOrderRepository     $yarnOrderRepository
      * @param WastageOrderRepository  $wastageOrderRepository
      * @param AgentRepository         $agentRepository
+     * @param MasterRepository        $masterRepository
      */
     public function __construct(
         CustomerRepository $customerRepository,
@@ -65,7 +70,8 @@ class CustomerController extends Controller
         SalesOrderRepository $salesOrderRepository,
         YarnOrderRepository $yarnOrderRepository,
         WastageOrderRepository $wastageOrderRepository,
-        AgentRepository $agentRepository
+        AgentRepository $agentRepository,
+        MasterRepository $masterRepository
     ) {
         $this->customerRepository = $customerRepository;
         $this->purchaseOrderRepository = $purchaseOrderRepository;
@@ -73,6 +79,7 @@ class CustomerController extends Controller
         $this->yarnOrderRepository = $yarnOrderRepository;
         $this->wastageOrderRepository = $wastageOrderRepository;
         $this->agentRepository = $agentRepository;
+        $this->masterRepository = $masterRepository;
     }
 
     /**
@@ -263,33 +270,36 @@ class CustomerController extends Controller
     private function orderList($customer, $input, $export = false) {
         switch ($input['order_type']) {
             case OrderConstant::PURCHASE_ORDER:
-                $orders = $this->purchaseOrderRepository->customerOrders($customer->id, $input);
-                break;
+                return $this->purchaseOrderRepository->customerOrders($customer->id, $input,
+                    $export);
 
             case OrderConstant::FABRIC_ORDER:
-                $orders = $this->salesOrderRepository->customerOrders($customer->id, $input);
-                break;
+                $statuses = $this->fabricMeterStatuses();
+
+                return $this->salesOrderRepository->customerOrders($statuses[Master::SO_DELIVERED]['id'],
+                    [
+                        $statuses[Master::SO_MANUFACTURING]['id'],
+                        $statuses[Master::SO_COMPLETED]['id']
+                    ], $customer->id, $input, $export);
 
             case OrderConstant::YARN_ORDER:
-                $orders = $this->yarnOrderRepository->customerOrders($customer->id, $input);
-                break;
-
-            case OrderConstant::WASTAGE_ORDER:
-                $orders = $this->wastageOrderRepository->customerOrders($customer->id, $input);
-                break;
+                return $this->yarnOrderRepository->customerOrders($customer->id, $input, $export);
 
             default:
-                throw new UnprocessableEntityHttpException('Invalid order type');
+                return $this->wastageOrderRepository->customerOrders($customer->id, $input,
+                    $export);
 
         }
-        $orders = datatables()->of($orders);
+    }
 
-        if ($export) {
-            $orders = $orders->skipPaging();
-        }
-
-        return $orders->make(true);
-
+    /**
+     * @return mixed
+     */
+    private function fabricMeterStatuses() {
+        return $this->masterRepository->findWhereIn('code',
+            [Master::SO_DELIVERED, Master::SO_MANUFACTURING, Master::SO_COMPLETED], ['id', 'code'])
+                                      ->keyBy('code')
+                                      ->all();
     }
 
     /**
@@ -307,7 +317,8 @@ class CustomerController extends Controller
                     HTTPCode::OK);
             }
 
-            return Excel::download(new ExportLedger($orders,$customer, $input['order_type']), 'ledger.xlsx');
+            return Excel::download(new ExportLedger($orders, $customer, $input['order_type']),
+                'ledger.xlsx');
         } catch (Exception $exception) {
             Log::error($exception);
 
