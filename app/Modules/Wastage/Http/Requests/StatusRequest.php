@@ -97,6 +97,8 @@ class StatusRequest extends FormRequest
     public function messages() {
 
         return [
+            'order_date.required'               => 'Order date must be required.',
+            'delivery_date.required'            => 'Delivery date must be required.',
             'delivery_date.after_or_equal'      => 'Delivery date must be an after or equal to order date',
             'customer_id.required'              => 'Customer must be required',
             'manufacturing_company_id.required' => 'Manufacturing company must be required',
