@@ -388,10 +388,13 @@ class PurchaseController extends Controller
                 __('messages.purchase_deliveries_must_complete'),
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
-        $pendingStatusId = $this->masterRepository->findByCode(MasterConstant::PO_PENDING)->id;
+        $statuses = $this->masterRepository->findWhereIn('code', [$input['code'], MasterConstant::PO_PENDING])->keyBy('code');
+        $input['status_id'] = $statuses[$input['code']]->id;
         try {
             DB::beginTransaction();
-            $purchaseOrder->orderStocks()->where(['status_id' => $pendingStatusId])->delete();
+            $purchaseOrder->orderStocks()->where([
+                'status_id' => $statuses[MasterConstant::PO_PENDING]->id
+            ])->delete();
             $purchaseOrder->update($input);
             DB::commit();
 
