@@ -101,15 +101,16 @@ class PurchaseOrderRepository extends BaseRepository
     /**
      * @param $customerId
      * @param $input
+     * @param $export
      * @return Builder|Model|mixed
+     * @throws Exception
      */
-    public function customerOrders($customerId, $input) {
-
+    public function customerOrders($customerId, $input, $export) {
         $orders = $this->model->with([
             'status:id,name,code',
             'quantity'
         ])->select(['id', 'order_no', 'order_date', 'status_id'])
-                              ->where('customer_id', '=', $customerId);
+                              ->where('customer_id', '=', $customerId)->orderByDesc('id');
 
 
         if (isset($input['ids']) && (!empty($input['ids']))) {
@@ -124,7 +125,17 @@ class PurchaseOrderRepository extends BaseRepository
             $orders = $orders->whereDate('order_date', '<=', $input['end_date']);
         }
 
-        return $orders->orderByDesc('id');
+        if ($export) {
+            $orders = datatables()->of($orders)->skipPaging();
+        } else {
+
+            $orders = datatables()->of($orders->with('deliveredMeters'))
+                                  ->addColumn('pending_kg', function ($order) {
+                                      return $order->pending_kg;
+                                  });
+        }
+
+        return $orders->make(true);
     }
 
 
