@@ -133,7 +133,7 @@ class PurchaseOrder extends Model
             throw UnloadedRelationException::make(get_class($this), 'status');
         }
 
-        if (($this->status->code == MasterConstant::PO_DELIVERED) && ($this->status->code ==
+        if (($this->status->code == MasterConstant::PO_DELIVERED) || ($this->status->code ==
                 MasterConstant::PO_CANCELED)) {
             return 0;
         }
