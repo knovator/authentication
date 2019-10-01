@@ -49,7 +49,7 @@ class UpdateRequest extends FormRequest
             // design fiddle picks
             'fiddle_picks'              => 'required|array|size:' . $this->fiddles,
             'fiddle_picks.*.id'         => 'sometimes|required|integer',
-            'fiddle_picks.*.pick'       => 'required|integer',
+            'fiddle_picks.*.pick'       => 'required|integer|gte:1',
             'fiddle_picks.*.fiddle_no'  => 'required|integer',
 
             // design beams
@@ -74,6 +74,7 @@ class UpdateRequest extends FormRequest
             'fiddle_picks.required'              => 'Feeder picks are required.',
             'fiddle_picks.*.pick.required'       => 'Feeder picks are required.',
             'fiddle_picks.size'                  => 'Feeder picks are required.',
+            'fiddle_picks.*.pick.gte'            => "Feeders pick must be greater than or equal to 1.",
             'design_beams.required'              => 'At least one beam must be required.',
             'design_beams.*.recipes_id.required' => 'At least one recipe must be required for beam.',
         ];
