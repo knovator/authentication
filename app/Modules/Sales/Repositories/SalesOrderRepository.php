@@ -199,7 +199,7 @@ class SalesOrderRepository extends BaseRepository
             }
 
             return TopCustomer::collection($orders->take($input['length'])
-                                                  ->get());
+                                                  ->get()->sortBy('meters'));
         }
         if ($input['type'] == 'export') {
             return datatables()->of($orders)->skipPaging()->make(true)->getData()->data;
