@@ -35,7 +35,7 @@ class CreateRequest extends FormRequest
             'bill_no'                           => 'required|string',
             'delivery_date'                     => 'required|date_format:Y-m-d|after_or_equal:'
                 . $this->purchase->order_date,
-            'orders.*.kg_qty'                   => 'required|numeric',
+            'orders.*.kg_qty'                   => 'required|numeric|gte:1',
         ];
     }
 
@@ -49,7 +49,9 @@ class CreateRequest extends FormRequest
 
         return [
             'delivery_date.after_or_equal' => 'Delivery date must be an after or equal to order date',
-            'bill_no.required'             => 'Challan number is required'
+            'bill_no.required'             => 'Challan number is required',
+            'orders.*.kg_qty.required'     => 'Quantity must be required',
+            'orders.*.kg_qty.gte'          => 'Quantity must be greater than or equal to 1',
         ];
 
     }
