@@ -29,6 +29,7 @@ class ThreadColor extends Model
     protected $fillable = [
         'color_id',
         'thread_id',
+        'is_active',
     ];
 
     protected $hidden = [

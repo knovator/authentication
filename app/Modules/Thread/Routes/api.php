@@ -13,11 +13,12 @@ Route::group([
         Route::put('threads/partiallyUpdate/{thread}', 'ThreadController@partiallyUpdate')
              ->name('threads.partially-update');
 
-//        Route::put('thread-colors/partiallyUpdate/{threadColor}',
-//            'ThreadController@partiallyUpdate')->name('threads.thread-colors-partially-update');
+        Route::put('thread-colors/partiallyUpdate/{threadColor}',
+            'ThreadController@colorPartiallyUpdate')
+             ->name('threads.colors-partially-update');
 
         Route::get('thread/colors-list', 'ThreadController@threadColorsList');
     });
 
 Route::model('thread', Thread::class);
-//Route::model('threadColor', ThreadColor::class);
+Route::model('threadColor', ThreadColor::class);
