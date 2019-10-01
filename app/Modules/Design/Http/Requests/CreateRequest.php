@@ -71,6 +71,7 @@ class CreateRequest extends FormRequest
             'fiddles.required'                   => 'Total feeders are required.',
             'fiddle_picks.required'              => 'Feeder picks are required.',
             'fiddle_picks.*.pick.required'       => 'Feeder picks are required.',
+            'fiddle_picks.size'                  => 'Feeder picks are required.',
             'design_beams.required'              => 'At least one beam must be required.',
             'design_beams.*.recipes_id.required' => 'At least one recipe must be required for beam.',
         ];
