@@ -3,11 +3,7 @@
 namespace App\Modules\Sales\Support;
 
 
-use App\Modules\Report\Http\Resources\Overview;
-use App\Modules\Sales\Models\SalesOrder;
 use Carbon\Carbon;
-use DB;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**
  * Trait CommonReportService
