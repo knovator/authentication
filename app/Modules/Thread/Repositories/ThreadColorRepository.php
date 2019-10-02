@@ -5,6 +5,7 @@ namespace App\Modules\Thread\Repositories;
 
 use App\Modules\Thread\Models\ThreadColor;
 use Carbon\Carbon;
+use DB;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -47,10 +48,6 @@ class ThreadColorRepository extends BaseRepository
         $this->applyCriteria();
 
         $threadColors = $this->model->whereHas('thread', function ($thread) use ($input) {
-            if (!isset($input['all'])) {
-                /** @var Builder $thread */
-                $thread->where('is_active', '=', true);
-            }
             if (isset($input['type_id'])) {
                 $thread->where('type_id', '=', $input['type_id']);
             }
@@ -59,7 +56,11 @@ class ThreadColorRepository extends BaseRepository
                 /** @var Builder $color */
                 $color->where('is_active', '=', true);
             }
-        })->with(['thread:id,name,denier,price', 'color:id,name,code'])->get();
+        })->where('is_active', '=', true);
+
+        $threadColors = $threadColors->with(['thread:id,name,denier,price', 'color:id,name,code'])
+                                     ->get();
+
 
         $this->resetModel();
 
