@@ -17,7 +17,8 @@ Route::group([
             'ThreadController@colorPartiallyUpdate')
              ->name('threads.colors-partially-update');
 
-        Route::get('thread/colors-list', 'ThreadController@threadColorsList');
+        Route::get('thread/colors-list', 'ThreadController@threadColorsList')
+             ->name('threads.colors-list');
     });
 
 Route::model('thread', Thread::class);
