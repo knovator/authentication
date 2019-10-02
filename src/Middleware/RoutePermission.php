@@ -53,9 +53,7 @@ class RoutePermission
 
             if ($permission && $permission->roles->isNotEmpty() && ($user = Auth::user())) {
                 /** @var User $user */
-                $role = $user->orderByRoles()->with('permissions')->first();
-
-                if (!$permission->roles->firstWhere('name', $role->name)) {
+                if (!$permission->roles->firstWhere('name', $user->orderByRoles()->first()->name)) {
                     return $this->sendResponse(null, __('messages.unauthorized_permission'),
                         HTTPCode::UNAUTHORIZED);
 
