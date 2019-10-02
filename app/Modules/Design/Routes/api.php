@@ -19,7 +19,7 @@ Route::group([
 ],
     function () {
         Route::get('active-designs', 'DesignController@activeDesigns')
-             ->name('active-designs');
+             ->name('designs.active-designs');
     });
 
 

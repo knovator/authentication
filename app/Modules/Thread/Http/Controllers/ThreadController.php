@@ -123,9 +123,8 @@ class ThreadController extends Controller
             $thread->update($input);
             $this->storeThreadColors($thread, $input['color_ids']);
             DB::commit();
-            $thread->fresh();
 
-            return $this->sendResponse($this->makeResource($thread->load('type')),
+            return $this->sendResponse($this->makeResource($thread->fresh('type')),
                 __('messages.updated', ['module' => 'Thread']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
