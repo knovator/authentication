@@ -79,6 +79,9 @@ class CreatePermissionSeeder extends Seeder
             "recipes.active.index",
             "recipes.create",
 
+            "users.change-password",
+            "users.change-profile",
+
             "dashboard.most-used-designs",
             "dashboard.design-analysis",
         ];
@@ -297,6 +300,8 @@ class CreatePermissionSeeder extends Seeder
 
             "stocks.index",
             "dashboard.order-analysis",
+            "users.change-password",
+            "users.change-profile",
         ];
 
         $roles['ACCOUNTANT'] = [
@@ -322,6 +327,8 @@ class CreatePermissionSeeder extends Seeder
             "stocks.report",
             "dashboard.order-analysis",
             "sales.index",
+            "users.change-password",
+            "users.change-profile",
         ];
 
         return $roles;
