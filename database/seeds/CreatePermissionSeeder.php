@@ -77,7 +77,10 @@ class CreatePermissionSeeder extends Seeder
             "designs.export",
             "threads.colors-list",
             "recipes.active.index",
-            "recipes.create"
+            "recipes.create",
+
+            "dashboard.most-used-designs",
+            "dashboard.design-analysis",
         ];
 
         $roles['MANAGER'] = [
@@ -102,10 +105,6 @@ class CreatePermissionSeeder extends Seeder
             "customers.agents.index",
             "customers.ledgers.index",
             "customers.ledgers.export",
-            "dashboard.order-analysis",
-            "dashboard.top-customer-report",
-            "dashboard.least-used-thread-chart",
-            "dashboard.most-used-designs",
             "designs.index",
             "designs.create",
             "designs.store",
@@ -145,9 +144,6 @@ class CreatePermissionSeeder extends Seeder
             "recipes.destroy",
             "recipes.partially-update",
             "recipes.active.index",
-            "report.overview",
-            "report.top-customer-export",
-            "report.least-used-thread-export",
             "sales.index",
             "sales.create",
             "sales.store",
@@ -205,7 +201,8 @@ class CreatePermissionSeeder extends Seeder
             "yarns.export",
             "yarns.export.summary",
             "users.change-password",
-            "users.change-profile"
+            "users.change-profile",
+            "dashboard.order-analysis"
         ];
 
         $roles['PROGRAMMER'] = [
@@ -297,6 +294,9 @@ class CreatePermissionSeeder extends Seeder
             "wastages.change-status",
             "wastages.export",
             "wastages.export.summary",
+
+            "stocks.index",
+            "dashboard.order-analysis",
         ];
 
         $roles['ACCOUNTANT'] = [
@@ -320,6 +320,8 @@ class CreatePermissionSeeder extends Seeder
             "stocks.index",
             "stocks.count",
             "stocks.report",
+            "dashboard.order-analysis",
+            "sales.index",
         ];
 
         return $roles;

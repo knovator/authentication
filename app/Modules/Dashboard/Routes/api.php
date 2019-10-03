@@ -10,7 +10,7 @@ Route::group([
              ->name('dashboard.order-analysis');
 
         Route::get('design-analysis', 'DashboardController@designAnalysis')
-             ->name('dashboard.order-analysis');
+             ->name('dashboard.design-analysis');
 
         Route::get('top-customer/chart', 'DashboardController@topCustomerReport')
              ->name('dashboard.top-customer-report');
