@@ -183,9 +183,9 @@ class SalesOrderRepository extends BaseRepository
      */
     public function topCustomerReport($input, $canceledId) {
 
-        $orders = $this->model->selectRaw("customer_id,SUM(if(total_meters <> {$canceledId},total_meters,0)) as meters,COUNT(id) as orders")
+        $orders = $this->model->selectRaw('customer_id,SUM(total_meters) as meters,COUNT(id) as orders')
                               ->with('customer:id,first_name,last_name,email,phone')
-
+                              ->where('status_id', '<>', $canceledId)
                               ->groupBy('customer_id')->orderByRaw('meters DESC');
 
 
