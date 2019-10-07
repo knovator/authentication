@@ -20,7 +20,12 @@ class Stock extends Model
         MasterConstant::SO_DELIVERED,
         MasterConstant::WASTAGE_DELIVERED,
     ];
-
+    public $morphOrderTypes = [
+        'yarn',
+        'purchase',
+        'sales',
+        'wastage',
+    ];
     protected $table = 'stocks';
     protected $fillable = [
         'product_type',
