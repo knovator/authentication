@@ -177,13 +177,15 @@ class SalesOrderRepository extends BaseRepository
 
     /**
      * @param      $input
+     * @param      $canceledId
      * @return AnonymousResourceCollection
      * @throws Exception
      */
-    public function topCustomerReport($input) {
+    public function topCustomerReport($input, $canceledId) {
 
         $orders = $this->model->selectRaw('customer_id,SUM(total_meters) as meters,COUNT(id) as orders')
                               ->with('customer:id,first_name,last_name,email,phone')
+                              ->where('status_id', '<>', $canceledId)
                               ->groupBy('customer_id')->orderByRaw('meters DESC');
 
 
