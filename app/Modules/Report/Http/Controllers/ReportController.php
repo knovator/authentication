@@ -3,6 +3,7 @@
 namespace App\Modules\Report\Http\Controllers;
 
 use App\Constants\Master;
+use App\Constants\Master as MasterConstant;
 use App\Constants\Overview;
 use App\Http\Controllers\Controller;
 use App\Modules\Purchase\Repositories\PurchaseOrderRepository;
@@ -80,9 +81,10 @@ class ReportController extends Controller
      */
     public function topCustomerExport(Request $request) {
         $input = $request->all();
+        $canceledId = $this->masterRepository->findByCode(MasterConstant::SO_CANCELED)->id;
         $input['type'] = 'export';
         try {
-            $orders = $this->salesOrderRepository->topCustomerReport($input);
+            $orders = $this->salesOrderRepository->topCustomerReport($input, $canceledId);
             if (($orders = collect($orders))->isEmpty()) {
                 return $this->sendResponse(null,
                     __('messages.can_not_export', ['module' => 'Customers']),

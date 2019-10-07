@@ -223,8 +223,9 @@ class DashboardController extends Controller
         if ($input['api'] == 'dashboard' && $input['type'] == 'chart') {
             $this->financialYear($input);
         }
+        $canceledId = $this->masterRepository->findByCode(MasterConstant::SO_CANCELED)->id;
         try {
-            $customers = $this->salesOrderRepository->topCustomerReport($input);
+            $customers = $this->salesOrderRepository->topCustomerReport($input,$canceledId);
 
             return $this->sendResponse($customers,
                 __('messages.retrieved', ['module' => 'Customers']),
