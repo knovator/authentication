@@ -37,5 +37,9 @@ return [
 
         'max_size' => '200000',
     ],
+    'resize' => [
+
+        'extension' => 'jpg|jpeg|png|gif',
+    ],
 
 ];
