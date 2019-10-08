@@ -46,8 +46,8 @@ class CreateRequest extends FormRequest
      * @return array
      */
     public function messages() {
-
         return [
+            'orders.required'              => 'At least One Thread must be required',
             'delivery_date.after_or_equal' => 'Delivery date must be an after or equal to order date',
             'bill_no.required'             => 'Challan number is required',
             'orders.*.kg_qty.required'     => 'Quantity must be required',
