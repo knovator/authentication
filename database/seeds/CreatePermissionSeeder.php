@@ -301,9 +301,11 @@ class CreatePermissionSeeder extends Seeder
             "wastages.export.summary",
 
             "stocks.index",
-            "dashboard.order-analysis",
             "users.change-password",
             "users.change-profile",
+            "dashboard.order-analysis",
+            "dashboard.most-used-designs",
+            "dashboard.design-analysis",
         ];
 
         $roles['ACCOUNTANT'] = [
