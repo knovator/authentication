@@ -77,7 +77,7 @@ class CreatePermissionSeeder extends Seeder
             "designs.export",
             "threads.colors-list",
             "recipes.active.index",
-            "recipes.create",
+            "recipes.store",
 
             "users.change-password",
             "users.change-profile",
@@ -139,7 +139,7 @@ class CreatePermissionSeeder extends Seeder
             "purchases.deliveries.create",
             "purchases.export",
             "recipes.index",
-            "recipes.create",
+            "recipes.store",
             "recipes.store",
             "recipes.show",
             "recipes.edit",
@@ -222,7 +222,7 @@ class CreatePermissionSeeder extends Seeder
             "designs.export",
             "threads.colors-list",
             "recipes.active.index",
-            "recipes.create",
+            "recipes.store",
             // machine
             "machines.index",
             "machines.create",
