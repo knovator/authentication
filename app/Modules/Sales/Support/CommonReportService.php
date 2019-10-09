@@ -39,7 +39,7 @@ trait CommonReportService
                               ->groupBy('month')->get()->keyBy('month');
 
             case 'weekly':
-                return $orders->selectRaw('WEEK(order_date) as week')
+                return $orders->selectRaw('(WEEK(order_date) + 1) as week')
                               ->groupBy('week')->get()->keyBy('week');
 
             default:
