@@ -301,6 +301,8 @@ class CreatePermissionSeeder extends Seeder
             "wastages.export.summary",
 
             "stocks.index",
+            "stocks.count",
+            "stocks.report",
             "users.change-password",
             "users.change-profile",
             "dashboard.order-analysis",
