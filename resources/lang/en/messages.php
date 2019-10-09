@@ -46,4 +46,6 @@ return [
 
     // Delivery messages
     'partial_order_not_present' => "This delivery doesn't have any partial orders, so you can not export it.",
+
+    'unauthorized_permission' => 'Unauthorized permission.',
 ];
