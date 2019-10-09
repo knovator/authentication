@@ -205,7 +205,9 @@ class CreatePermissionSeeder extends Seeder
             "yarns.export.summary",
             "users.change-password",
             "users.change-profile",
-            "dashboard.order-analysis"
+            "dashboard.order-analysis",
+            "dashboard.most-used-designs",
+            "dashboard.design-analysis",
         ];
 
         $roles['PROGRAMMER'] = [
