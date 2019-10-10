@@ -23,6 +23,5 @@ class DatabaseSeeder extends Seeder
 //        $this->call(OrderQuantitySeeder::class);
 //        $this->call(PartiallyUpdateSeeder::class);
 //        $this->call(CreatePermissionSeeder::class);
-        $this->call(AvailableQuantitySeeder::class);
     }
 }
