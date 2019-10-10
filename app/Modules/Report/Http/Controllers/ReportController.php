@@ -111,13 +111,14 @@ class ReportController extends Controller
             ->whereIn('code', Stock::AVAILABLE_STATUSES)->pluck('id')->toArray();
         try {
             $threads = $this->stockRepository->leastUsedThreads($statuses[MasterConstant::SO_DELIVERED]['id'],
-                $statuses[MasterConstant::PO_DELIVERED]['id'], $usedCount);
+                $statuses[MasterConstant::PO_DELIVERED]['id'], $usedCount,true);
 
             if (($threads = collect($threads))->isEmpty()) {
                 return $this->sendResponse(null,
                     __('messages.can_not_export', ['module' => 'Threads']),
                     HTTPCode::OK);
             }
+
 
             return Excel::download(new ThreadExport($threads), 'threads.xlsx');
         } catch (Exception $exception) {
