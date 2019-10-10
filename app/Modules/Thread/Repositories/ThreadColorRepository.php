@@ -127,10 +127,10 @@ class ThreadColorRepository extends BaseRepository
                 /** @var Builder $stocks */
                 $stocks->where('status_id', '<>', $soDeliveredId);
 
-                if (isset($input['api']) && $input['api'] == 'dashboard') {
+//                if (isset($input['api']) && $input['api'] == 'dashboard') {
                     $stocks->whereDate('created_at', '>=', $input['startDate'])
                            ->whereDate('created_at', '<=', $input['endDate']);
-                }
+//                }
             })->with(['thread:id,name,denier', 'color:id,name,code', 'availableStock']);
 
 
