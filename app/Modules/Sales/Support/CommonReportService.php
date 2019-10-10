@@ -28,6 +28,7 @@ trait CommonReportService
                              ->whereDate('order_date', '<=', $input['date_range']['end_date']);
         }
 
+
         switch ($input['group']) {
 
             case 'daily':
@@ -35,12 +36,12 @@ trait CommonReportService
                               ->groupBy('order_date')->get()->keyBy('end_date');
 
             case 'monthly':
-                return $orders->selectRaw('MONTH(order_date) as month')
-                              ->groupBy('month')->get()->keyBy('month');
+                return $orders->selectRaw("MONTH(order_date) as month,CONCAT(MONTH(order_date), '-', YEAR(order_date)) as month_year")
+                              ->groupBy('month')->get()->keyBy('month_year');
 
             case 'weekly':
-                return $orders->selectRaw('(WEEK(order_date) + 1) as week')
-                              ->groupBy('week')->get()->keyBy('week');
+                return $orders->selectRaw('(WEEK(order_date) + 1) as week,CONCAT((WEEK(order_date) + 1), \'-\', YEAR(order_date)) as week_year')
+                              ->groupBy('week')->get()->keyBy('week_year');
 
             default:
                 return $orders->get()->keyBy('year');

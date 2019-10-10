@@ -16,6 +16,7 @@ use App\Modules\Thread\Repositories\ThreadColorRepository;
 use App\Modules\Wastage\Repositories\WastageOrderRepository;
 use App\Modules\Yarn\Repositories\YarnOrderRepository;
 use App\Repositories\MasterRepository;
+use DB;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -133,11 +134,11 @@ class ReportController extends Controller
     public function orderViewReport(OverviewRequest $request) {
         $input = $request->all();
         try {
-            $orders['fabric'] = $this->salesOrderRepository->getReportList($input, 'total_meters');
+//            $orders['fabric'] = $this->salesOrderRepository->getReportList($input, 'total_meters');
             $orders['purchase'] = $this->purchaseOrderRepository->getReportList($input, 'total_kg');
-            $orders['yarn'] = $this->yarnOrderRepository->getReportList($input, 'total_kg');
-            $orders['wastage'] = $this->wastageOrderRepository->getReportList($input,
-                'total_meters');
+//            $orders['yarn'] = $this->yarnOrderRepository->getReportList($input, 'total_kg');
+//            $orders['wastage'] = $this->wastageOrderRepository->getReportList($input,
+//                'total_meters');
 
             return $this->sendResponse($this->generateDateRange($orders, $input),
                 __('messages.retrieved', ['module' => 'Overview']),
@@ -162,20 +163,22 @@ class ReportController extends Controller
         $dates = [];
         for ($date = $from; $date->lte($to); $from->{'startOf' . $type}()->{'add' . $type}()) {
             $startDate = $date->format('Y-m-d');
-            $dateInt = ($type !== 'day') ? $date->{$type} : $startDate;
+            $year = $date->year;
+            $dateInt = (($type == 'month' || $type == 'week') ? ($date->{$type} . '-' . $year) :
+                (($type == 'day') ? $startDate : $year));
             $endDate = $date->{'endOf' . $type}();
             /** @var Carbon $endDate */
             if ($endDate->gt($to)) {
                 $endDate = $to;
             }
-            $this->createDateForParticularOrder($dates, 'fabric', $orders['fabric'], $dateInt,
-                $startDate, $endDate, 'total_meters');
+//            $this->createDateForParticularOrder($dates, 'fabric', $orders['fabric'], $dateInt,
+//                $startDate, $endDate, 'total_meters');
             $this->createDateForParticularOrder($dates, 'purchase', $orders['purchase'], $dateInt,
                 $startDate, $endDate, 'total_kg');
-            $this->createDateForParticularOrder($dates, 'yarn', $orders['yarn'], $dateInt,
-                $startDate, $endDate, 'total_kg');
-            $this->createDateForParticularOrder($dates, 'wastage', $orders['wastage'], $dateInt,
-                $startDate, $endDate, 'total_meters');
+//            $this->createDateForParticularOrder($dates, 'yarn', $orders['yarn'], $dateInt,
+//                $startDate, $endDate, 'total_kg');
+//            $this->createDateForParticularOrder($dates, 'wastage', $orders['wastage'], $dateInt,
+//                $startDate, $endDate, 'total_meters');
         }
 
         return $dates;
