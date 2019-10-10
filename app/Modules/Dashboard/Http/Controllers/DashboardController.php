@@ -253,7 +253,6 @@ class DashboardController extends Controller
     public function leastUsedThreadChart(LeastThreadRequest $request) {
         $statuses = $this->statusFilters();
 
-
         $usedCount['available_count'] = collect($statuses)
             ->whereIn('code', Stock::AVAILABLE_STATUSES)->pluck('id')->toArray();
 

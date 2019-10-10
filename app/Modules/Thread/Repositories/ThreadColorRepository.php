@@ -108,7 +108,4 @@ class ThreadColorRepository extends BaseRepository
         ];
     }
 
-
-
-
 }
