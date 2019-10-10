@@ -10,9 +10,9 @@
     @foreach($threadColors as $threadColorKey => $threadColor)
         <tr>
             <td>{{$threadColorKey + 1}}</td>
-            <td>({{$threadColor->thread->denier}}) {{$threadColor->thread->name}}
-                -{{$threadColor->color->name}}</td>
-            <td>{{(!is_null($threadColor->available_stock)) ? $threadColor->available_stock->available_qty: 0.0}}</td>
+            <td>({{$threadColor->product->thread->denier}}) {{$threadColor->product->thread->name}}
+                -{{$threadColor->product->color->name}}</td>
+            <td>{{$threadColor->available_count}}</td>
         </tr>
     @endforeach
     </tbody>

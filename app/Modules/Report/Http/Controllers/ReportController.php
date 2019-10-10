@@ -11,12 +11,12 @@ use App\Modules\Report\Http\Exports\CustomerExport;
 use App\Modules\Report\Http\Exports\ThreadExport;
 use App\Modules\Report\Http\Requests\OverviewRequest;
 use App\Modules\Sales\Repositories\SalesOrderRepository;
+use App\Modules\Stock\Models\Stock;
 use App\Modules\Stock\Repositories\StockRepository;
 use App\Modules\Thread\Repositories\ThreadColorRepository;
 use App\Modules\Wastage\Repositories\WastageOrderRepository;
 use App\Modules\Yarn\Repositories\YarnOrderRepository;
 use App\Repositories\MasterRepository;
-use DB;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -106,16 +106,19 @@ class ReportController extends Controller
      * @return JsonResponse|BinaryFileResponse
      */
     public function leastUsedThreadExport(Request $request) {
-        $input = $request->all();
+        $statuses = $this->statusFilters();
+        $usedCount['available_count'] = collect($statuses)
+            ->whereIn('code', Stock::AVAILABLE_STATUSES)->pluck('id')->toArray();
         try {
-            $soDeliveredId = $this->masterRepository->findByCode(Master::SO_DELIVERED)->id;
-            $threads = $this->threadColorRepository->leastUsedThreads($input, $soDeliveredId, true);
+            $threads = $this->stockRepository->leastUsedThreads($statuses[MasterConstant::SO_DELIVERED]['id'],
+                $statuses[MasterConstant::PO_DELIVERED]['id'], $usedCount,true);
 
             if (($threads = collect($threads))->isEmpty()) {
                 return $this->sendResponse(null,
                     __('messages.can_not_export', ['module' => 'Threads']),
                     HTTPCode::OK);
             }
+
 
             return Excel::download(new ThreadExport($threads), 'threads.xlsx');
         } catch (Exception $exception) {
@@ -126,6 +129,28 @@ class ReportController extends Controller
         }
     }
 
+    /**
+     * @return array
+     */
+    private function statusFilters() {
+        $statuses = $this->getMasterByCodes([
+            MasterConstant::PO_DELIVERED,
+            MasterConstant::SO_MANUFACTURING,
+            MasterConstant::SO_DELIVERED,
+            MasterConstant::WASTAGE_DELIVERED,
+        ]);
+
+        return $statuses;
+    }
+
+    /**
+     * @param $codes
+     * @return mixed
+     */
+    private function getMasterByCodes($codes) {
+        return $this->masterRepository->findWhereIn('code',
+            $codes, ['id', 'code'])->keyBy('code')->toArray();
+    }
 
     /**
      * @param OverviewRequest $request
