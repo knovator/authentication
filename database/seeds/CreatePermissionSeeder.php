@@ -303,6 +303,8 @@ class CreatePermissionSeeder extends Seeder
             "stocks.index",
             "stocks.count",
             "stocks.report",
+            "threads.show",
+
             "users.change-password",
             "users.change-profile",
             "dashboard.order-analysis",
@@ -331,6 +333,8 @@ class CreatePermissionSeeder extends Seeder
             "stocks.index",
             "stocks.count",
             "stocks.report",
+            "threads.show",
+
             "dashboard.order-analysis",
             "sales.index",
             "users.change-password",
