@@ -110,6 +110,34 @@ class StockRepository extends BaseRepository
 
 
     /**
+     * @param      $soDeliveredId
+     * @param      $poDeliveredId
+     * @param      $usedCount
+     * @param bool $export
+     * @return mixed
+     * @throws Exception
+     */
+    public function leastUsedThreads($soDeliveredId, $poDeliveredId, $usedCount, $export = false) {
+        $columns = $this->setStockCountColumn($usedCount,
+            "product_id,product_type,CEIL((100 * ABS(SUM(IF(status_id = {$soDeliveredId}, kg_qty, 0))))/SUM(IF(status_id = {$poDeliveredId}, kg_qty, 0))) as percentage,ABS(SUM(IF(status_id = {$soDeliveredId}, kg_qty, 0))) AS so_delivered,SUM(IF(status_id = {$poDeliveredId}, kg_qty, 0)) AS po_delivered");
+        $stocks = $this->model->selectRaw($columns)
+            ->with([
+                'product.thread:id,name,denier',
+                'product.color:id,name,code'
+            ]) ->groupBy('product_id', 'product_type')
+                              ->havingRaw('po_delivered > 0')->orderByRaw('percentage');
+
+        $stocks = datatables()->of($stocks);
+
+        if ($export) {
+            return $stocks->skipPaging()->make(true)->getData()->data;
+        }
+
+        return $stocks->make(true);
+    }
+
+
+    /**
      * @param $threadColorId
      * @param $usedCount
      * @return mixed
