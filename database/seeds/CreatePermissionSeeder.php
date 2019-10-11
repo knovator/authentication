@@ -208,6 +208,7 @@ class CreatePermissionSeeder extends Seeder
             "dashboard.order-analysis",
             "dashboard.most-used-designs",
             "dashboard.design-analysis",
+            "designs.active-designs",
         ];
 
         $roles['PROGRAMMER'] = [
@@ -336,7 +337,6 @@ class CreatePermissionSeeder extends Seeder
             "threads.show",
 
             "dashboard.order-analysis",
-            "sales.index",
             "users.change-password",
             "users.change-profile",
         ];
