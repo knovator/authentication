@@ -337,7 +337,6 @@ class CreatePermissionSeeder extends Seeder
             "threads.show",
 
             "dashboard.order-analysis",
-            "sales.index",
             "users.change-password",
             "users.change-profile",
         ];
