@@ -109,7 +109,7 @@ class PurchaseOrderRepository extends BaseRepository
         $orders = $this->model->with([
             'status:id,name,code',
             'quantity'
-        ])->select(['id', 'order_no', 'order_date', 'status_id'])
+        ])->select(['id', 'order_no', 'order_date', 'status_id','total_kg'])
                               ->where('customer_id', '=', $customerId)->orderByDesc('id');
 
 
