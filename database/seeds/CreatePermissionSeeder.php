@@ -140,7 +140,7 @@ class CreatePermissionSeeder extends Seeder
             "purchases.export",
             "recipes.index",
             "recipes.store",
-            "recipes.store",
+            "recipes.create",
             "recipes.show",
             "recipes.edit",
             "recipes.update",
