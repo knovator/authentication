@@ -46,21 +46,26 @@ class ThreadColorRepository extends BaseRepository
     public function getColorsList($input) {
 
         $this->applyCriteria();
+        $threadColors = $this->model;
 
-        $threadColors = $this->model->whereHas('thread', function ($thread) use ($input) {
-            if (isset($input['type_id'])) {
+        if (isset($input['type_id'])) {
+            /** @var Builder $threadColors */
+            $threadColors = $threadColors->whereHas('thread', function ($thread) use ($input) {
+                /** @var Builder $thread */
                 $thread->where('type_id', '=', $input['type_id']);
-            }
-        })->whereHas('color', function ($color) use ($input) {
-            if (!isset($input['all'])) {
+            });
+        }
+
+        if (!isset($input['all'])) {
+            $threadColors = $threadColors->whereHas('color', function ($color) use ($input) {
                 /** @var Builder $color */
                 $color->where('is_active', '=', true);
-            }
-        })->where('is_active', '=', true);
+
+            })->where('is_active', '=', true);
+        }
 
         $threadColors = $threadColors->with(['thread:id,name,denier,price', 'color:id,name,code'])
                                      ->get();
-
 
         $this->resetModel();
 
