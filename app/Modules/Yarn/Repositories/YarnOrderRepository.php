@@ -49,23 +49,23 @@ class YarnOrderRepository extends BaseRepository
         $orders = $this->model->with($relations)->with('threadQty')->select('yarn_sales_orders.*');
 
         if (isset($input['ids']) && (!empty($input['ids']))) {
-            $orders = $orders->whereIn('id', $input['ids']);
+            $orders = $orders->whereIn('yarn_sales_orders.id', $input['ids']);
         }
         if (isset($input['start_date'])) {
-            $orders = $orders->whereDate('order_date', '>=', $input['start_date']);
+            $orders = $orders->whereDate('yarn_sales_orders.order_date', '>=', $input['start_date']);
         }
 
         if (isset($input['end_date'])) {
-            $orders = $orders->whereDate('order_date', '<=', $input['end_date']);
+            $orders = $orders->whereDate('yarn_sales_orders.order_date', '<=', $input['end_date']);
         }
 
 
         if (isset($input['payment'])) {
             if ($input['payment'] == 'yes') {
-                $orders = $orders->whereNotNull('challan_no');
+                $orders = $orders->whereNotNull('yarn_sales_orders.challan_no');
             }
             if ($input['payment'] == 'no') {
-                $orders = $orders->where('status_id', $input['delivered_id'])
+                $orders = $orders->where('yarn_sales_orders.status_id', $input['delivered_id'])
                                  ->whereNull('challan_no');
             }
         }
