@@ -55,15 +55,15 @@ class WastageOrderRepository extends BaseRepository
 
 
         if (isset($input['ids']) && (!empty($input['ids']))) {
-            $orders = $orders->whereIn('id', $input['ids']);
+            $orders = $orders->whereIn('wastage_orders.id', $input['ids']);
         }
 
         if (isset($input['start_date'])) {
-            $orders = $orders->whereDate('order_date', '>=', $input['start_date']);
+            $orders = $orders->whereDate('wastage_orders.order_date', '>=', $input['start_date']);
         }
 
         if (isset($input['end_date'])) {
-            $orders = $orders->whereDate('order_date', '<=', $input['end_date']);
+            $orders = $orders->whereDate('wastage_orders.order_date', '<=', $input['end_date']);
         }
 
 

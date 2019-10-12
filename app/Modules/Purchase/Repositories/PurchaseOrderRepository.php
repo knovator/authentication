@@ -69,15 +69,15 @@ class PurchaseOrderRepository extends BaseRepository
         }
 
         if (isset($input['ids']) && (!empty($input['ids']))) {
-            $orders = $orders->whereIn('id', $input['ids']);
+            $orders = $orders->whereIn('purchase_orders.id', $input['ids']);
         }
 
         if (isset($input['start_date'])) {
-            $orders = $orders->whereDate('order_date', '>=', $input['start_date']);
+            $orders = $orders->whereDate('purchase_orders.order_date', '>=', $input['start_date']);
         }
 
         if (isset($input['end_date'])) {
-            $orders = $orders->whereDate('order_date', '<=', $input['end_date']);
+            $orders = $orders->whereDate('purchase_orders.order_date', '<=', $input['end_date']);
         }
 
         if ($export) {
@@ -114,15 +114,15 @@ class PurchaseOrderRepository extends BaseRepository
 
 
         if (isset($input['ids']) && (!empty($input['ids']))) {
-            $orders = $orders->whereIn('id', $input['ids']);
+            $orders = $orders->whereIn('purchase_orders.id', $input['ids']);
         }
 
         if (isset($input['start_date'])) {
-            $orders = $orders->whereDate('order_date', '>=', $input['start_date']);
+            $orders = $orders->whereDate('purchase_orders.order_date', '>=', $input['start_date']);
         }
 
         if (isset($input['end_date'])) {
-            $orders = $orders->whereDate('order_date', '<=', $input['end_date']);
+            $orders = $orders->whereDate('purchase_orders.order_date', '<=', $input['end_date']);
         }
 
         if ($export) {
