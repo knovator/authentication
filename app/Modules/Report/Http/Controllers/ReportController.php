@@ -107,11 +107,11 @@ class ReportController extends Controller
      */
     public function leastUsedThreadExport(Request $request) {
         $statuses = $this->statusFilters();
+
         $usedCount['available_count'] = collect($statuses)
             ->whereIn('code', Stock::AVAILABLE_STATUSES)->pluck('id')->toArray();
         try {
-            $threads = $this->stockRepository->leastUsedThreads($statuses[MasterConstant::SO_DELIVERED]['id'],
-                $statuses[MasterConstant::PO_DELIVERED]['id'], $usedCount,true);
+            $threads = $this->stockRepository->leastUsedThreads($statuses, $usedCount,true);
 
             if (($threads = collect($threads))->isEmpty()) {
                 return $this->sendResponse(null,

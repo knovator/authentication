@@ -2,6 +2,7 @@
 
 namespace App\Modules\Stock\Repositories;
 
+use App\Constants\Master;
 use App\Modules\Stock\Models\Stock;
 use Carbon\Carbon;
 use Exception;
@@ -110,22 +111,22 @@ class StockRepository extends BaseRepository
 
 
     /**
-     * @param      $soDeliveredId
-     * @param      $poDeliveredId
+     * @param      $statuses
      * @param      $usedCount
      * @param bool $export
      * @return mixed
      * @throws Exception
      */
-    public function leastUsedThreads($soDeliveredId, $poDeliveredId, $usedCount, $export = false) {
+    public function leastUsedThreads($statuses, $usedCount, $export = false) {
         $columns = $this->setStockCountColumn($usedCount,
-            "product_id,product_type,CEIL((100 * ABS(SUM(IF(status_id = {$soDeliveredId}, kg_qty, 0))))/SUM(IF(status_id = {$poDeliveredId}, kg_qty, 0))) as percentage,ABS(SUM(IF(status_id = {$soDeliveredId}, kg_qty, 0))) AS so_delivered,SUM(IF(status_id = {$poDeliveredId}, kg_qty, 0)) AS po_delivered");
+            "product_id,product_type,CEIL((100 * (ABS(SUM(IF(status_id = {$statuses[Master::SO_DELIVERED]['id']}, kg_qty, 0))) + ABS(SUM(IF(status_id = {$statuses[Master::SO_MANUFACTURING]['id']}, kg_qty, 0))) + ABS(SUM(IF(status_id = {$statuses[Master::WASTAGE_DELIVERED]['id']}, kg_qty, 0)))))/SUM(IF(status_id = {$statuses[Master::PO_DELIVERED]['id']}, kg_qty, 0))) as percentage,(ABS(SUM(IF(status_id = {$statuses[Master::SO_DELIVERED]['id']}, kg_qty, 0))) + ABS(SUM(IF(status_id = {$statuses[Master::SO_MANUFACTURING]['id']}, kg_qty, 0))) + ABS(SUM(IF(status_id = {$statuses[Master::WASTAGE_DELIVERED]['id']}, kg_qty, 0)))) AS so_used,SUM(IF(status_id = {$statuses[Master::PO_DELIVERED]['id']}, kg_qty, 0)) AS po_delivered");
         $stocks = $this->model->selectRaw($columns)
-            ->with([
-                'product.thread:id,name,denier',
-                'product.color:id,name,code'
-            ]) ->groupBy('product_id', 'product_type')
-                              ->havingRaw('po_delivered > 0')->orderByRaw('percentage');
+                              ->with([
+                                  'product.thread:id,name,denier',
+                                  'product.color:id,name,code'
+                              ])->groupBy('product_id', 'product_type')
+                              ->havingRaw('po_delivered > 0 AND available_count > 0')
+                              ->orderByRaw('percentage');
 
         $stocks = datatables()->of($stocks);
 
