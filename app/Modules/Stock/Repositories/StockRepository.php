@@ -74,8 +74,9 @@ class StockRepository extends BaseRepository
      * @return string
      */
     private function setStockCountColumn($stockCountStatus, $columns) {
+
         foreach ($stockCountStatus as $key => $status) {
-            if ($key == 'available_count' || $key == 'remaining_count') {
+            if (!preg_match("/[A-Z]/", $key)) {
                 $condition = '';
                 $last = end($stockCountStatus[$key]);
                 foreach ($stockCountStatus[$key] as $availableId) {
