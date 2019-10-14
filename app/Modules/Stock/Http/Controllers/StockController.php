@@ -52,18 +52,7 @@ class StockController extends Controller
      * @throws Exception
      */
     public function index(Request $request) {
-        $filter = $this->statusFilters();
-        $usedCount = $filter['userCount'];
-        $usedCount['remaining_count'] = array_column([
-            $filter['statuses'][Master::PO_DELIVERED],
-            $filter['statuses'][Master::SO_MANUFACTURING],
-            $filter['statuses'][Master::SO_DELIVERED],
-            $filter['statuses'][Master::WASTAGE_DELIVERED],
-            $filter['statuses'][Master::PO_PENDING],
-            $filter['statuses'][Master::SO_PENDING],
-        ], 'id');
-
-        $stocks = $this->stockRepository->getStockOverview($usedCount);
+        $stocks = $this->stockRepository->getStockOverview($this->statusFilters(true));
 
         return $this->sendResponse($stocks,
             __('messages.retrieved', ['module' => 'Stocks']),
@@ -71,9 +60,10 @@ class StockController extends Controller
     }
 
     /**
+     * @param bool $index
      * @return array
      */
-    private function statusFilters() {
+    private function statusFilters($index = false) {
         $statuses = $this->getMasterByCodes([
             Master::PO_PENDING,
             Master::SO_PENDING,
@@ -83,13 +73,20 @@ class StockController extends Controller
             Master::WASTAGE_PENDING,
             Master::WASTAGE_DELIVERED,
         ]);
-        $usedCount = Arr::except($statuses, [Master::PO_DELIVERED]);
 
-        $usedCount['available_count'] = collect($statuses)
-            ->whereIn('code', Stock::AVAILABLE_STATUSES)->pluck('id')->toArray();
+        if ($index) {
+            $usedCount = Arr::only($statuses, [Master::PO_PENDING, Master::SO_MANUFACTURING]);
+            $usedCount['so_pending'] = array_column(Arr::only($statuses,
+                [Master::SO_PENDING, Master::WASTAGE_PENDING]), 'id');
+            $usedCount['remaining_count'] = array_column($statuses, 'id');
+        } else {
+            $usedCount = Arr::except($statuses, [Master::PO_DELIVERED]);
+        }
+        $usedCount['available_count'] = array_column(Arr::only($statuses,
+            Stock::AVAILABLE_STATUSES), 'id');
 
 
-        return ['statuses' => $statuses, 'userCount' => $usedCount];
+        return $usedCount;
     }
 
     /**
@@ -108,7 +105,7 @@ class StockController extends Controller
     public function threadCount(ThreadColor $threadColor) {
         try {
             $stock = $this->stockRepository->stockCount($threadColor->id,
-                $this->statusFilters()['userCount']);
+                $this->statusFilters());
 
             return $this->sendResponse($stock,
                 __('messages.retrieved', ['module' => 'Stocks']),
