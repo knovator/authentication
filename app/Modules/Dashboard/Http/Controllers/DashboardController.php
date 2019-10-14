@@ -222,6 +222,7 @@ class DashboardController extends Controller
         }
     }
 
+
     /**
      * @param TopCustomerRequest $request
      * @return JsonResponse
@@ -274,14 +275,12 @@ class DashboardController extends Controller
      * @return array
      */
     private function statusFilters() {
-        $statuses = $this->getMasterByCodes([
+        return $this->getMasterByCodes([
             MasterConstant::PO_DELIVERED,
             MasterConstant::SO_MANUFACTURING,
             MasterConstant::SO_DELIVERED,
             MasterConstant::WASTAGE_DELIVERED,
         ]);
-
-        return $statuses;
     }
 
 

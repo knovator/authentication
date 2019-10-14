@@ -6,6 +6,7 @@ use App\Constants\Master;
 use App\Http\Controllers\Controller;
 use App\Modules\Stock\Models\Stock;
 use App\Modules\Stock\Repositories\StockRepository;
+use App\Modules\Thread\Constants\ThreadType;
 use App\Modules\Thread\Models\ThreadColor;
 use App\Modules\Thread\Repositories\ThreadColorRepository;
 use App\Repositories\MasterRepository;
@@ -52,7 +53,12 @@ class StockController extends Controller
      * @throws Exception
      */
     public function index(Request $request) {
-        $stocks = $this->stockRepository->getStockOverview($this->statusFilters(true));
+        $input = $request->all();
+        if (isset($input['type']) && $input['type'] == ThreadType::WARP) {
+            $input['type_id'] = $this->masterRepository->findByCode(ThreadType::WARP)->id;
+        }
+        $stocks = $this->stockRepository->getStockOverview($this->statusFilters($input, true),
+            $input);
 
         return $this->sendResponse($stocks,
             __('messages.retrieved', ['module' => 'Stocks']),
@@ -60,28 +66,40 @@ class StockController extends Controller
     }
 
     /**
+     * @param      $input
      * @param bool $index
      * @return array
      */
-    private function statusFilters($index = false) {
+    private function statusFilters($input, $index = false) {
         $statuses = $this->getMasterByCodes([
             Master::PO_PENDING,
+            Master::PO_DELIVERED,
             Master::SO_PENDING,
+            Master::WASTAGE_PENDING,
             Master::SO_MANUFACTURING,
             Master::SO_DELIVERED,
-            Master::PO_DELIVERED,
-            Master::WASTAGE_PENDING,
             Master::WASTAGE_DELIVERED,
         ]);
 
         if ($index) {
+
             $usedCount = Arr::only($statuses, [Master::PO_PENDING, Master::SO_MANUFACTURING]);
+
             $usedCount['so_pending'] = array_column(Arr::only($statuses,
                 [Master::SO_PENDING, Master::WASTAGE_PENDING]), 'id');
-            $usedCount['remaining_count'] = array_column($statuses, 'id');
+
+            // warp type statuses
+            if (isset($input['type_id'])) {
+                $usedCount['so_delivered'] = array_column(Arr::only($statuses,
+                    [Master::SO_DELIVERED, Master::WASTAGE_DELIVERED]), 'id');
+            } else {
+                $usedCount['remaining_count'] = array_column($statuses, 'id');
+            }
         } else {
             $usedCount = Arr::except($statuses, [Master::PO_DELIVERED]);
         }
+
+
         $usedCount['available_count'] = array_column(Arr::only($statuses,
             Stock::AVAILABLE_STATUSES), 'id');
 
@@ -100,12 +118,13 @@ class StockController extends Controller
 
     /**
      * @param ThreadColor $threadColor
+     * @param Request     $request
      * @return JsonResponse
      */
-    public function threadCount(ThreadColor $threadColor) {
+    public function threadCount(ThreadColor $threadColor, Request $request) {
         try {
             $stock = $this->stockRepository->stockCount($threadColor->id,
-                $this->statusFilters());
+                $this->statusFilters($request->all()));
 
             return $this->sendResponse($stock,
                 __('messages.retrieved', ['module' => 'Stocks']),

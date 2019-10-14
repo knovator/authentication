@@ -4,8 +4,10 @@ namespace App\Modules\Stock\Repositories;
 
 use App\Constants\Master;
 use App\Modules\Stock\Models\Stock;
-use Carbon\Carbon;
+use App\Modules\Thread\Constants\ThreadType;
+use App\Modules\Thread\Models\ThreadColor;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
 use Prettus\Repository\Exceptions\RepositoryException;
@@ -97,15 +99,32 @@ class StockRepository extends BaseRepository
 
     /**
      * @param $usedCount
+     * @param $input
      * @return mixed
      * @throws Exception
      */
-    public function getStockOverview($usedCount) {
+    public function getStockOverview($usedCount, $input) {
         $columns = $this->setStockCountColumn($usedCount, 'product_id,product_type');
         $stocks = $this->model->selectRaw($columns)->with([
             'product.thread:id,name,denier',
             'product.color:id,name,code'
-        ])->groupBy('product_id', 'product_type')->orderBy('remaining_count');
+        ])->groupBy('product_id', 'product_type');
+
+
+        if (isset($input['type_id'])) {
+            /** @var Builder $stocks */
+            $stocks = $stocks->whereHasMorph('product', [ThreadColor::class],
+                function ($product) use ($input) {
+                    /** @var Builder $product */
+                    $product->whereHas('thread', function ($thread) use ($input) {
+                        /** @var Builder $thread */
+                        $thread->where('type_id', '=', $input['type_id']);
+                    });
+                });
+        } else {
+            $stocks = $stocks->orderBy('remaining_count');
+        }
+
 
         return datatables()->of($stocks)->make(true);
     }
