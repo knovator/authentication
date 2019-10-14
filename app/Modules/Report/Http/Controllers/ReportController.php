@@ -111,7 +111,7 @@ class ReportController extends Controller
         $usedCount['available_count'] = collect($statuses)
             ->whereIn('code', Stock::AVAILABLE_STATUSES)->pluck('id')->toArray();
         try {
-            $threads = $this->stockRepository->leastUsedThreads($statuses,$usedCount);
+            $threads = $this->stockRepository->leastUsedThreads($statuses, $usedCount,true);
 
             if (($threads = collect($threads))->isEmpty()) {
                 return $this->sendResponse(null,

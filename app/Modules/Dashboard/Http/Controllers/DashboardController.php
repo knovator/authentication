@@ -257,7 +257,7 @@ class DashboardController extends Controller
             ->whereIn('code', Stock::AVAILABLE_STATUSES)->pluck('id')->toArray();
 
         try {
-            $threads = $this->stockRepository->leastUsedThreads($statuses,$usedCount);
+            $threads = $this->stockRepository->leastUsedThreads($statuses, $usedCount);
 
             return $this->sendResponse($threads,
                 __('messages.retrieved', ['module' => 'Threads']),
