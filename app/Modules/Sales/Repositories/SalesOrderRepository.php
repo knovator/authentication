@@ -54,7 +54,7 @@ class SalesOrderRepository extends BaseRepository
             'customer.state:id,name,code,gst_code',
             'status:id,name,code',
             'design:id,design_no,quality_name',
-            'deliveries:id,delivery_no,delivery_date,sales_order_id',
+            'deliveries.partialOrders:machine_id,delivery_id',
             'recipeMeters',
             'designBeam:id,thread_color_id',
         ])->with([
