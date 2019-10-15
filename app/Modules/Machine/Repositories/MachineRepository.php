@@ -67,16 +67,21 @@ class MachineRepository extends BaseRepository
      * @throws RepositoryException
      */
     public function getActiveMachines($input) {
-        $this->pushCriteria(IsActiveCriteria::class);
         $this->applyCriteria();
         $machines = $this->model->select('id', 'name', 'panno');
+
+        if (!isset($input['all'])) {
+            $this->pushCriteria(IsActiveCriteria::class);
+        }
+
         if (isset($input['sales_order'])) {
             /** @var Builder $machines */
             $machines = $machines->where([
                 'reed' => $input['sales_order']->design->detail->reed
-                //                'thread_color_id' => $input['sales_order']->designBeam->thread_color_id,
             ]);
         }
+
+
         $machines = $machines->get();
         $this->resetModel();
 
