@@ -3,6 +3,7 @@
 namespace App\Modules\Machine\Repositories;
 
 use App\Modules\Machine\Models\Machine;
+use DB;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -67,12 +68,11 @@ class MachineRepository extends BaseRepository
      * @throws RepositoryException
      */
     public function getActiveMachines($input) {
-        $this->applyCriteria();
-        $machines = $this->model->select('id', 'name', 'panno');
-
         if (!isset($input['all'])) {
             $this->pushCriteria(IsActiveCriteria::class);
         }
+        $this->applyCriteria();
+        $machines = $this->model->select('id', 'name', 'panno');
 
         if (isset($input['sales_order'])) {
             /** @var Builder $machines */
