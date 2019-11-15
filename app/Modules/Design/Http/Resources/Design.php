@@ -32,6 +32,10 @@ class Design extends JsonResource
             'fiddles'      => $this->fiddles,
             'is_active'    => $this->is_active,
             'is_approved'  => $this->is_approved,
+            $this->mergeWhen(isset($this->wastage_available), [
+                'wastage_available' => $this->wastage_available
+            ]),
+
             'detail'       => new DesignDetailResource($this->whenLoaded('detail')),
             'fiddlePicks'  => DesignFiddlePickResource::collection($this->whenLoaded('fiddlePicks')),
             'images'       => DesignImageResource::collection($this->whenLoaded('images')),

@@ -228,10 +228,11 @@ class DesignController extends Controller
     }
 
     /**
-     * @param Design $design
+     * @param Design  $design
+     * @param Request $request
      * @return JsonResponse
      */
-    public function show(Design $design) {
+    public function show(Design $design, Request $request) {
         $design->load([
             'detail',
             'fiddlePicks',
@@ -251,6 +252,10 @@ class DesignController extends Controller
             },
             'images.file',
         ]);
+
+        if ($request->has('action') && in_array('sales', $request->get('action'))) {
+            $design->wastage_available = $design->wastageOrders()->exists();
+        }
 
 
         foreach ($design->beams as $beam) {

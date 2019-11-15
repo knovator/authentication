@@ -42,9 +42,9 @@ class YarnOrder implements FromView, ShouldAutoSize, WithEvents
     public function registerEvents() : array {
         return [
             AfterSheet::class => function (AfterSheet $event) {
-                $this->createStyle($event, 'A1:G1', 11);
+                $this->createStyle($event, 'A1:H1', 11);
                 $event->sheet->styleCells(
-                    'A1:G1',
+                    'A1:H1',
                     [
                         'font' => [
                             'bold' => true,

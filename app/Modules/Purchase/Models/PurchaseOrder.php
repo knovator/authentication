@@ -150,4 +150,27 @@ class PurchaseOrder extends Model
 
         return $total;
     }
+    /**
+     * @return int
+     */
+    public function getDeliveredKgAttribute() {
+
+        if (!$this->relationLoaded('deliveredMeters')) {
+            throw UnloadedRelationException::make(get_class($this), 'deliveredMeters');
+        }
+
+        if ($this->deliveredMeters) {
+            return $this->deliveredMeters->total;
+        }
+
+        if (!$this->relationLoaded('status')) {
+            throw UnloadedRelationException::make(get_class($this), 'status');
+        }
+
+        if ($this->status->code == MasterConstant::PO_DELIVERED && (is_null($this->deliveredMeters))) {
+            return $this->total_kg;
+        }
+        return 0;
+    }
+
 }
