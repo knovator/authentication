@@ -54,7 +54,8 @@ class MachineRepository extends BaseRepository
                     /** @var Builder $delivery */
                     $delivery->where('status_id', '=', $statusId);
                 });
-            }
+            },
+            'soPartialOrders as destroy_count'
         ]))->make(true);
         $this->resetModel();
 
