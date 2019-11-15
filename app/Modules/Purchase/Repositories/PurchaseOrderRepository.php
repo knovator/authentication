@@ -87,7 +87,13 @@ class PurchaseOrderRepository extends BaseRepository
             $orders = datatables()->of($orders->with('deliveredMeters'))
                                   ->addColumn('pending_kg', function ($order) {
                                       return $order->pending_kg;
-                                  });
+                                  })->editColumn('delivered_meters', function ($order) {
+                    $data['total'] = $order->deliveredKg;
+                    $data['purchase_order_id'] = $order->id;
+
+                    return $data;
+                });
+
         }
 
         $orders = $orders->make(true);
@@ -132,7 +138,13 @@ class PurchaseOrderRepository extends BaseRepository
             $orders = datatables()->of($orders->with('deliveredMeters'))
                                   ->addColumn('pending_kg', function ($order) {
                                       return $order->pending_kg;
-                                  });
+                                  })->editColumn('delivered_meters', function ($order) {
+                    $data['total'] = $order->deliveredKg;
+                    $data['purchase_order_id'] = $order->id;
+
+                    return $data;
+                });
+
         }
 
         return $orders->make(true);

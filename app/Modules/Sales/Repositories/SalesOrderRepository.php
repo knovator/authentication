@@ -53,7 +53,8 @@ class SalesOrderRepository extends BaseRepository
         $orders = $this->model->with([
             'customer.state:id,name,code,gst_code',
             'status:id,name,code',
-            'design:id,design_no,quality_name',
+//            'design:id,design_no,quality_name',
+            'design.detail:design_id,reed',
             'deliveries.partialOrders:machine_id,delivery_id',
             'recipeMeters',
             'designBeam:id,thread_color_id',

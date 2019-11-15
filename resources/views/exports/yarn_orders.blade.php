@@ -6,8 +6,9 @@
         <th>Customer</th>
         <th>Order Date</th>
         <th>Threads</th>
-        <th>Status</th>
-        <th>Challan No</th>
+        <th>Quantity</th>
+        <th>Rate</th>
+        <th>Total Rate</th>
     </tr>
     </thead>
     <tbody>
@@ -22,10 +23,11 @@
                 <td rowspan="{{$rowSpan}}">{{$order->order_no}}</td>
                 <td rowspan="{{$rowSpan}}">{{$order->customer->full_name}}</td>
                 <td rowspan="{{$rowSpan}}">{{\Carbon\Carbon::parse($order->order_date)->format('d M Y')}}</td>
-                <td>{{$order->threads[0]->thread_color->thread->name.' ('.$order->threads[0]->thread_color->color->name.')'}}
-                    : {{$order->threads[0]->kg_qty. ' KG'}}</td>
-                <td rowspan="{{$rowSpan}}">{{$order->status->name}}</td>
-                <td rowspan="{{$rowSpan}}">{{$order->challan_no}}</td>
+                <td>{{$order->threads[0]->thread_color->thread->denier.' - '.$order->threads[0]->thread_color->thread->name.' ('.$order->threads[0]->thread_color->color->name.')'}}</td>
+                <td>{{$order->threads[0]->kg_qty}}</td>
+                <td>{{$order->threads[0]->rate}}</td>
+                <td>{{$order->threads[0]->kg_qty * $order->threads[0]->rate}}</td>
+
             </tr>
             @php
                 unset($order->threads[0]);
@@ -33,8 +35,10 @@
 
             @foreach($order->threads as $thread)
                 <tr>
-                    <td>{{$thread->thread_color->thread->name.' ('.$thread->thread_color->color->name.')'}}
-                        : {{$thread->kg_qty. ' KG'}}</td>
+                    <td>{{$thread->thread_color->thread->denier.' - '.$thread->thread_color->thread->name.' ('.$thread->thread_color->color->name.')'}}</td>
+                    <td>{{$thread->kg_qty}}</td>
+                    <td>{{$thread->rate}}</td>
+                    <td>{{$thread->kg_qty * $thread->kg_qty}}</td>
                 </tr>
             @endforeach
         @endif
