@@ -19,6 +19,7 @@ class Stock extends Model
         MasterConstant::SO_MANUFACTURING,
         MasterConstant::SO_DELIVERED,
         MasterConstant::WASTAGE_DELIVERED,
+        MasterConstant::WASTAGE_PENDING,
     ];
     public $morphOrderTypes = [
         'yarn',
