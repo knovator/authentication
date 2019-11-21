@@ -30,6 +30,7 @@ class ThreadColor extends Model
         'color_id',
         'thread_id',
         'is_active',
+        'is_demanded',
     ];
 
     protected $hidden = [

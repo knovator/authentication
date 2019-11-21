@@ -111,15 +111,22 @@ class StockRepository extends BaseRepository
         ])->groupBy('product_id', 'product_type');
 
 
-        if (isset($input['type_id'])) {
-            /** @var Builder $stocks */
+        /** @var Builder $stocks */
+
+
+        if (isset($input['type_id']) || isset($input['is_demanded'])) {
             $stocks = $stocks->whereHasMorph('product', [ThreadColor::class],
                 function ($product) use ($input) {
                     /** @var Builder $product */
-                    $product->whereHas('thread', function ($thread) use ($input) {
-                        /** @var Builder $thread */
-                        $thread->where('type_id', '=', $input['type_id']);
-                    });
+                    if (isset($input['type_id'])) {
+                        return $product->whereHas('thread', function ($thread) use ($input) {
+                            /** @var Builder $thread */
+                            $thread->where('type_id', '=', $input['type_id']);
+                        });
+                    }
+
+                    return $product->where('is_demanded', '=', true);
+
                 });
         } else {
             $stocks = $stocks->orderBy('remaining_count');
