@@ -4,7 +4,6 @@ namespace App\Modules\Thread\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PartiallyUpdateRequest;
-use App\Modules\Thread\Constants\ThreadType;
 use App\Modules\Thread\Http\Requests\CreateRequest;
 use App\Modules\Thread\Http\Requests\ThreadColorRequest;
 use App\Modules\Thread\Http\Requests\UpdateRequest;
@@ -13,14 +12,13 @@ use App\Modules\Thread\Models\Thread;
 use App\Modules\Thread\Models\ThreadColor;
 use App\Modules\Thread\Repositories\ThreadColorRepository;
 use App\Modules\Thread\Repositories\ThreadRepository;
+use App\Support\DestroyObject;
 use DB;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Knovators\Masters\Repository\MasterRepository;
 use Knovators\Support\Helpers\HTTPCode;
-use App\Support\DestroyObject;
 use Log;
 
 /**
@@ -209,7 +207,7 @@ class ThreadController extends Controller
         ThreadColor $threadColor,
         PartiallyUpdateRequest $request
     ) {
-        $threadColor->update(['is_active' => $request->get('is_active')]);
+        $threadColor->update($request->all());
 
         return $this->sendResponse($threadColor->fresh(),
             __('messages.updated', ['module' => 'Thread']),
@@ -236,7 +234,7 @@ class ThreadController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param ThreadColorRequest $request
      * @return JsonResponse
      */
     public function threadColorsList(ThreadColorRequest $request) {
