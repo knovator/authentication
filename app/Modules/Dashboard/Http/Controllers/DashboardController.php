@@ -252,13 +252,18 @@ class DashboardController extends Controller
      * @return JsonResponse
      */
     public function leastUsedThreadChart(LeastThreadRequest $request) {
-        $statuses = $this->statusFilters();
-
+        $statuses = $this->getMasterByCodes([
+            MasterConstant::PO_DELIVERED,
+            MasterConstant::SO_MANUFACTURING,
+            MasterConstant::SO_DELIVERED,
+            MasterConstant::WASTAGE_DELIVERED,
+            MasterConstant::WASTAGE_PENDING,
+            MasterConstant::SO_PENDING,
+        ]);
         $usedCount['available_count'] = collect($statuses)
             ->whereIn('code', Stock::AVAILABLE_STATUSES)->pluck('id')->toArray();
-
         try {
-            $threads = $this->stockRepository->leastUsedThreads($statuses, $usedCount);
+            $threads = $this->stockRepository->leastUsedThreads($statuses,$usedCount);
 
             return $this->sendResponse($threads,
                 __('messages.retrieved', ['module' => 'Threads']),
@@ -271,17 +276,6 @@ class DashboardController extends Controller
         }
     }
 
-    /**
-     * @return array
-     */
-    private function statusFilters() {
-        return $this->getMasterByCodes([
-            MasterConstant::PO_DELIVERED,
-            MasterConstant::SO_MANUFACTURING,
-            MasterConstant::SO_DELIVERED,
-            MasterConstant::WASTAGE_DELIVERED,
-        ]);
-    }
 
 
     /**

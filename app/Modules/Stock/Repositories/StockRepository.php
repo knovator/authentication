@@ -146,14 +146,13 @@ class StockRepository extends BaseRepository
      */
     public function leastUsedThreads($statuses, $usedCount, $export = false) {
         $columns = $this->setStockCountColumn($usedCount,
-            "product_id,product_type,CEIL((100 * (ABS(SUM(IF(status_id = {$statuses[Master::SO_DELIVERED]['id']}, kg_qty, 0))) + ABS(SUM(IF(status_id = {$statuses[Master::SO_MANUFACTURING]['id']}, kg_qty, 0))) + ABS(SUM(IF(status_id = {$statuses[Master::WASTAGE_DELIVERED]['id']}, kg_qty, 0)))))/SUM(IF(status_id = {$statuses[Master::PO_DELIVERED]['id']}, kg_qty, 0))) as percentage,(ABS(SUM(IF(status_id = {$statuses[Master::SO_DELIVERED]['id']}, kg_qty, 0))) + ABS(SUM(IF(status_id = {$statuses[Master::SO_MANUFACTURING]['id']}, kg_qty, 0))) + ABS(SUM(IF(status_id = {$statuses[Master::WASTAGE_DELIVERED]['id']}, kg_qty, 0)))) AS so_used,SUM(IF(status_id = {$statuses[Master::PO_DELIVERED]['id']}, kg_qty, 0)) AS po_delivered");
+            "product_id,product_type,max(created_at) as last_used_date, (SUM(IF(status_id = {$statuses[Master::PO_DELIVERED]['id']} OR status_id = {$statuses[Master::SO_MANUFACTURING]['id']} OR status_id = {$statuses[Master::SO_DELIVERED]['id']} OR status_id = {$statuses[Master::WASTAGE_PENDING]['id']} OR status_id = {$statuses[Master::WASTAGE_DELIVERED]['id']}, kg_qty, 0)))-ABS(SUM(IF(status_id = {$statuses[Master::SO_PENDING]['id']}, kg_qty, 0))) AS unused_qty");
         $stocks = $this->model->selectRaw($columns)
                               ->with([
                                   'product.thread:id,name,denier',
                                   'product.color:id,name,code'
                               ])->groupBy('product_id', 'product_type')
-                              ->havingRaw('po_delivered > 0 AND available_count > 0')
-                              ->orderByRaw('percentage');
+                              ->havingRaw('available_count > 0')->orderByRaw('unused_qty DESC,last_used_date ASC');
 
         $stocks = datatables()->of($stocks);
 

@@ -106,8 +106,14 @@ class ReportController extends Controller
      * @return JsonResponse|BinaryFileResponse
      */
     public function leastUsedThreadExport(Request $request) {
-        $statuses = $this->statusFilters();
-
+        $statuses = $this->getMasterByCodes([
+            MasterConstant::PO_DELIVERED,
+            MasterConstant::SO_MANUFACTURING,
+            MasterConstant::SO_DELIVERED,
+            MasterConstant::WASTAGE_DELIVERED,
+            MasterConstant::WASTAGE_PENDING,
+            MasterConstant::SO_PENDING,
+        ]);
         $usedCount['available_count'] = collect($statuses)
             ->whereIn('code', Stock::AVAILABLE_STATUSES)->pluck('id')->toArray();
         try {
@@ -129,19 +135,7 @@ class ReportController extends Controller
         }
     }
 
-    /**
-     * @return array
-     */
-    private function statusFilters() {
-        $statuses = $this->getMasterByCodes([
-            MasterConstant::PO_DELIVERED,
-            MasterConstant::SO_MANUFACTURING,
-            MasterConstant::SO_DELIVERED,
-            MasterConstant::WASTAGE_DELIVERED,
-        ]);
 
-        return $statuses;
-    }
 
     /**
      * @param $codes
