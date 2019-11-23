@@ -44,16 +44,16 @@ class ThreadExport implements FromView, ShouldAutoSize, WithEvents
     public function registerEvents() : array {
         return [
             AfterSheet::class => function (AfterSheet $event) {
-                $this->createStyle($event, 'A1:C1', 12);
+                $this->createStyle($event, 'A1:E1', 12);
                 $event->sheet->styleCells(
-                    'A1:C1',
+                    'A1:E1',
                     [
                         'font' => [
                             'bold' => true,
                         ]
                     ]
                 );
-                $event->sheet->getStyle('A1:C1')->getFill()
+                $event->sheet->getStyle('A1:E1')->getFill()
                              ->setFillType(Fill::FILL_SOLID)
                              ->getStartColor()->setARGB('FFEFD5');
             },
