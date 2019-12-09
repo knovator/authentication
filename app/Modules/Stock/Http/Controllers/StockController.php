@@ -89,7 +89,7 @@ class StockController extends Controller
                 [Master::SO_PENDING, Master::WASTAGE_PENDING]), 'id');
 
             // warp type statuses
-            if (isset($input['type_id'])) {
+            if (isset($input['type_id']) || isset($input['is_demanded'])) {
                 $usedCount['so_delivered'] = array_column(Arr::only($statuses,
                     [Master::SO_DELIVERED, Master::WASTAGE_DELIVERED]), 'id');
             } else {

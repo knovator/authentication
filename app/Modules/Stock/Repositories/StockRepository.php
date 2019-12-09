@@ -106,8 +106,19 @@ class StockRepository extends BaseRepository
     public function getStockOverview($usedCount, $input) {
         $columns = $this->setStockCountColumn($usedCount, 'product_id,product_type');
         $stocks = $this->model->selectRaw($columns)->with([
-            'product.thread:id,name,denier',
-            'product.color:id,name,code'
+            'product' => function ($product) use ($input,$usedCount) {
+                /** @var Builder $product */
+                if ($input['type'] == ThreadType::WARP) {
+                    $product->with([
+                        'beamMeters' => function ($beamMeters) use ($usedCount) {
+                            /** @var Builder $beamMeters */
+                            $beamMeters->selectRaw($this->setStockCountColumn($usedCount,'design_beam_id'));
+                        }
+                    ]);
+                }
+                $product->with('thread:id,name,denier', 'color:id,name,code');
+            }
+
         ])->groupBy('product_id', 'product_type');
 
 
@@ -118,12 +129,14 @@ class StockRepository extends BaseRepository
             $stocks = $stocks->whereHasMorph('product', [ThreadColor::class],
                 function ($product) use ($input) {
                     /** @var Builder $product */
+
                     if (isset($input['type_id'])) {
                         return $product->whereHas('thread', function ($thread) use ($input) {
                             /** @var Builder $thread */
                             $thread->where('type_id', '=', $input['type_id']);
                         });
                     }
+
 
                     return $product->where('is_demanded', '=', true);
 
@@ -152,7 +165,8 @@ class StockRepository extends BaseRepository
                                   'product.thread:id,name,denier',
                                   'product.color:id,name,code'
                               ])->groupBy('product_id', 'product_type')
-                              ->havingRaw('available_count > 0')->orderByRaw('unused_qty DESC,last_used_date ASC');
+                              ->havingRaw('available_count > 0')
+                              ->orderByRaw('unused_qty DESC,last_used_date ASC');
 
         $stocks = datatables()->of($stocks);
 

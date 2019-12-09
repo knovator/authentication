@@ -6,6 +6,7 @@ namespace App\Modules\Thread\Models;
 use App\Modules\Design\Models\DesignBeam;
 use App\Modules\Purchase\Models\PurchaseOrderThread;
 use App\Modules\Recipe\Models\Recipe;
+use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Stock\Models\Stock;
 use App\Modules\Wastage\Models\WastageOrder;
 use App\Modules\Yarn\Models\YarnOrderThread;
@@ -67,6 +68,25 @@ class ThreadColor extends Model
         return $this->hasMany(DesignBeam::class, 'thread_color_id', 'id');
     }
 
+
+    /**
+     * @return mixed
+     */
+    public function totalOrderMeters() {
+        return $this->hasOneThrough(SalesOrder::class, DesignBeam::class, 'thread_color_id',
+            'design_beam_id', 'id', 'id')
+                    ->selectRaw('SUM(sales_orders.total_meters) as total');
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function beamMeters() {
+        return $this->hasOneThrough(SalesOrder::class, DesignBeam::class, 'thread_color_id',
+            'design_beam_id', 'id', 'id')
+                    ->leftJoin('deliveries', 'deliveries.sales_order_id', '=', 'sales_orders.id');
+    }
 
     /**
      * @return mixed
