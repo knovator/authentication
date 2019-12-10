@@ -27,6 +27,7 @@ class Delivery extends Model
         'delivery_date',
         'status_id',
         'bill_no',
+        'meters',
     ];
 
     protected $hidden = [

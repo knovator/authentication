@@ -8,6 +8,7 @@ use App\Modules\Thread\Constants\ThreadType;
 use App\Modules\Thread\Models\ThreadColor;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
 use Knovators\Support\Criteria\OrderByDescId;
 use Knovators\Support\Traits\BaseRepository;
 use Prettus\Repository\Exceptions\RepositoryException;
@@ -71,24 +72,32 @@ class StockRepository extends BaseRepository
     }
 
     /**
-     * @param $stockCountStatus
-     * @param $columns
+     * @param        $stockCountStatus
+     * @param        $columns
+     * @param string $tablePrefix
+     * @param string $quantityColumn
      * @return string
      */
-    private function setStockCountColumn($stockCountStatus, $columns) {
+    private function setStockCountColumn(
+        $stockCountStatus,
+        $columns,
+        $tablePrefix = '',
+        $quantityColumn = 'kg_qty'
+    ) {
 
         foreach ($stockCountStatus as $key => $status) {
             if (!preg_match("/[A-Z]/", $key)) {
                 $condition = '';
                 $last = end($stockCountStatus[$key]);
                 foreach ($stockCountStatus[$key] as $availableId) {
-                    $condition .= 'status_id = ' . $availableId . ($availableId != $last ? ' OR ' : '');
+                    $condition .= $tablePrefix . 'status_id = ' . $availableId . ($availableId !=
+                        $last ? ' OR ' : '');
                 }
-                $columns .= ",SUM(IF($condition, kg_qty, 0)) AS {$key}";
+                $columns .= ",SUM(IF($condition, {$quantityColumn}, 0)) AS {$key}";
 
             } else {
                 $status['code'] = strtolower($status['code']);
-                $columns .= ",SUM(IF(status_id = {$status['id']}, kg_qty, 0)) AS {$status['code']}";
+                $columns .= ",SUM(IF({$tablePrefix}status_id = {$status['id']}, {$quantityColumn}, 0)) AS {$status['code']}";
             }
         }
 
@@ -104,10 +113,25 @@ class StockRepository extends BaseRepository
      * @throws Exception
      */
     public function getStockOverview($usedCount, $input) {
-        $columns = $this->setStockCountColumn($usedCount, 'product_id,product_type');
+        $columns = $this->setStockCountColumn(Arr::except($usedCount, 'beam_statuses'),
+            'product_id,product_type');
         $stocks = $this->model->selectRaw($columns)->with([
-            'product.thread:id,name,denier',
-            'product.color:id,name,code'
+            'product' => function ($product) use ($input, $usedCount) {
+                /** @var Builder $product */
+                if ($input['type'] == ThreadType::WARP) {
+                    $product->with([
+                        'beamMeters' => function ($beamMeters) use ($usedCount) {
+                            /** @var Builder $beamMeters */
+                            $beamMeters->selectRaw($this->setStockCountColumn($usedCount['beam_statuses'],
+                                'thread_color_id', 'deliveries.', 'deliveries.meters'));
+                        }
+                        ,
+                        'totalOrderMeters'
+                    ]);
+                }
+                $product->with('thread:id,name,denier', 'color:id,name,code');
+            }
+
         ])->groupBy('product_id', 'product_type');
 
 
@@ -118,12 +142,14 @@ class StockRepository extends BaseRepository
             $stocks = $stocks->whereHasMorph('product', [ThreadColor::class],
                 function ($product) use ($input) {
                     /** @var Builder $product */
+
                     if (isset($input['type_id'])) {
                         return $product->whereHas('thread', function ($thread) use ($input) {
                             /** @var Builder $thread */
                             $thread->where('type_id', '=', $input['type_id']);
                         });
                     }
+
 
                     return $product->where('is_demanded', '=', true);
 
@@ -152,7 +178,8 @@ class StockRepository extends BaseRepository
                                   'product.thread:id,name,denier',
                                   'product.color:id,name,code'
                               ])->groupBy('product_id', 'product_type')
-                              ->havingRaw('available_count > 0')->orderByRaw('unused_qty DESC,last_used_date ASC');
+                              ->havingRaw('available_count > 0')
+                              ->orderByRaw('unused_qty DESC,last_used_date ASC');
 
         $stocks = datatables()->of($stocks);
 
