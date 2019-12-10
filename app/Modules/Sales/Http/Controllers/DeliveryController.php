@@ -31,6 +31,7 @@ use Exception;
 use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Collection;
 use Knovators\Support\Helpers\HTTPCode;
 use Log;
 use Prettus\Repository\Exceptions\RepositoryException;
@@ -92,12 +93,14 @@ class DeliveryController extends Controller
      */
     public function store(SalesOrder $salesOrder, CreateRequest $request) {
         $input = $request->all();
-        if ($this->checkQuantityNotExists($salesOrder, $input['orders'])) {
+        $orders = collect($input['orders']);
+        if ($this->checkQuantityNotExists($salesOrder, $orders)) {
             return $this->sendResponse(null, __('messages.quantity_not_exists'),
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
         $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::SO_PENDING)->id;
         $input['delivery_no'] = $this->generateUniqueId(GenerateNumber::DELIVERY);
+        $input['meters'] = $orders->sum('total_meters');
         try {
             DB::beginTransaction();
             $delivery = $salesOrder->deliveries()->create($input);
@@ -124,8 +127,8 @@ class DeliveryController extends Controller
      * @param null $deliveryId
      * @return bool
      */
-    private function checkQuantityNotExists($salesOrder, $orders, $deliveryId = null) {
-        $orders = collect($orders)->groupBy('sales_order_recipe_id');
+    private function checkQuantityNotExists($salesOrder, Collection $orders, $deliveryId = null) {
+        $orders = $orders->groupBy('sales_order_recipe_id');
         $orderRecipes = $this->orderRecipeRepository->getOrderRecipeList($salesOrder->id,
             $deliveryId);
         foreach ($orders as $key => $order) {
@@ -282,10 +285,12 @@ class DeliveryController extends Controller
      */
     public function update(SalesOrder $salesOrder, Delivery $delivery, UpdateRequest $request) {
         $input = $request->all();
-        if ($this->checkQuantityNotExists($salesOrder, $input['orders'], $delivery->id)) {
+        $orders = collect($input['orders']);
+        if ($this->checkQuantityNotExists($salesOrder, $orders, $delivery->id)) {
             return $this->sendResponse(null, __('messages.quantity_not_exists'),
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
+        $input['meters'] = $orders->sum('total_meters');
         try {
             DB::beginTransaction();
             $delivery->update($input);
