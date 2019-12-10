@@ -118,7 +118,7 @@ class StockRepository extends BaseRepository
         $stocks = $this->model->selectRaw($columns)->with([
             'product' => function ($product) use ($input, $usedCount) {
                 /** @var Builder $product */
-                if ($input['type'] == ThreadType::WARP) {
+                if (isset($input['type']) && ($input['type'] == ThreadType::WARP)) {
                     $product->with([
                         'beamMeters' => function ($beamMeters) use ($usedCount) {
                             /** @var Builder $beamMeters */
