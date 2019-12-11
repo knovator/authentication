@@ -471,23 +471,23 @@ class WastageController extends Controller
      * @throws Exception
      */
     private function updateWASTAGEDELIVEREDStatus(WastageOrder $wastageOrder, $input) {
-        $wastageStocks = $this->wastageOrderRepository->usedStocks($wastageOrder);
-        $threadColors = $this->threadColorRepository->findWithAvailableQty(array_keys($wastageStocks));
-        foreach ($threadColors as $thread) {
-            if (!is_null($thread->availableStock)) {
-                $newQty = $thread->availableStock->available_qty +
-                    $wastageStocks[$thread->id]['used_stock'];
-            } else {
-                $newQty = $wastageStocks[$thread->id]['used_stock'];
-            }
-            if ($newQty < 0) {
-                $newQty = ceil(str_replace('-', '', $newQty));
-
-                return $this->sendResponse(null,
-                    "You need to purchase {$thread->thread->denier}-{$thread->thread->name}-{$thread->color->name} ({$newQty} KG) for deliver this order.",
-                    HTTPCode::UNPROCESSABLE_ENTITY);
-            }
-        }
+//        $wastageStocks = $this->wastageOrderRepository->usedStocks($wastageOrder);
+//        $threadColors = $this->threadColorRepository->findWithAvailableQty(array_keys($wastageStocks));
+//        foreach ($threadColors as $thread) {
+//            if (!is_null($thread->availableStock)) {
+//                $newQty = $thread->availableStock->available_qty +
+//                    $wastageStocks[$thread->id]['used_stock'];
+//            } else {
+//                $newQty = $wastageStocks[$thread->id]['used_stock'];
+//            }
+//            if ($newQty < 0) {
+//                $newQty = ceil(str_replace('-', '', $newQty));
+//
+//                return $this->sendResponse(null,
+//                    "You need to purchase {$thread->thread->denier}-{$thread->thread->name}-{$thread->color->name} ({$newQty} KG) for deliver this order.",
+//                    HTTPCode::UNPROCESSABLE_ENTITY);
+//            }
+//        }
 
 
         $input['status_id'] = $this->masterRepository->findByCode(MasterConstant::WASTAGE_DELIVERED)->id;
