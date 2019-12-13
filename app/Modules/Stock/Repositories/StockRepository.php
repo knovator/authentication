@@ -94,11 +94,11 @@ class StockRepository extends BaseRepository
                     $condition .= $tablePrefix . 'status_id = ' . $availableId . ($availableId !=
                         $last ? ' OR ' : '');
                 }
-                $columns .= ",SUM(IF($condition, {$quantityColumn}, 0)) AS {$key}";
+                $columns .= ",IFNULL(SUM(IF($condition, {$quantityColumn}, 0)),0) AS {$key}";
 
             } else {
                 $status['code'] = strtolower($status['code']);
-                $columns .= ",SUM(IF({$tablePrefix}status_id = {$status['id']}, {$quantityColumn}, 0)) AS {$status['code']}";
+                $columns .= ",IFNULL(SUM(IF({$tablePrefix}status_id = {$status['id']}, {$quantityColumn}, 0)),0) AS {$status['code']}";
             }
         }
 
@@ -209,6 +209,24 @@ class StockRepository extends BaseRepository
         }
         /** @var Stock $stock */
         $stock = $stock->where('product_id', $threadColorId)->first();
+
+        return $stock;
+    }
+
+    /**
+     * @param $customerId
+     * @param $usedCount
+     * @param $input
+     * @return mixed
+     */
+    public function customerStockCount($customerId, $usedCount) {
+        $stock = $this->model->selectRaw($this->setStockCountColumn($usedCount,
+            'product_type'))
+                             ->whereHasMorph('order', ['*'], function ($order) use ($customerId) {
+                                 $order->whereCustomerId($customerId);
+                             })->first();
+
+
         return $stock;
     }
 

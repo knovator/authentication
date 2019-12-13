@@ -15,11 +15,13 @@ use App\Modules\Customer\Repositories\AgentRepository;
 use App\Modules\Customer\Repositories\CustomerRepository;
 use App\Modules\Purchase\Repositories\PurchaseOrderRepository;
 use App\Modules\Sales\Repositories\SalesOrderRepository;
+use App\Modules\Stock\Repositories\StockRepository;
 use App\Modules\Wastage\Repositories\WastageOrderRepository;
 use App\Modules\Yarn\Repositories\YarnOrderRepository;
 use App\Repositories\MasterRepository;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Knovators\Support\Helpers\HTTPCode;
 use App\Support\DestroyObject;
 use Log;
@@ -54,6 +56,8 @@ class CustomerController extends Controller
 
     protected $masterRepository;
 
+    protected $stockRepository;
+
     /**
      * CustomerController constructor.
      * @param CustomerRepository      $customerRepository
@@ -63,6 +67,7 @@ class CustomerController extends Controller
      * @param WastageOrderRepository  $wastageOrderRepository
      * @param AgentRepository         $agentRepository
      * @param MasterRepository        $masterRepository
+     * @param StockRepository         $stockRepository
      */
     public function __construct(
         CustomerRepository $customerRepository,
@@ -71,7 +76,8 @@ class CustomerController extends Controller
         YarnOrderRepository $yarnOrderRepository,
         WastageOrderRepository $wastageOrderRepository,
         AgentRepository $agentRepository,
-        MasterRepository $masterRepository
+        MasterRepository $masterRepository,
+        StockRepository $stockRepository
     ) {
         $this->customerRepository = $customerRepository;
         $this->purchaseOrderRepository = $purchaseOrderRepository;
@@ -80,6 +86,7 @@ class CustomerController extends Controller
         $this->wastageOrderRepository = $wastageOrderRepository;
         $this->agentRepository = $agentRepository;
         $this->masterRepository = $masterRepository;
+        $this->stockRepository = $stockRepository;
     }
 
     /**
@@ -103,7 +110,6 @@ class CustomerController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
     }
-
 
     /**
      * @param $input

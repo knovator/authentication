@@ -26,6 +26,9 @@ Route::group([
 
         Route::get('stocks/thread-color/{threadColor}/report', 'StockController@threadReport')
              ->name('stocks.report');
+
+        Route::get('customer/{customer}/stocks', 'StockController@customerAnalysis')
+             ->name('customers.stocks.count');
     });
 
 Route::model('threadColor', ThreadColor::class);

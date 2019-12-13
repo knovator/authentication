@@ -4,6 +4,7 @@ namespace App\Modules\Stock\Http\Controllers;
 
 use App\Constants\Master;
 use App\Http\Controllers\Controller;
+use App\Modules\Customer\Models\Customer;
 use App\Modules\Stock\Models\Stock;
 use App\Modules\Stock\Repositories\StockRepository;
 use App\Modules\Thread\Constants\ThreadType;
@@ -70,7 +71,7 @@ class StockController extends Controller
      * @param bool $index
      * @return array
      */
-    private function statusFilters($input, $index = false) {
+    private function statusFilters($input = [], $index = false) {
         $statuses = $this->getMasterByCodes([
             Master::PO_PENDING,
             Master::PO_DELIVERED,
@@ -90,8 +91,11 @@ class StockController extends Controller
 
             // warp type statuses
             if (isset($input['type_id']) || isset($input['is_demanded'])) {
-                $usedCount['beam_statuses'] = Arr::only($statuses, [Master::SO_PENDING,
-                                                        Master::SO_MANUFACTURING,Master::SO_DELIVERED]);
+                $usedCount['beam_statuses'] = Arr::only($statuses, [
+                    Master::SO_PENDING,
+                    Master::SO_MANUFACTURING,
+                    Master::SO_DELIVERED
+                ]);
 
                 $usedCount['so_delivered'] = array_column(Arr::only($statuses,
                     [Master::SO_DELIVERED, Master::WASTAGE_DELIVERED]), 'id');
@@ -129,7 +133,29 @@ class StockController extends Controller
         $input = $request->all();
         try {
             $stock = $this->stockRepository->stockCount($threadColor->id,
-                $this->statusFilters($input),$input);
+                $this->statusFilters($input), $input);
+
+            return $this->sendResponse($stock,
+                __('messages.retrieved', ['module' => 'Stocks']),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, __('messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
+
+
+    /**
+     * @param Customer $customer
+     * @param Request  $request
+     * @return JsonResponse
+     */
+    public function customerAnalysis(Customer $customer) {
+        try {
+            $stock = $this->stockRepository->customerStockCount($customer->id,
+                $this->statusFilters());
 
             return $this->sendResponse($stock,
                 __('messages.retrieved', ['module' => 'Stocks']),
