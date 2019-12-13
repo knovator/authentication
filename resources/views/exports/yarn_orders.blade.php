@@ -38,7 +38,7 @@
                     <td>{{$thread->thread_color->thread->denier.' - '.$thread->thread_color->thread->name.' ('.$thread->thread_color->color->name.')'}}</td>
                     <td>{{$thread->kg_qty}}</td>
                     <td>{{$thread->rate}}</td>
-                    <td>{{$thread->kg_qty * $thread->kg_qty}}</td>
+                    <td>{{$thread->kg_qty * $thread->rate}}</td>
                 </tr>
             @endforeach
         @endif
