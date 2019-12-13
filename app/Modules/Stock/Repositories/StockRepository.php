@@ -202,9 +202,9 @@ class StockRepository extends BaseRepository
         $stock = $this->model->selectRaw($this->setStockCountColumn($usedCount,
             'product_id,product_type'));
         /** @var Builder $stock */
-        if (isset($input['customer_id'])) {
+        if (isset($input['customer_ids'])) {
             $stock = $stock->whereHasMorph('order', ['*'], function ($order) use ($input) {
-                $order->whereCustomerId($input['customer_id']);
+                $order->whereIn('customer_id', $input['customer_ids']);
             });
         }
         /** @var Stock $stock */
