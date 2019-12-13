@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
 //        $this->call(MachineChangeSeeder::class);
 //        $this->call(OrderQuantitySeeder::class);
 //        $this->call(PartiallyUpdateSeeder::class);
-//        $this->call(CreatePermissionSeeder::class);
+        $this->call(CreatePermissionSeeder::class);
 
         $this->call(DeliveryUpdateSeeder::class);
     }

@@ -98,6 +98,7 @@ class CreatePermissionSeeder extends Seeder
             "masters.partially.update",
             "masters.childs.index",
             "customers.index",
+            "customers.stocks.count",
             "customers.create",
             "customers.store",
             "customers.show",
@@ -252,6 +253,7 @@ class CreatePermissionSeeder extends Seeder
             "sales.export.summary",
             "sales.export",
             "customers.index",
+            "customers.stocks.count",
             "designs.active-designs",
             "designs.show",
             // SO fabric deliveries
@@ -329,6 +331,7 @@ class CreatePermissionSeeder extends Seeder
             "purchases.export",
             "masters.index",
             "customers.index",
+            "customers.stocks.count",
             "threads.colors-list",
             // Stock
             "stocks.index",
