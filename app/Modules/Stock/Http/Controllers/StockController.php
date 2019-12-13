@@ -72,7 +72,7 @@ class StockController extends Controller
      * @return array
      */
     private function statusFilters($input = [], $index = false) {
-        $usedCount = $this->getMasterByCodes([
+        $statuses = $this->getMasterByCodes([
             Master::PO_PENDING,
             Master::PO_DELIVERED,
             Master::SO_PENDING,
@@ -84,28 +84,31 @@ class StockController extends Controller
 
         if ($index) {
 
-            $usedCount = Arr::only($usedCount, [Master::PO_PENDING, Master::SO_MANUFACTURING]);
+            $usedCount = Arr::only($statuses, [Master::PO_PENDING, Master::SO_MANUFACTURING]);
 
-            $usedCount['so_pending'] = array_column(Arr::only($usedCount,
+            $usedCount['so_pending'] = array_column(Arr::only($statuses,
                 [Master::SO_PENDING, Master::WASTAGE_PENDING]), 'id');
 
             // warp type statuses
             if (isset($input['type_id']) || isset($input['is_demanded'])) {
-                $usedCount['beam_statuses'] = Arr::only($usedCount, [
+                $usedCount['beam_statuses'] = Arr::only($statuses, [
                     Master::SO_PENDING,
                     Master::SO_MANUFACTURING,
                     Master::SO_DELIVERED
                 ]);
 
-                $usedCount['so_delivered'] = array_column(Arr::only($usedCount,
+                $usedCount['so_delivered'] = array_column(Arr::only($statuses,
                     [Master::SO_DELIVERED, Master::WASTAGE_DELIVERED]), 'id');
 
             } else {
-                $usedCount['remaining_count'] = array_column($usedCount, 'id');
+                $usedCount['remaining_count'] = array_column($statuses, 'id');
             }
+        } else {
+            $usedCount = $statuses;
         }
 
-        $usedCount['available_count'] = array_column(Arr::only($usedCount,
+
+        $usedCount['available_count'] = array_column(Arr::only($statuses,
             Stock::AVAILABLE_STATUSES), 'id');
 
 
