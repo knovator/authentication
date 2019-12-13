@@ -126,9 +126,10 @@ class StockController extends Controller
      * @return JsonResponse
      */
     public function threadCount(ThreadColor $threadColor, Request $request) {
+        $input = $request->all();
         try {
             $stock = $this->stockRepository->stockCount($threadColor->id,
-                $this->statusFilters($request->all()));
+                $this->statusFilters($input),$input);
 
             return $this->sendResponse($stock,
                 __('messages.retrieved', ['module' => 'Stocks']),

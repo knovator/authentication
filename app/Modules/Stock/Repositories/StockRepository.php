@@ -6,6 +6,7 @@ use App\Constants\Master;
 use App\Modules\Stock\Models\Stock;
 use App\Modules\Thread\Constants\ThreadType;
 use App\Modules\Thread\Models\ThreadColor;
+use DB;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
@@ -194,16 +195,21 @@ class StockRepository extends BaseRepository
     /**
      * @param $threadColorId
      * @param $usedCount
+     * @param $input
      * @return mixed
-     * @throws Exception
      */
-    public function stockCount($threadColorId, $usedCount) {
-        $columns = $this->setStockCountColumn($usedCount, 'product_id,product_type');
-
-        return $this->model->selectRaw($columns)->with([
-            'product.thread:id,name,denier',
-            'product.color:id,name,code'
-        ])->where('product_id', $threadColorId)->first();
+    public function stockCount($threadColorId, $usedCount, $input) {
+        $stock = $this->model->selectRaw($this->setStockCountColumn($usedCount,
+            'product_id,product_type'));
+        /** @var Builder $stock */
+        if (isset($input['customer_id'])) {
+            $stock = $stock->whereHasMorph('order', ['*'], function ($order) use ($input) {
+                $order->whereCustomerId($input['customer_id']);
+            });
+        }
+        /** @var Stock $stock */
+        $stock = $stock->where('product_id', $threadColorId)->first();
+        return $stock;
     }
 
 
