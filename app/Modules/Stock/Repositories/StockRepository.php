@@ -24,7 +24,8 @@ class StockRepository extends BaseRepository
     /**
      * @throws RepositoryException
      */
-    public function boot() {
+    public function boot()
+    {
         $this->pushCriteria(OrderByDescId::class);
     }
 
@@ -32,7 +33,8 @@ class StockRepository extends BaseRepository
      * Configure the Model
      *
      **/
-    public function model() {
+    public function model()
+    {
         return Stock::class;
     }
 
@@ -41,7 +43,8 @@ class StockRepository extends BaseRepository
      * @param $values
      * @return mixed
      */
-    public function removeByField($field, $values) {
+    public function removeByField($field, $values)
+    {
         return $this->model->whereIn($field,
             $values)->delete();
     }
@@ -53,13 +56,14 @@ class StockRepository extends BaseRepository
      * @return
      * @throws Exception
      */
-    public function getThreadOrderReport($threadColor, $exceptIds, $stockCountStatus) {
+    public function getThreadOrderReport($threadColor, $exceptIds, $stockCountStatus)
+    {
         $columns = 'order_id,order_type,SUM(kg_qty) as stock';
         $reports = $this->model->selectRaw($this->setStockCountColumn($stockCountStatus, $columns))
-                               ->where([
-                                   'product_id'   => $threadColor->id,
-                                   'product_type' => 'thread_color',
-                               ])->whereNotIn('status_id', $exceptIds)->groupBy([
+            ->where([
+                'product_id' => $threadColor->id,
+                'product_type' => 'thread_color',
+            ])->whereNotIn('status_id', $exceptIds)->groupBy([
                 'order_id',
                 'order_type'
             ])->with([
@@ -84,7 +88,8 @@ class StockRepository extends BaseRepository
         $columns,
         $tablePrefix = '',
         $quantityColumn = 'kg_qty'
-    ) {
+    )
+    {
 
         foreach ($stockCountStatus as $key => $status) {
             if (!preg_match("/[A-Z]/", $key)) {
@@ -113,7 +118,8 @@ class StockRepository extends BaseRepository
      * @return mixed
      * @throws Exception
      */
-    public function getStockOverview($usedCount, $input) {
+    public function getStockOverview($usedCount, $input)
+    {
         $columns = $this->setStockCountColumn(Arr::except($usedCount, 'beam_statuses'),
             'product_id,product_type');
         $stocks = $this->model->selectRaw($columns)->with([
@@ -121,13 +127,17 @@ class StockRepository extends BaseRepository
                 /** @var Builder $product */
                 if (isset($input['type']) && ($input['type'] == ThreadType::WARP)) {
                     $product->with([
-                        'beamMeters' => function ($beamMeters) use ($usedCount) {
+                        'beamMeters' => function ($beamMeters) use ($usedCount, $input) {
                             /** @var Builder $beamMeters */
-                            $beamMeters->selectRaw($this->setStockCountColumn($usedCount['beam_statuses'],
+                            $beamMeters->where('sales_orders.status_id', '<>', $input['so_cancel_id'])
+                                ->where('deliveries.status_id', '<>', $input['so_cancel_id'])
+                                ->selectRaw($this->setStockCountColumn($usedCount['beam_statuses'],
                                 'thread_color_id', 'deliveries.', 'deliveries.meters'));
                         }
                         ,
-                        'totalOrderMeters'
+                        'totalOrderMeters' => function ($totalOrderMeters) use ($usedCount, $input) {
+                            $totalOrderMeters->where('sales_orders.status_id', '<>', $input['so_cancel_id']);
+                        }
                     ]);
                 }
                 $product->with('thread:id,name,denier', 'color:id,name,code');
@@ -171,16 +181,17 @@ class StockRepository extends BaseRepository
      * @return mixed
      * @throws Exception
      */
-    public function leastUsedThreads($statuses, $usedCount, $export = false) {
+    public function leastUsedThreads($statuses, $usedCount, $export = false)
+    {
         $columns = $this->setStockCountColumn($usedCount,
             "product_id,product_type,max(created_at) as last_used_date, (SUM(IF(status_id = {$statuses[Master::PO_DELIVERED]['id']} OR status_id = {$statuses[Master::SO_MANUFACTURING]['id']} OR status_id = {$statuses[Master::SO_DELIVERED]['id']} OR status_id = {$statuses[Master::WASTAGE_PENDING]['id']} OR status_id = {$statuses[Master::WASTAGE_DELIVERED]['id']}, kg_qty, 0)))-ABS(SUM(IF(status_id = {$statuses[Master::SO_PENDING]['id']}, kg_qty, 0))) AS unused_qty");
         $stocks = $this->model->selectRaw($columns)
-                              ->with([
-                                  'product.thread:id,name,denier',
-                                  'product.color:id,name,code'
-                              ])->groupBy('product_id', 'product_type')
-                              ->havingRaw('available_count > 0')
-                              ->orderByRaw('unused_qty DESC,last_used_date ASC');
+            ->with([
+                'product.thread:id,name,denier',
+                'product.color:id,name,code'
+            ])->groupBy('product_id', 'product_type')
+            ->havingRaw('available_count > 0')
+            ->orderByRaw('unused_qty DESC,last_used_date ASC');
 
         $stocks = datatables()->of($stocks);
 
@@ -198,7 +209,8 @@ class StockRepository extends BaseRepository
      * @param $input
      * @return mixed
      */
-    public function stockCount($threadColorId, $usedCount, $input) {
+    public function stockCount($threadColorId, $usedCount, $input)
+    {
         $stock = $this->model->selectRaw($this->setStockCountColumn($usedCount,
             'product_id,product_type'));
         /** @var Builder $stock */
@@ -219,12 +231,13 @@ class StockRepository extends BaseRepository
      * @param $input
      * @return mixed
      */
-    public function customerStockCount($customerId, $usedCount) {
+    public function customerStockCount($customerId, $usedCount)
+    {
         $stock = $this->model->selectRaw($this->setStockCountColumn($usedCount,
             'product_type'))
-                             ->whereHasMorph('order', ['*'], function ($order) use ($customerId) {
-                                 $order->whereCustomerId($customerId);
-                             })->first();
+            ->whereHasMorph('order', ['*'], function ($order) use ($customerId) {
+                $order->whereCustomerId($customerId);
+            })->first();
 
 
         return $stock;
