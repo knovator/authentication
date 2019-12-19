@@ -58,6 +58,8 @@ class StockController extends Controller
         if (isset($input['type']) && $input['type'] == ThreadType::WARP) {
             $input['type_id'] = $this->masterRepository->findByCode(ThreadType::WARP)->id;
         }
+
+        $input['cancel_order'] = $this->getMasterByCodes([Master::SO_CANCELED])['SO_CANCELED']['id'];
         $stocks = $this->stockRepository->getStockOverview($this->statusFilters($input, true),
             $input);
 

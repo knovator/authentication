@@ -121,13 +121,15 @@ class StockRepository extends BaseRepository
                 /** @var Builder $product */
                 if (isset($input['type']) && ($input['type'] == ThreadType::WARP)) {
                     $product->with([
-                        'beamMeters' => function ($beamMeters) use ($usedCount) {
+                        'beamMeters' => function ($beamMeters) use ($usedCount,$input) {
                             /** @var Builder $beamMeters */
-                            $beamMeters->selectRaw($this->setStockCountColumn($usedCount['beam_statuses'],
+                            $beamMeters->where('sales_orders.status_id','<>',$input['cancel_order'])->selectRaw($this->setStockCountColumn($usedCount['beam_statuses'],
                                 'thread_color_id', 'deliveries.', 'deliveries.meters'));
                         }
                         ,
-                        'totalOrderMeters'
+                        'totalOrderMeters'=> function ($totalOrderMeters) use($usedCount,$input) {
+                            $totalOrderMeters->where('sales_orders.status_id', '<>',$input['cancel_order']);
+                        }
                     ]);
                 }
                 $product->with('thread:id,name,denier', 'color:id,name,code');
