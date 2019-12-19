@@ -75,7 +75,7 @@ class ThreadColor extends Model
     public function totalOrderMeters() {
         return $this->hasOneThrough(SalesOrder::class, DesignBeam::class, 'thread_color_id',
             'design_beam_id', 'id', 'id')
-                    ->selectRaw('SUM(sales_orders.total_meters) as total');
+                    ->selectRaw('SUM(sales_orders.total_meters) as total')->groupBy('thread_color_id');
     }
 
 
@@ -84,7 +84,7 @@ class ThreadColor extends Model
      */
     public function beamMeters() {
         return $this->hasOneThrough(SalesOrder::class, DesignBeam::class, 'thread_color_id',
-            'design_beam_id', 'id', 'id')
+            'design_beam_id', 'id', 'id')->groupBy('thread_color_id')
                     ->leftJoin('deliveries', 'deliveries.sales_order_id', '=', 'sales_orders.id');
     }
 
