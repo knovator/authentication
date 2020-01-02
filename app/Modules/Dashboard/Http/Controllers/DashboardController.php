@@ -104,7 +104,6 @@ class DashboardController extends Controller
      */
     private function orderTypeAnalysis($input) {
         $this->financialYear($input);
-        dd($input);
         $statuses = $this->orderStatuses();
         $orders = [];
 
