@@ -104,6 +104,7 @@ class DashboardController extends Controller
      */
     private function orderTypeAnalysis($input) {
         $this->financialYear($input);
+        dd($input);
         $statuses = $this->orderStatuses();
         $orders = [];
 
@@ -147,7 +148,7 @@ class DashboardController extends Controller
      * @param $input
      */
     private function financialYear(&$input) {
-        $year = (date('Y') > 3) ? date('Y') + 1 : (int) date('Y');
+        $year = ((int) date('m') > 3) ? date('Y') + 1 : (int) date('Y');
         $input['startDate'] = ($year - 1) . '-04-01';
         $input['endDate'] = ($year) . '-03-31';
     }
@@ -263,7 +264,7 @@ class DashboardController extends Controller
         $usedCount['available_count'] = collect($statuses)
             ->whereIn('code', Stock::AVAILABLE_STATUSES)->pluck('id')->toArray();
         try {
-            $threads = $this->stockRepository->leastUsedThreads($statuses,$usedCount);
+            $threads = $this->stockRepository->leastUsedThreads($statuses, $usedCount);
 
             return $this->sendResponse($threads,
                 __('messages.retrieved', ['module' => 'Threads']),
@@ -275,7 +276,6 @@ class DashboardController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY, $exception);
         }
     }
-
 
 
     /**
