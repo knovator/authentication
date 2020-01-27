@@ -37,6 +37,7 @@ class SalesOrder extends Model
         'manufacturing_company_id',
         'customer_id',
         'status_id',
+        'is_bookmark',
         'created_by',
         'deleted_by',
     ];

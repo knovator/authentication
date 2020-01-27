@@ -668,6 +668,15 @@ class SalesController extends Controller
         return $this->updateStatus($salesOrder, $status);
 
     }
-
-
+    public function addBookmark(SalesOrder $salesOrder,Request $request){
+        if(isset($request['is_bookmark'])){
+            $salesOrder->update(['is_bookmark' => $request['is_bookmark']]);
+            return $this->sendResponse(null,
+                __('messages.bookmark_added'),
+                HTTPCode::OK);
+        }
+        return $this->sendResponse(null,
+            __('messages.something_wrong'),
+            HTTPCode::OK);
+    }
 }

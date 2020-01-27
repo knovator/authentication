@@ -40,7 +40,8 @@ Route::group([
 
         Route::get('sales-statuses', 'SalesController@statuses')
              ->name('sales.statuses');
-
+        Route::post('add-bookmark/{sale}','SalesController@addBookmark')
+            ->name('add.bookmark');
     });
 
 Route::group([
