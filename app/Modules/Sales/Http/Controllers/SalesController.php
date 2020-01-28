@@ -676,6 +676,7 @@ class SalesController extends Controller
                 __('messages.bookmark_added'),
                 HTTPCode::OK);
         }catch (Exception $exception){
+            Log::error($exception);
             return $this->sendResponse(null,
                 __('messages.something_wrong'),
                 HTTPCode::OK);
