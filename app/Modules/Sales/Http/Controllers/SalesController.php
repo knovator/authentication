@@ -6,6 +6,7 @@ use App\Constants\GenerateNumber;
 use App\Constants\Master;
 use App\Constants\Master as MasterConstant;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\BookmarkRequest;
 use App\Jobs\OrderFormJob;
 use App\Modules\Design\Repositories\DesignDetailRepository;
 use App\Modules\Sales\Http\Exports\SalesOrder as ExportSalesOrder;
@@ -668,15 +669,16 @@ class SalesController extends Controller
         return $this->updateStatus($salesOrder, $status);
 
     }
-    public function addBookmark(SalesOrder $salesOrder,Request $request){
-        if(isset($request['is_bookmark'])){
+    public function addBookmark(SalesOrder $salesOrder,BookmarkRequest $request){
+        try {
             $salesOrder->update(['is_bookmark' => $request['is_bookmark']]);
             return $this->sendResponse(null,
                 __('messages.bookmark_added'),
                 HTTPCode::OK);
+        }catch (Exception $exception){
+            return $this->sendResponse(null,
+                __('messages.something_wrong'),
+                HTTPCode::OK);
         }
-        return $this->sendResponse(null,
-            __('messages.something_wrong'),
-            HTTPCode::OK);
     }
 }
