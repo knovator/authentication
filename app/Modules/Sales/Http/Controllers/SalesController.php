@@ -672,7 +672,7 @@ class SalesController extends Controller
     public function addBookmark(SalesOrder $salesOrder,BookmarkRequest $request){
         try {
             $salesOrder->update(['is_bookmark' => $request['is_bookmark']]);
-            return $this->sendResponse(null,
+            return $this->sendResponse(['is_bookmark' => true],
                 __('messages.bookmark_added'),
                 HTTPCode::OK);
         }catch (Exception $exception){
