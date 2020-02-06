@@ -67,6 +67,7 @@ class SalesOrderRepository extends BaseRepository
                 /** @var Builder $delivered */
                 $delivered->where('deliveries.status_id', $deliveredId);
             }
+
         ])->select('sales_orders.*');
 
 
