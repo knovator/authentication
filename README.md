@@ -15,7 +15,7 @@ Features:
 
 Require the knovators/authentication package in your composer.json and update your dependencies:
 
-You want to need add http logger repository in your composer.json file.
+You want to need add authentication repository in your composer.json file.
 
 ```"repositories": [
           {
