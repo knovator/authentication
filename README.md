@@ -25,6 +25,8 @@ You want to need add authentication repository in your composer.json file.
       ],
 ```
 
+You want to need add ```multiple_column```  in ```config/auth.php``` User Providers sections
+
 This package included 
 ```laravel/passport``` and
 ```prettus/l5-repository``` packages.
