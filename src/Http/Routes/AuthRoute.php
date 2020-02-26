@@ -27,11 +27,15 @@ class AuthRoute extends RouteRegistrar
 
             $this->name('auth.reset-password')
                  ->post('/reset-password', 'AuthController@resetPassword');
+            $this->name('auth.verify.post')
+                 ->any('/verify-user', 'AuthController@verify');
         });
 
         $this->group($this->routeAttributes('log_out_attributes'), function () {
             $this->name('auth.logout')->post('logout', 'LoginController@logout');
         });
+
+
 
 
     }

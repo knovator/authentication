@@ -3,6 +3,7 @@
 namespace Knovators\Authentication\Http\Resources;
 
 
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Knovators\Media\Http\Resources\Media as MediaResource;
 
@@ -16,7 +17,7 @@ class User extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      * @return array
      */
     public function toArray($request) {
@@ -30,8 +31,8 @@ class User extends JsonResource
             'is_active'  => $this->is_active,
             'image'      => new MediaResource($this->whenLoaded('image')),
 
-            $this->mergeWhen(isset($this->token), [
-                'token' => $this->token
+            $this->mergeWhen(isset($this->new_token), [
+                'token' => $this->new_token
             ]),
             $this->mergeWhen(isset($this->role), [
                 'role' => $this->role

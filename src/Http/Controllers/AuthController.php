@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Knovators\Authentication\Http\Requests\ForgotPasswordRequest;
 use Knovators\Authentication\Http\Requests\ResetPasswordRequest;
+use Knovators\Authentication\Http\Requests\VerificationFormRequest;
 use Knovators\Authentication\Models\User;
 use Knovators\Authentication\Repository\UserRepository;
 use Knovators\Support\Helpers\HTTPCode;
@@ -82,6 +83,13 @@ class AuthController extends Controller
         return $this->userRepository->findBy('email', $input['email']);
     }
 
+    /**
+     * @param $parameters
+     * @return mixed
+     */
+    public function hashMake($parameters) {
+        return Hash::make($parameters);
+    }
 
     /**
      * @param ResetPasswordRequest $request
@@ -120,6 +128,14 @@ class AuthController extends Controller
             HTTPCode::UNPROCESSABLE_ENTITY, $exception);
     }
 
+    /**
+     * @param $source
+     * @param $target
+     * @return bool
+     */
+    public function hasCheck($source, $target) {
+        return Hash::check($source, $target);
+    }
 
     /**
      * @param null $user
@@ -138,22 +154,41 @@ class AuthController extends Controller
         return true;
     }
 
+    public function verify(VerificationFormRequest $request) {
+        $input = $request->all();
+        $user = $this->userRepository->makeModel()->whereEmail($input['email'])->first();
+        if (!$user) {
+            return $this->sendResponse(null, __('messages.not_found', ['module' => 'User']),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+        if (!$user->emailVerified()) {
+            if (Hash::check($user->email . $user->email_verification_key, $input['key'])) {
+                return $this->createEmailVerification($user);
+            }
+            return $this->sendResponse(null, __('messages.invalid_url'),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
 
-    /**
-     * @param $source
-     * @param $target
-     * @return bool
-     */
-    public function hasCheck($source, $target) {
-        return Hash::check($source, $target);
+        return $this->sendResponse(null,
+            __('messages.already_verified', ['type' => ucwords($input['type'])]),
+            HTTPCode::OK);
     }
 
-    /**
-     * @param $parameters
-     * @return mixed
-     */
-    public function hashMake($parameters) {
-        return Hash::make($parameters);
+    private function createEmailVerification($user) {
+        try {
+            $user->update([
+                'email_verified'         => 1,
+                'email_verification_key' => null
+            ]);
+
+            return redirect(config('authentication.app_fronend_domain') . 'login/?verified=true');
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null,
+                __('messages.something_wrong'),
+                HTTPCode::OK);
+        }
     }
 
 }

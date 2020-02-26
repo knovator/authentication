@@ -115,8 +115,6 @@ class RegisterController extends Controller
      */
     protected function create(array $data) {
         try {
-            DB::beginTransaction();
-
             $user = $this->userRepository->create([
                 'first_name' => $data['first_name'],
                 'last_name'  => $data['last_name'],
@@ -124,14 +122,12 @@ class RegisterController extends Controller
                 'phone'      => $data['phone'],
                 'password'   => Hash::make($data['password']),
             ]);
-
             $role = $this->roleRepository->findByCode(RoleConstant::USER);
             $user->roles()->sync([$role->id]);
-            DB::commit();
 
             return $user;
-        } catch (\Exception $exception) {
-            DB::rollback();
+
+        } catch (Exception $exception) {
             throw $exception;
         }
     }
@@ -145,22 +141,19 @@ class RegisterController extends Controller
      * @return mixed
      * @throws \Exception
      */
-    protected function registered(Request $request, User $user) {
+    protected function registered(Request $request, $user) {
         try {
-//            $key = mt_rand(100000, 999999);
-//            $hashKey = Hash::make($user->email . $key);
-//            $user->update([
-//                'email_verification_key' => $key,
-//            ]);
-//            $user->sendVerificationMail($hashKey,
-//                [UserConstant::TYPE_EMAIL, UserConstant::TYPE_PHONE]);
-
-            $user->token = null;
-
+            $key = mt_rand(100000, 999999);
+            $hashKey = Hash::make($user->email . $key);
+            $user->update([
+                'email_verification_key' => $key,
+            ]);
+            $user->sendVerificationMail($hashKey);
+            $user->new_token = null;
             return $this->sendResponse($this->makeResource($user),
                 trans('authentication::messages.user_registered'),
                 HTTPCode::CREATED);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             throw $exception;
         }
     }
