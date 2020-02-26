@@ -19,6 +19,7 @@ class RoleRepository extends BaseRepository
      *
      **/
     public function model() {
+        // test
         return CommonService::getClass('role');
     }
 
