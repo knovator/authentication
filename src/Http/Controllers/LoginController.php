@@ -76,8 +76,8 @@ class LoginController extends Controller
                 HTTPCode::UNAUTHORIZED);
         }
 
-        $user->token = $user->createToken('Client Token')->accessToken;
-        if (!$user->token) {
+        $user->new_token = $user->createToken('Client Token')->accessToken;
+        if (!$user->new_token) {
             auth()->logout();
 
             return $this->sendResponse(null, trans('authentication::messages.something_wrong'),

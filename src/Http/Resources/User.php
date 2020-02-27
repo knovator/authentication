@@ -31,8 +31,8 @@ class User extends JsonResource
             'is_active'  => $this->is_active,
             'image'      => new MediaResource($this->whenLoaded('image')),
 
-            $this->mergeWhen(isset($this->token), [
-                'token' => $this->token
+            $this->mergeWhen(isset($this->new_token), [
+                'token' => $this->new_token
             ]),
             $this->mergeWhen(isset($this->role), [
                 'role' => $this->role
