@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Knovators\Authentication\Common\CommonService;
 use Knovators\Authentication\Notifications\ResetPasswordNotification;
+use Knovators\Authentication\Notifications\VerificationUserNotification;
 use Knovators\Media\Models\Media;
 use Knovators\Support\Traits\HasModelEvent;
 use Knovators\Support\Traits\HasSlug;
@@ -21,7 +22,7 @@ use Laravel\Passport\HasApiTokens;
 class User extends Authenticatable
 {
 
-    use Notifiable, SoftDeletes, HasApiTokens, Notifiable, HasSlug, HasModelEvent;
+    use SoftDeletes, HasApiTokens, Notifiable, HasSlug, HasModelEvent;
     /**
      * The attributes that are mass assignable.
      *
@@ -129,6 +130,13 @@ class User extends Authenticatable
      */
     public function sendPasswordResetNotification($token) {
         $this->notify(new ResetPasswordNotification($token));
+    }
+
+    /**
+     * @param $hashKey
+     */
+    public function sendVerificationMail($hashKey) {
+        $this->notify(new VerificationUserNotification($this, $hashKey));
     }
 
 

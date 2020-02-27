@@ -48,8 +48,10 @@ class MongoDBPassportCommand extends Command
      */
     protected $paths = [
         'vendor/laravel/passport/src/',
-        'vendor/knovators/authentication/src/Models',
-        'vendor/knovators/media/src/Models'
+        'vendor/knovators/support/src',
+        'vendor/knovators/authentication/src',
+        'vendor/knovators/media/src
+        '
     ];
 
     /**

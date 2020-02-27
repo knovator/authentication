@@ -15,6 +15,7 @@ class Role extends Model
 {
 
     protected $table = 'roles';
+    protected $fillable = ['code', 'name'];
 
     /**
      * @param $query

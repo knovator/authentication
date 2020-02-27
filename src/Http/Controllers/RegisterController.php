@@ -124,7 +124,6 @@ class RegisterController extends Controller
             $connection = 'assignRole' . config('authentication.db');
             $role = $this->roleRepository->getRole(RoleConstant::USER);
             $this->$connection($user, $role);
-
             return $user;
 
         } catch (Exception $exception) {
