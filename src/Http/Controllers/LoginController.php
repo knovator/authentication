@@ -2,6 +2,7 @@
 
 namespace Knovators\Authentication\Http\Controllers;
 
+use Exception;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\JsonResponse;
@@ -50,7 +51,6 @@ class LoginController extends Controller
         if (!$columns = config('authentication.login_columns')) {
             $columns = 'email,phone';
         }
-
         return [
             $columns   => $request->get($this->username()),
             'password' => $request->get('password')
@@ -135,7 +135,7 @@ class LoginController extends Controller
 
             return $this->sendResponse(null, trans('authentication::messages.user_logout_access'),
                 HTTPCode::OK);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             Log::error($exception);
 
             return $this->sendResponse(null, trans('authentication::messages.something_wrong'),

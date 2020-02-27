@@ -40,11 +40,11 @@ class ResetPasswordNotification extends Notification
      * Get the mail representation of the notification.
      *
      * @param mixed $notifiable
-     * @return \Illuminate\Notifications\Messages\MailMessage
+     * @return MailMessage
      */
     public function toMail($notifiable) {
         return (new MailMessage)
-            ->subject('Forget password request from Textile')
+            ->subject('Forget password request from' . config('app.name'))
             ->line('You are receiving this email because we received a password reset request for your account.')
             ->action('Reset Password',
                 config('authentication.front_url') . '/reset-password?token=' . $this->token . '&email=' . $notifiable->email)

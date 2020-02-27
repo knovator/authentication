@@ -3,6 +3,7 @@
 namespace Knovators\Authentication\Models;
 
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -60,7 +61,6 @@ class User extends Authenticatable
     protected $slugifyColumns = ['first_name', 'last_name', 'id'];
 
 
-
     /**
      * @return bool
      */
@@ -95,7 +95,8 @@ class User extends Authenticatable
      */
     public function roles() {
 
-        return $this->belongsToMany(CommonService::getClass('role'), 'users_roles', 'user_id', 'role_id');
+        return $this->belongsToMany(CommonService::getClass('role'), 'users_roles', 'user_id',
+            'role_id');
     }
 
 
@@ -109,16 +110,21 @@ class User extends Authenticatable
 
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function image() {
-        return $this->belongsTo(Media::class, 'image_id', 'id')->select(['id', 'name','type','mime_type']);
+        return $this->belongsTo(Media::class, 'image_id', 'id')->select([
+            'id',
+            'name',
+            'type',
+            'mime_type'
+        ]);
     }
 
     /**
      * Send the password reset notification.
      *
-     * @param  string $token
+     * @param string $token
      * @return void
      */
     public function sendPasswordResetNotification($token) {

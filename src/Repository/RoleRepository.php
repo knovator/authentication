@@ -22,4 +22,13 @@ class RoleRepository extends BaseRepository
         return CommonService::getClass('role');
     }
 
+    /**
+     * @param $code
+     * @return
+     */
+    public function getRole($code) {
+        return $this->model->firstOrCreate(['code' => $code],
+            ['name' => strtolower($code)]);
+    }
+
 }

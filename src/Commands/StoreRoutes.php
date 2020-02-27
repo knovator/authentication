@@ -69,7 +69,7 @@ class StoreRoutes extends Command
 
                 if ($data['module'] = strstr($data['route_name'], '.', true)) {
 
-                    $roleId = $this->roleRepository->findByCode(RoleConstant::ADMIN)->first()->id;
+                    $roleId = $this->roleRepository->getRole(RoleConstant::ADMIN)->value('id');
 
                     $permission = $this->createPermission($data);
 

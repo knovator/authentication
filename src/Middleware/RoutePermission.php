@@ -62,7 +62,6 @@ class RoutePermission
                 }
             }
         }
-
         return $next($request);
     }
 
