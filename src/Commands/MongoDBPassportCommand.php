@@ -33,7 +33,7 @@ class MongoDBPassportCommand extends Command
      * @var string
      */
     protected $mongoModel = 'Jenssegers\Mongodb';
-    protected $mongoAuth = 'Jenssegers\Mongodb';
+    protected $mongoAuth = 'Jenssegers\Mongodb\Auth\User';
 
     /**
      * Laravel Eloquent Model to Replace with
@@ -41,7 +41,7 @@ class MongoDBPassportCommand extends Command
      * @var string
      */
     protected $laravelModel = 'Illuminate\Database';
-    protected $laravelAuth = 'Illuminate\Foundation';
+    protected $laravelAuth = 'Illuminate\Foundation\Auth\User';
 
     /**
      * Passport vendor files location
