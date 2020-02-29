@@ -65,6 +65,12 @@ class User extends Authenticatable
         'phone_verified' => 0
     ];
 
+    protected $casts = [
+        'is_active'      => 'boolean',
+        'email_verified' => 'boolean',
+        'phone_verified' => 'boolean'
+    ];
+
 
     protected $slugifyColumns = ['first_name', 'last_name', 'id'];
 
