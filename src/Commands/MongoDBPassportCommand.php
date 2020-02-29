@@ -32,7 +32,7 @@ class MongoDBPassportCommand extends Command
      *
      * @var string
      */
-    protected $mongoModel = 'Jenssegers\Mongodb';
+    protected $mongoModel = 'Jenssegers\Mongodb\Eloquent\Model';
     protected $mongoAuth = 'Jenssegers\Mongodb\Auth\User';
 
     /**
@@ -40,8 +40,9 @@ class MongoDBPassportCommand extends Command
      *
      * @var string
      */
-    protected $laravelModel = 'Illuminate\Database';
+    protected $laravelModel = 'Illuminate\Database\Eloquent\Model';
     protected $laravelAuth = 'Illuminate\Foundation\Auth\User';
+
 
     /**
      * Passport vendor files location
@@ -101,12 +102,11 @@ class MongoDBPassportCommand extends Command
             if (File::isDirectory($path)) {
                 $files = File::allfiles($path);
                 foreach ($files as $filename) {
-                    $file = file_get_contents($filename);
-                    file_put_contents($filename,
-                        str_replace($source, $target, $file));
-                    $file = file_get_contents($filename);
-                    file_put_contents($filename,
-                        str_replace($authFrom, $authTo, $file));
+                    $str = file_get_contents($filename);
+                    $str = str_replace($source, $target, $str);
+                    $str = str_replace($authFrom, $authTo, $str);
+                    file_put_contents($filename, $str);
+
                 }
             }
         }

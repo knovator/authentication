@@ -83,9 +83,8 @@ class LoginController extends Controller
             return $this->sendResponse(null, trans('authentication::messages.something_wrong'),
                 HTTPCode::UNAUTHORIZED);
         }
-
-        $role = $user->orderByRoles()->with('permissions')->first();
-
+        $role = $user->orderByRoles()->first();
+        $role->load('permissions');
         $user->role = $role->name;
 
         $user->permissions = collect($role->permissions->groupBy('module'))->map(function ($item) {

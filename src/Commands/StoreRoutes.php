@@ -3,6 +3,7 @@
 namespace Knovators\Authentication\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Route;
 use Knovators\Authentication\Constants\Role as RoleConstant;
 use Knovators\Authentication\Repository\PermissionRepository;
@@ -63,24 +64,25 @@ class StoreRoutes extends Command
 
             if ($data['route_name'] && $this->strPositionArray($data['route_name'],
                     config('authentication.permission.except_modules')) === false) {
-
                 /** @var \Illuminate\Routing\Route $route */
                 $data['uri'] = $route->uri;
-
                 if ($data['module'] = strstr($data['route_name'], '.', true)) {
-
                     $roleId = $this->roleRepository->getRole(RoleConstant::ADMIN)->value('id');
-
                     $permission = $this->createPermission($data);
-
-                    if (!$permission->roles()->where('role_id', $roleId)->exists()) {
-                        $permission->roles()->attach($roleId);
-                    }
+                    $storeRoles = 'storeRoles' . config('authentication.db');
+                    $this->$storeRoles($permission, $roleId);
                 }
             }
         }
 
         return 'routes stored successfully.';
+    }
+
+    /**
+     * @return mixed
+     */
+    private function getAllRoutes() {
+        return Route::getRoutes();
     }
 
     /**
@@ -101,7 +103,6 @@ class StoreRoutes extends Command
         return false;
     }
 
-
     /**
      * @param $data
      * @return mixed
@@ -114,11 +115,23 @@ class StoreRoutes extends Command
 
     }
 
+    /**
+     * @param $permission
+     * @param $roleId
+     */
+    protected function storeRolesmysql($permission, $roleId) {
+        if (!$permission->roles()->where('role_id', $roleId)->exists()) {
+            $permission->roles()->attach($roleId);
+        }
+    }
 
     /**
-     * @return mixed
+     * @param $permission
+     * @param $roleId
      */
-    private function getAllRoutes() {
-        return Route::getRoutes();
+    protected function storeRolesmongodb($permission, $roleId) {
+        if (!in_array($roleId, Arr::flatten($permission->roles->toArray()))) {
+            $permission->push('roles', [$roleId]);
+        }
     }
 }
