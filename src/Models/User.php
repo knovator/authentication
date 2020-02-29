@@ -38,6 +38,7 @@ class User extends Authenticatable
         'email_verified',
         'password',
         'phone',
+        'phone_verified',
         'created_by',
         'deleted_by',
         'image_id'
@@ -57,6 +58,11 @@ class User extends Authenticatable
     protected $slugColumn = 'slug';
 
     protected $appends = ['full_name'];
+    protected $attributes = [
+        'is_active'      => 1,
+        'email_verified' => 0,
+        'phone_verified' => 0
+    ];
 
 
     protected $slugifyColumns = ['first_name', 'last_name', 'id'];
@@ -67,6 +73,13 @@ class User extends Authenticatable
      */
     public function emailVerified() {
         return $this->email_verified == 1;
+    }
+
+    /**
+     * @return bool
+     */
+    public function phoneVerified() {
+        return $this->phone_verified == 1;
     }
 
     /**
