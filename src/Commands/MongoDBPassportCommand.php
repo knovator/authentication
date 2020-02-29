@@ -51,7 +51,7 @@ class MongoDBPassportCommand extends Command
     protected $paths = [
         'vendor/laravel/passport/src/',
         'vendor/knovators/support/src',
-        'vendor/knovators/authentication/src',
+        'vendor/knovators/authentication/src/Models',
         'vendor/knovators/media/src
         '
     ];
@@ -104,6 +104,7 @@ class MongoDBPassportCommand extends Command
                     $file = file_get_contents($filename);
                     file_put_contents($filename,
                         str_replace($source, $target, $file));
+                    $file = file_get_contents($filename);
                     file_put_contents($filename,
                         str_replace($authFrom, $authTo, $file));
                 }
