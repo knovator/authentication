@@ -33,6 +33,7 @@ class MongoDBPassportCommand extends Command
      * @var string
      */
     protected $mongoModel = 'Jenssegers\Mongodb';
+    protected $mongoAuth = 'Jenssegers\Mongodb';
 
     /**
      * Laravel Eloquent Model to Replace with
@@ -40,6 +41,7 @@ class MongoDBPassportCommand extends Command
      * @var string
      */
     protected $laravelModel = 'Illuminate\Database';
+    protected $laravelAuth = 'Illuminate\Foundation';
 
     /**
      * Passport vendor files location
@@ -84,14 +86,17 @@ class MongoDBPassportCommand extends Command
      * @return void
      */
     protected function fixFiles() {
-        $this->modifyFiles($this->laravelModel, $this->mongoModel);
+        $this->modifyFiles($this->laravelModel, $this->mongoModel, $this->laravelAuth,
+            $this->mongoAuth);
     }
 
     /**
      * @param $source
      * @param $target
+     * @param $authFrom
+     * @param $authTo
      */
-    protected function modifyFiles($source, $target) {
+    protected function modifyFiles($source, $target, $authFrom, $authTo) {
         foreach ($this->paths as $path) {
             if (File::isDirectory($path)) {
                 $files = File::allfiles($path);
@@ -99,12 +104,15 @@ class MongoDBPassportCommand extends Command
                     $file = file_get_contents($filename);
                     file_put_contents($filename,
                         str_replace($source, $target, $file));
+                    file_put_contents($filename,
+                        str_replace($authFrom, $authTo, $file));
                 }
             }
         }
     }
 
     protected function rollbackFiles() {
-        $this->modifyFiles($this->mongoModel, $this->laravelModel);
+        $this->modifyFiles($this->mongoModel, $this->laravelModel, $this->mongoAuth,
+            $this->laravelAuth);
     }
 }
