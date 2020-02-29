@@ -37,6 +37,7 @@ class User extends Authenticatable
         'email_verification_key',
         'email_verified',
         'password',
+        'roles',
         'phone',
         'phone_verified',
         'created_by',
@@ -112,6 +113,7 @@ class User extends Authenticatable
         if ($config === 'mongodb') {
             return $this->embedsMany(CommonService::getClass('role'));
         }
+
         return $this->belongsToMany(CommonService::getClass('role'), 'users_roles', 'user_id',
             'role_id');
     }
@@ -121,9 +123,8 @@ class User extends Authenticatable
      * @return mixed
      */
     public function orderByRoles() {
-        return $this->roles()->with('permissions')->orderBy('weight');
+        return $this->roles()->orderBy('weight');
     }
-
 
     /**
      * @return BelongsTo
