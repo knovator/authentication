@@ -184,7 +184,8 @@ class RegisterController extends Controller
      */
     private function assignRoleMongodb($user, $role) {
         try {
-            $user->update(['roles' => [$role->id]]);
+            /** @var User $user */
+            $user->roles()->associate($role);
         } catch (Exception $exception) {
             throw $exception;
         }
