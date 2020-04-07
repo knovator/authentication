@@ -55,8 +55,9 @@ class AuthController extends Controller
         try {
             $key = mt_rand(100000, 999999);
             $hashKey = $this->hashMake($user->email . $key);
-            $user->email_verification_key = $key;
-            $user->save();
+            $this->updatePrimaryAccount($user, [
+                'email_verification_key' => $key
+            ]);
             $user->sendPasswordResetNotification($hashKey);
 
             return $this->sendResponse(null,
@@ -80,7 +81,7 @@ class AuthController extends Controller
      * @throws RepositoryException
      */
     private function getUser($input) {
-        return $this->userRepository->findBy('email', $input['email']);
+        return $this->userRepository->with('primaryAccount')->findBy('email', $input['email']);
     }
 
     /**
@@ -89,6 +90,15 @@ class AuthController extends Controller
      */
     public function hashMake($parameters) {
         return Hash::make($parameters);
+    }
+
+    /**
+     * @param $user
+     * @param $values
+     */
+    private function updatePrimaryAccount($user, $values) {
+        /** @var User $user */
+        $user->primaryAccount()->update($values);
     }
 
     /**
@@ -105,10 +115,13 @@ class AuthController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
         try {
-            if ($this->hasCheck($user->email . $user->email_verification_key, $input['token'])) {
+            if ($this->hasCheck($user->email . $user->primaryAccount->email_verification_key,
+                $input['token'])) {
                 $this->revokeTokens($user);
                 $user->update([
-                    'password'               => $this->hashMake($input['password']),
+                    'password' => $this->hashMake($input['password']),
+                ]);
+                $this->updatePrimaryAccount($user, [
                     'email_verification_key' => null
                 ]);
 
@@ -165,8 +178,9 @@ class AuthController extends Controller
             return $this->sendResponse(null, __('messages.not_found', ['module' => 'User']),
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
-        if (!$user->emailVerified()) {
-            if (Hash::check($user->email . $user->email_verification_key, $input['key'])) {
+        if (!$user->isVerified()) {
+            if (Hash::check($user->email . $user->primaryAccount->email_verification_key,
+                $input['key'])) {
                 return $this->createEmailVerification($user);
             }
 
@@ -185,10 +199,11 @@ class AuthController extends Controller
      */
     private function createEmailVerification($user) {
         try {
-            $user->update([
-                'email_verified'         => 1,
+            $this->updatePrimaryAccount($user, [
+                'is_verified'            => 1,
                 'email_verification_key' => null
             ]);
+
             return redirect(config('authentication.front_url') . 'login/?verified=true');
         } catch (Exception $exception) {
             Log::error($exception);

@@ -2,6 +2,7 @@
 
 namespace Knovators\Authentication\Http\Controllers;
 
+use Exception;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Http\JsonResponse;
@@ -66,7 +67,7 @@ class RegisterController extends Controller
     /**
      * @param Request $request
      * @return JsonResponse|mixed
-     * @throws \Exception
+     * @throws Exception
      */
     public function register(Request $request) {
         try {
@@ -78,7 +79,7 @@ class RegisterController extends Controller
             event(new Registered($user = $this->create($request->all())));
 
             return $this->registered($request, $user);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             Log::error($exception);
 
             return $this->sendResponse(null, trans('authentication::messages.something_wrong'),
@@ -109,7 +110,7 @@ class RegisterController extends Controller
      *
      * @param array $data
      * @return User|JsonResponse
-     * @throws \Exception
+     * @throws Exception
      */
     protected function create(array $data) {
         try {
@@ -124,6 +125,7 @@ class RegisterController extends Controller
             $connection = 'assignRole' . config('authentication.db');
             $role = $this->roleRepository->getRole(RoleConstant::USER);
             $this->$connection($user, $role);
+
             return $user;
 
         } catch (Exception $exception) {
@@ -137,23 +139,38 @@ class RegisterController extends Controller
      * @param Request $request
      * @param mixed   $user
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
     protected function registered(Request $request, $user) {
         try {
-            $key = mt_rand(100000, 999999);
-            $hashKey = Hash::make($user->email . $key);
-            $user->update([
-                'email_verification_key' => $key,
-            ]);
-            $user->sendVerificationMail($hashKey);
+            $user = $this->insertUserAccount($user);
             $user->new_token = null;
+
             return $this->sendResponse($this->makeResource($user),
                 trans('authentication::messages.user_registered'),
                 HTTPCode::CREATED);
         } catch (Exception $exception) {
             throw $exception;
         }
+    }
+
+    /**
+     * @param $user
+     * @return User
+     */
+    private function insertUserAccount($user) {
+        $key = mt_rand(100000, 999999);
+        $email = $user->email;
+        $hashKey = Hash::make($email . $key);
+        /** @var User $user */
+        $user->userAccounts()->create([
+            'email'                  => $email,
+            'default'                => true,
+            'email_verification_key' => $key
+        ]);
+        $user->sendVerificationMail($hashKey);
+
+        return $user;
     }
 
     /**
@@ -169,6 +186,7 @@ class RegisterController extends Controller
     /**
      * @param $user
      * @param $role
+     * @throws Exception
      */
     private function assignRoleMysql($user, $role) {
         try {
@@ -181,6 +199,7 @@ class RegisterController extends Controller
     /**
      * @param $user
      * @param $role
+     * @throws Exception
      */
     private function assignRoleMongodb($user, $role) {
         try {
@@ -190,5 +209,4 @@ class RegisterController extends Controller
             throw $exception;
         }
     }
-
 }

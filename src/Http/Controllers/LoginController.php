@@ -65,7 +65,7 @@ class LoginController extends Controller
         $this->clearLoginAttempts($request);
         $user = $this->guard()->user();
         /** @var User $user */
-        if (!$user->isActive() || !$user->emailVerified()) {
+        if (!$user->isActive() || !$user->isVerified()) {
             $message = trans('authentication::messages.confirm_email');
             if (!$user->isActive()) {
                 $message = trans('authentication::messages.account_deactivated');

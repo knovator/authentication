@@ -4,6 +4,8 @@ namespace Knovators\Authentication\Models;
 
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -35,11 +37,10 @@ class User extends Authenticatable
         'is_active',
         'email',
         'email_verification_key',
-        'email_verified',
         'password',
         'roles',
         'phone',
-        'phone_verified',
+        'is_verified',
         'created_by',
         'deleted_by',
         'image_id'
@@ -60,15 +61,13 @@ class User extends Authenticatable
 
     protected $appends = ['full_name'];
     protected $attributes = [
-        'is_active'      => 1,
-        'email_verified' => 0,
-        'phone_verified' => 0
+        'is_active'   => 1,
+        'is_verified' => 0
     ];
 
     protected $casts = [
-        'is_active'      => 'boolean',
-        'email_verified' => 'boolean',
-        'phone_verified' => 'boolean'
+        'is_active'   => 'boolean',
+        'is_verified' => 'boolean'
     ];
 
 
@@ -78,16 +77,10 @@ class User extends Authenticatable
     /**
      * @return bool
      */
-    public function emailVerified() {
-        return $this->email_verified == 1;
+    public function isVerified() {
+        return $this->primaryAccount->is_verified == 1;
     }
 
-    /**
-     * @return bool
-     */
-    public function phoneVerified() {
-        return $this->phone_verified == 1;
-    }
 
     /**
      * @return string
@@ -159,6 +152,22 @@ class User extends Authenticatable
      */
     public function sendVerificationMail($hashKey) {
         $this->notify(new VerificationUserNotification($this, $hashKey));
+    }
+
+
+    /**
+     * @return HasOne
+     */
+    public function primaryAccount() {
+        return $this->hasOne(CommonService::getClass('user_account'), 'user_id', 'id')
+                    ->where('default', true);
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function userAccounts() {
+        return $this->hasMany(CommonService::getClass('user_account'), 'user_id', 'id');
     }
 
 

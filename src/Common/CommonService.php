@@ -7,6 +7,7 @@ use Knovators\Authentication\Http\Resources\User as UserResource;
 use Knovators\Authentication\Models\Permission;
 use Knovators\Authentication\Models\Role;
 use Knovators\Authentication\Models\User;
+use Knovators\Authentication\Models\UserAccount;
 
 /**
  * Class CommonService
@@ -30,6 +31,8 @@ class CommonService
                 return self::getClassByName('models.permission', Permission::class);
             case 'user_resource':
                 return self::getClassByName('resources.user' . $classLabel, UserResource::class);
+            case 'user_account':
+                return self::getClassByName('model.userAccount', UserAccount::class);
 
             default:
                 return null;
