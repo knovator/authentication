@@ -92,7 +92,6 @@ class AuthController extends Controller
 
     }
 
-
     /**
      * @param $input
      * @return mixed
@@ -123,6 +122,34 @@ class AuthController extends Controller
     private function updatePrimaryAccount($user, $values) {
         /** @var User $user */
         $user->primaryAccount()->update($values);
+    }
+
+    /**
+     * @param ForgotPasswordRequest $request
+     * @return JsonResponse
+     * @throws RepositoryException
+     */
+    public function resendOtp(ForgotPasswordRequest $request) {
+        $input = $request->all();
+        $user = $this->getUser($input);
+        if (!$user) {
+            return $this->sendResponse(null,
+                trans('authentication::messages.user_not_registered', ['module' => 'User']),
+                HTTPCode::UNPROCESSABLE_ENTITY);
+        }
+        try {
+            CommonService::resendOtp($input);
+
+            return $this->sendResponse(null,
+                trans('messages.resend_otp'),
+                HTTPCode::OK);
+
+        } catch (Exception $exception) {
+            Log::error($exception);
+        }
+
+        return $this->sendResponse(null, trans('authentication::messages.something_wrong'),
+            HTTPCode::UNPROCESSABLE_ENTITY, $exception);
     }
 
     /**

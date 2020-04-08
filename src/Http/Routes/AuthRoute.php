@@ -25,6 +25,8 @@ class AuthRoute extends RouteRegistrar
 
             $this->name('auth.forgot-password')
                  ->post('/forgot-password', 'AuthController@forgotPassword');
+            $this->name('auth.resendOtp')
+                 ->post('/resend-otp', 'AuthController@resendOtp');
 
             $this->name('auth.reset-password')
                  ->post('/reset-password', 'AuthController@resetPassword');

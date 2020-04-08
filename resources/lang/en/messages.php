@@ -29,6 +29,7 @@ return [
     'not_verified'          => 'Account not verified please verify your account',
     'otp_message'           => 'Your OTP is :otp and create password link is :url',
     'invalid_otp'           => 'Please provide valid OTP.',
-    'forget_password_phone' => 'We have sent OTP to this mobile number, verify it to reset your password'
+    'forget_password_phone' => 'We have sent OTP to this mobile number, verify it to reset your password',
+    'resend_otp'            => 'OTP resent successfully in your number'
 
 ];
