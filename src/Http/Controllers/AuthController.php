@@ -11,6 +11,8 @@ use Knovators\Authentication\Http\Requests\ForgotPasswordRequest;
 use Knovators\Authentication\Http\Requests\ResetPasswordRequest;
 use Knovators\Authentication\Http\Requests\VerificationFormRequest;
 use Knovators\Authentication\Models\User;
+use Knovators\Authentication\Models\UserAccount;
+use Knovators\Authentication\Repository\AccountRepository;
 use Knovators\Authentication\Repository\UserRepository;
 use Knovators\Support\Helpers\HTTPCode;
 use Knovators\Support\Traits\APIResponse;
@@ -27,14 +29,20 @@ class AuthController extends Controller
     use APIResponse;
 
     private $userRepository;
+    private $accountRepository;
 
     /**
      * Create a new controller instance.
      *
-     * @param UserRepository $userRepository
+     * @param UserRepository    $userRepository
+     * @param AccountRepository $accountRepository
      */
-    public function __construct(UserRepository $userRepository) {
+    public function __construct(
+        UserRepository $userRepository,
+        AccountRepository $accountRepository
+    ) {
         $this->userRepository = $userRepository;
+        $this->accountRepository = $accountRepository;
         $this->middleware('guest');
     }
 
@@ -170,18 +178,20 @@ class AuthController extends Controller
     /**
      * @param VerificationFormRequest $request
      * @return mixed
+     * @throws RepositoryException
      */
     public function verify(VerificationFormRequest $request) {
         $input = $request->all();
-        $user = $this->getUser($input);
-        if (!$user) {
+        /** @var UserAccount $userAccount */
+        $userAccount = $this->getUserAccount('email', $input['email']);
+        if (!$userAccount) {
             return $this->sendResponse(null, __('messages.not_found', ['module' => 'User']),
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
-        if (!$user->isVerified()) {
-            if (Hash::check($user->email . $user->primaryAccount->email_verification_key,
+        if (!$userAccount->isVerified()) {
+            if (Hash::check($userAccount->email . $userAccount->email_verification_key,
                 $input['key'])) {
-                return $this->createEmailVerification($user);
+                return $this->createEmailVerification($userAccount);
             }
 
             return $this->sendResponse(null, __('messages.invalid_url'),
@@ -194,12 +204,21 @@ class AuthController extends Controller
     }
 
     /**
+     * @param $field
+     * @param $value
+     * @throws RepositoryException
+     */
+    private function getUserAccount($field, $value) {
+        $this->accountRepository->findBy($field, $value);
+    }
+
+    /**
      * @param $user
      * @return mixed
      */
-    private function createEmailVerification($user) {
+    private function createEmailVerification($userAccount) {
         try {
-            $this->updatePrimaryAccount($user, [
+            $userAccount->update([
                 'is_verified'            => 1,
                 'email_verification_key' => null
             ]);

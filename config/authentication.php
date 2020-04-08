@@ -1,14 +1,14 @@
 <?php
 
+use Knovators\Authentication\Http\Resources\User as UserResource;
 use Knovators\Authentication\Models\Permission;
 use Knovators\Authentication\Models\Role;
 use Knovators\Authentication\Models\User;
-use Knovators\Authentication\Http\Resources\User as UserResource;
 
 return [
 
     'front_url' => env('APP_URL'),
-    'db'        => env('DB_CONNECTION','mysql'),
+    'db'        => env('DB_CONNECTION', 'mysql'),
 
     'models' => [
 
@@ -35,9 +35,16 @@ return [
 
     'route' => [
 
-        'auth_attributes' => [
+        'auth_attributes'    => [
 
             'prefix' => 'api/v1/auth',
+
+            'middleware' => env('AUTH_MIDDLEWARE') ? explode(',',
+                env('AUTH_MIDDLEWARE')) : [],
+        ],
+        'account_attributes' => [
+
+            'prefix' => 'api/v1/accounts',
 
             'middleware' => env('AUTH_MIDDLEWARE') ? explode(',',
                 env('AUTH_MIDDLEWARE')) : [],

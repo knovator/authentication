@@ -26,4 +26,5 @@ return [
     'user_registered'     => 'User is registered successfully.',
     // Additional messages
     'something_wrong'     => 'Oops! something went wrong ,please try again later.',
+    'not_verified'        => 'Account not verified please verify your account'
 ];

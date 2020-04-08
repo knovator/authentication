@@ -6,12 +6,11 @@ use Knovators\Authentication\Common\CommonService;
 use Knovators\Support\Traits\BaseRepository;
 
 
-
 /**
- * Class ProfileRepository
+ * Class AccountRepository
  * @package Knovators\Authentication\Repository
  */
-class ProfileRepository extends BaseRepository
+class AccountRepository extends BaseRepository
 {
 
     /**

@@ -2,6 +2,7 @@
 
 namespace Knovators\Authentication\Http\Routes;
 
+use Knovators\Authentication\Models\UserAccount;
 use Knovators\Support\Routing\RouteRegistrar;
 
 /**
@@ -36,6 +37,13 @@ class AuthRoute extends RouteRegistrar
         });
 
 
+        $this->group($this->routeAttributes('account_attributes'), function () {
+            $this->resource('accounts', 'AccountController');
+            $this->name('accounts.partiallyUpdate')
+                 ->post('{account}', 'AccountController@partiallyUpdate');
+        });
+
+        $this->model('account', UserAccount::class);
     }
 
 

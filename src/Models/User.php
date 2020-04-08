@@ -163,6 +163,7 @@ class User extends Authenticatable
                     ->where('default', true);
     }
 
+
     /**
      * @return HasMany
      */

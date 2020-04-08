@@ -3,17 +3,14 @@
 namespace Knovators\Authentication\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Knovators\Support\Traits\APIResponse;
-
 
 /**
- * Class VerificationFormRequest
+ * Class PartiallyUpdateRequest
  * @package Knovators\Authentication\Http\Requests
  */
-class VerificationFormRequest extends FormRequest
+class PartiallyUpdateRequest extends FormRequest
 {
 
-    use APIResponse;
 
     /**
      * Determine if the user is authorized to make this request.
@@ -31,7 +28,7 @@ class VerificationFormRequest extends FormRequest
      */
     public function rules() {
         return [
-            'email' => 'required|exists:user_accounts,email',
+            'default' => 'required|boolean'
         ];
     }
 }
