@@ -41,6 +41,27 @@ class LoginController extends Controller
 //        $this->middleware('guest')->except('logout');
     }
 
+    /**
+     * @return JsonResponse
+     */
+    public function logout() {
+        try {
+            $user = auth()->guard('api')->user();
+            if (!$user) {
+                return $this->sendResponse(null, trans('authentication::messages.token_invalid'),
+                    HTTPCode::BAD_REQUEST);
+            }
+            $user->token()->revoke();
+
+            return $this->sendResponse(null, trans('authentication::messages.user_logout_access'),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
+
+            return $this->sendResponse(null, trans('authentication::messages.something_wrong'),
+                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
+        }
+    }
 
     /**
      * @param Request $request
@@ -51,6 +72,7 @@ class LoginController extends Controller
         if (!$columns = config('authentication.login_columns')) {
             $columns = 'email,phone';
         }
+
         return [
             $columns   => $request->get($this->username()),
             'password' => $request->get('password')
@@ -66,7 +88,10 @@ class LoginController extends Controller
         $user = $this->guard()->user();
         /** @var User $user */
         if (!$user->isActive() || !$user->isVerified()) {
-            $message = trans('authentication::messages.confirm_email');
+            $message = trans('authentication::messages.verify_phone');
+            if (!empty($user->email)) {
+                $message = trans('authentication::messages.confirm_email');
+            }
             if (!$user->isActive()) {
                 $message = trans('authentication::messages.account_deactivated');
             }
@@ -99,7 +124,6 @@ class LoginController extends Controller
 
     }
 
-
     /**
      * @param User $user
      * @return mixed
@@ -117,29 +141,6 @@ class LoginController extends Controller
     protected function sendFailedLoginResponse(Request $request) {
         return $this->sendResponse(null, trans('authentication::messages.user_not_registered'),
             HTTPCode::UNPROCESSABLE_ENTITY);
-    }
-
-
-    /**
-     * @return JsonResponse
-     */
-    public function logout() {
-        try {
-            $user = auth()->guard('api')->user();
-            if (!$user) {
-                return $this->sendResponse(null, trans('authentication::messages.token_invalid'),
-                    HTTPCode::BAD_REQUEST);
-            }
-            $user->token()->revoke();
-
-            return $this->sendResponse(null, trans('authentication::messages.user_logout_access'),
-                HTTPCode::OK);
-        } catch (Exception $exception) {
-            Log::error($exception);
-
-            return $this->sendResponse(null, trans('authentication::messages.something_wrong'),
-                HTTPCode::UNPROCESSABLE_ENTITY, $exception);
-        }
     }
 
 

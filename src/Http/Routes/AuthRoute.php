@@ -42,7 +42,7 @@ class AuthRoute extends RouteRegistrar
         $this->group($this->routeAttributes('account_attributes'), function () {
             $this->resource('accounts', 'AccountController');
             $this->name('accounts.partiallyUpdate')
-                 ->post('{account}', 'AccountController@partiallyUpdate');
+                 ->post('partiallyUpdate/{account}', 'AccountController@partiallyUpdate');
         });
 
         $this->model('account', UserAccount::class);
