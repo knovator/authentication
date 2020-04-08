@@ -31,7 +31,11 @@ class VerificationFormRequest extends FormRequest
      */
     public function rules() {
         return [
-            'email' => 'required|exists:user_accounts,email',
+            'type'  => 'required|string|in:phone,email',
+            'phone' => 'required_without:email',
+            'email' => 'required_without:phone|email',
+            'key'   => 'required_with:email',
+            'otp'   => 'required_with:phone',
         ];
     }
 }

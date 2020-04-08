@@ -4,9 +4,13 @@ namespace Knovators\Authentication\Http\Controllers;
 
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
+use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Knovators\Authentication\Common\CommonService;
+use Knovators\Authentication\Constants\UserConstant as UserConstant;
 use Knovators\Authentication\Http\Requests\ForgotPasswordRequest;
 use Knovators\Authentication\Http\Requests\ResetPasswordRequest;
 use Knovators\Authentication\Http\Requests\VerificationFormRequest;
@@ -61,15 +65,21 @@ class AuthController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
         try {
-            $key = mt_rand(100000, 999999);
-            $hashKey = $this->hashMake($user->email . $key);
-            $this->updatePrimaryAccount($user, [
-                'email_verification_key' => $key
-            ]);
-            $user->sendPasswordResetNotification($hashKey);
+            if (isset($input['email'])) {
+                $message = '';
+                $key = mt_rand(100000, 999999);
+                $hashKey = $this->hashMake($user->email . $key);
+                $this->updatePrimaryAccount($user, [
+                    'email_verification_key' => $key
+                ]);
+                $user->sendPasswordResetNotification($hashKey);
+            } else {
+                $message = '_phone';
+                CommonService::sendMessage($input);
+            }
 
             return $this->sendResponse(null,
-                trans('authentication::messages.forget_password'),
+                trans('authentication::messages.forget_password' . $message),
                 HTTPCode::OK);
 
         } catch (Exception $exception) {
@@ -89,7 +99,13 @@ class AuthController extends Controller
      * @throws RepositoryException
      */
     private function getUser($input) {
-        return $this->userRepository->with('primaryAccount')->findBy('email', $input['email']);
+        $user = $this->userRepository->with('primaryAccount');
+        if (isset($input['email'])) {
+            return $user->findBy('email', $input['email']);
+        }
+
+        return $user->findBy('phone', $input['phone']);
+
     }
 
     /**
@@ -116,6 +132,7 @@ class AuthController extends Controller
      */
     public function resetPassword(ResetPasswordRequest $request) {
         $input = $request->all();
+        $type = $input['type'];
         $user = $this->getUser($input);
         if (!$user) {
             return $this->sendResponse(null,
@@ -123,19 +140,31 @@ class AuthController extends Controller
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
         try {
-            if ($this->hasCheck($user->email . $user->primaryAccount->email_verification_key,
-                $input['token'])) {
-                $this->revokeTokens($user);
-                $user->update([
-                    'password' => $this->hashMake($input['password']),
-                ]);
-                $this->updatePrimaryAccount($user, [
-                    'email_verification_key' => null
-                ]);
+            $response = $this->sendResponse($user->fresh(),
+                trans('authentication::messages.password_reset'),
+                HTTPCode::OK);
+            if ($type == UserConstant::TYPE_EMAIL) {
+                if ($this->hasCheck($user->email . $user->primaryAccount->email_verification_key,
+                    $input['token'])) {
+                    $this->revokeTokens($user);
+                    $user->update([
+                        'password' => $this->hashMake($input['password']),
+                    ]);
+                    $this->updatePrimaryAccount($user, [
+                        'email_verification_key' => null
+                    ]);
 
-                return $this->sendResponse($user->fresh(),
-                    trans('authentication::messages.password_reset'),
-                    HTTPCode::OK);
+                    return $response;
+
+                }
+            } else {
+                if (CommonService::verifyOtp($input)) {
+                    $this->updatePrimaryAccount($user, [
+                        'password' => $this->hashMake($input['password'])
+                    ]);
+
+                    return $response;
+                }
             }
 
             return $this->sendResponse(null, trans('authentication::messages.something_wrong'),
@@ -177,60 +206,86 @@ class AuthController extends Controller
 
     /**
      * @param VerificationFormRequest $request
-     * @return mixed
-     * @throws RepositoryException
+     * @return JsonResponse|mixed
      */
     public function verify(VerificationFormRequest $request) {
         $input = $request->all();
-        /** @var UserAccount $userAccount */
-        $userAccount = $this->getUserAccount('email', $input['email']);
-        if (!$userAccount) {
-            return $this->sendResponse(null, __('messages.not_found', ['module' => 'User']),
-                HTTPCode::UNPROCESSABLE_ENTITY);
-        }
-        if (!$userAccount->isVerified()) {
-            if (Hash::check($userAccount->email . $userAccount->email_verification_key,
-                $input['key'])) {
-                return $this->createEmailVerification($userAccount);
+        $type = $input['type'];
+        try {
+            /** @var UserAccount $userAccount */
+            $userAccount = $this->getUserAccount($input);
+            if (!$userAccount) {
+                return $this->sendResponse(null, __('messages.not_found', ['module' => 'User']),
+                    HTTPCode::UNPROCESSABLE_ENTITY);
+            }
+            if (!$userAccount->isVerified()) {
+                if ($type == UserConstant::TYPE_EMAIL) {
+                    $message = 'url';
+                    if (Hash::check($userAccount->email .
+                        $userAccount->email_verification_key,
+                        $input['key'])) {
+
+                        return $this->createEmailVerification($userAccount);
+                    }
+                } else {
+                    $message = 'otp';
+                    if (CommonService::verifyOtp($input)) {
+                        $userAccount->update(['is_verified' => 1]);
+
+                        return $this->redirectUrl();
+                    }
+                }
+
+                return $this->sendResponse(null, __('messages.invalid_' . $message),
+                    HTTPCode::BAD_REQUEST);
             }
 
-            return $this->sendResponse(null, __('messages.invalid_url'),
-                HTTPCode::UNPROCESSABLE_ENTITY);
+            return $this->sendResponse(null,
+                __('messages.already_verified', ['type' => ucwords($input['type'])]),
+                HTTPCode::OK);
+        } catch (Exception $exception) {
+            Log::error($exception);
         }
 
-        return $this->sendResponse(null,
-            __('messages.already_verified', ['type' => ucwords($input['type'])]),
-            HTTPCode::OK);
+        return $this->sendResponse(null, trans('authentication::messages.something_wrong'),
+            HTTPCode::UNPROCESSABLE_ENTITY, $exception);
     }
 
     /**
-     * @param $field
-     * @param $value
+     * @param $input
+     * @return mixed
      * @throws RepositoryException
      */
-    private function getUserAccount($field, $value) {
-        $this->accountRepository->findBy($field, $value);
+    private function getUserAccount($input) {
+
+        $userAccount = $this->accountRepository;
+        if (isset($input['email'])) {
+            return $userAccount->findBy('email', $input['email']);
+        }
+
+        return $userAccount->findBy('phone', $input['phone']);
     }
 
     /**
-     * @param $user
+     * @param $userAccount
      * @return mixed
      */
     private function createEmailVerification($userAccount) {
-        try {
-            $userAccount->update([
-                'is_verified'            => 1,
-                'email_verification_key' => null
-            ]);
+        $userAccount->update([
+            'is_verified'            => 1,
+            'email_verification_key' => null
+        ]);
 
-            return redirect(config('authentication.front_url') . 'login/?verified=true');
-        } catch (Exception $exception) {
-            Log::error($exception);
+        return $this->redirectUrl();
 
-            return $this->sendResponse(null,
-                __('messages.something_wrong'),
-                HTTPCode::OK);
-        }
+    }
+
+    /**
+     * @return RedirectResponse|Redirector
+     */
+    private function redirectUrl() {
+        return redirect(config('authentication.front_url') . 'login/?verified=true');
+
     }
 
 }

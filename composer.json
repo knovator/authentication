@@ -5,7 +5,8 @@
     "minimum-stability": "dev",
     "require": {
         "laravel/passport": "^7.2",
-        "prettus/l5-repository": "^2.6"
+        "prettus/l5-repository": "^2.6",
+        "robincsamuel/laravel-msg91": "dev-master"
     },
     "autoload": {
         "psr-4": {

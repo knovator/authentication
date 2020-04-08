@@ -13,13 +13,13 @@ class ForgotPasswordRequest extends FormRequest
 {
 
     use APIResponse;
+
     /**
      * Determine if the user is authorized to make this request.
      *
      * @return bool
      */
-    public function authorize()
-    {
+    public function authorize() {
         return true;
     }
 
@@ -28,10 +28,10 @@ class ForgotPasswordRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
-    {
+    public function rules() {
         return [
-            'email' => 'required|exists:users,email',
+            'email' => 'required_without:phone|exists:user_accounts,email',
+            'phone' => 'required_without:email|exists:user_accounts,phone'
         ];
     }
 }

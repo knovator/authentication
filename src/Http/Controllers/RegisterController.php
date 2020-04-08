@@ -11,6 +11,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Knovators\Authentication\Common\CommonService;
 use Knovators\Authentication\Constants\Role as RoleConstant;
 use Knovators\Authentication\Models\User;
@@ -95,11 +96,15 @@ class RegisterController extends Controller
      * @return \Illuminate\Contracts\Validation\Validator
      */
     protected function validator(array $data) {
+        $unique = Rule::unique('user_accounts')->where(function ($query) {
+            return $query->where('is_verified', true);
+        });
+
         return Validator::make($data, [
             'first_name' => 'required|string|max:60',
             'last_name'  => 'required|string|max:60',
-            'email'      => 'required|string|email|max:60|unique:users',
-            'phone'      => 'required|numeric|digits:10|unique:users',
+            'email'      => 'required_without:phone|string|email|max:60|' . $unique,
+            'phone'      => 'required_without:email|numeric|digits:10|' . $unique,
             'password'   => 'required|string|min:6',
             'image_id'   => 'nullable|exists:files,id'
         ]);
@@ -117,8 +122,8 @@ class RegisterController extends Controller
             $user = $this->userRepository->create([
                 'first_name' => $data['first_name'],
                 'last_name'  => $data['last_name'],
-                'email'      => $data['email'],
-                'phone'      => $data['phone'],
+                'email'      => isset($data['email']) ? $data['email'] : null,
+                'phone'      => isset($data['phone']) ? $data['phone'] : null,
                 'password'   => Hash::make($data['password']),
             ]);
 
@@ -143,7 +148,7 @@ class RegisterController extends Controller
      */
     protected function registered(Request $request, $user) {
         try {
-            $user = $this->insertUserAccount($user);
+            $user = $this->insertUserAccount($user->fresh(), $request->all());
             $user->new_token = null;
 
             return $this->sendResponse($this->makeResource($user),
@@ -156,21 +161,42 @@ class RegisterController extends Controller
 
     /**
      * @param $user
+     * @param $input
      * @return User
+     * @throws Exception
      */
-    private function insertUserAccount($user) {
-        $key = mt_rand(100000, 999999);
-        $email = $user->email;
-        $hashKey = Hash::make($email . $key);
-        /** @var User $user */
-        $user->userAccounts()->create([
-            'email'                  => $email,
-            'default'                => true,
-            'email_verification_key' => $key
+    private function insertUserAccount($user, $input) {
+        if (isset($input['email'])) {
+            $key = mt_rand(100000, 999999);
+            $email = $user->email;
+            $hashKey = Hash::make($email . $key);
+            /** @var User $user */
+            $this->createUserAccount($user, [
+                'email'                  => $email,
+                'default'                => true,
+                'email_verification_key' => $key
+            ]);
+            $user->sendVerificationMail($hashKey);
+
+            return $user;
+        }
+        $phone = $user->phone;
+        CommonService::sendMessage($input);
+        $this->createUserAccount($user, [
+            'phone'   => $phone,
+            'default' => true
         ]);
-        $user->sendVerificationMail($hashKey);
 
         return $user;
+    }
+
+    /**
+     * @param $user
+     * @param $values
+     */
+    private function createUserAccount($user, $values) {
+        /** @var User $user */
+        $user->userAccounts()->create($values);
     }
 
     /**

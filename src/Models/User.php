@@ -36,11 +36,9 @@ class User extends Authenticatable
         'slug',
         'is_active',
         'email',
-        'email_verification_key',
         'password',
         'roles',
         'phone',
-        'is_verified',
         'created_by',
         'deleted_by',
         'image_id'
@@ -61,13 +59,11 @@ class User extends Authenticatable
 
     protected $appends = ['full_name'];
     protected $attributes = [
-        'is_active'   => 1,
-        'is_verified' => 0
+        'is_active'   => 1
     ];
 
     protected $casts = [
-        'is_active'   => 'boolean',
-        'is_verified' => 'boolean'
+        'is_active'   => 'boolean'
     ];
 
 
