@@ -189,7 +189,7 @@ class AuthController extends Controller
                     $this->updatePrimaryAccount($user, [
                         'password' => $this->hashMake($input['password'])
                     ]);
-
+                    $this->revokeTokens($user);
                     return $response;
                 }
             }
