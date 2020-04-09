@@ -4,7 +4,7 @@
     "type": "library",
     "minimum-stability": "dev",
     "require": {
-        "laravel/passport": "^7.2",
+        "laravel/passport": "^7.2|^8.0",
         "prettus/l5-repository": "^2.6",
         "robincsamuel/laravel-msg91": "^1.0"
     },
