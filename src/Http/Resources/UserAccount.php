@@ -24,7 +24,7 @@ class UserAccount extends JsonResource
         return [
             'email'      => $this->email,
             'phone'      => $this->phone,
-            'isVerified' => $this->isVerified,
+            'is_verified' => $this->is_verified,
             'default'    => $this->default
         ];
     }

@@ -75,7 +75,7 @@ class AccountController extends Controller
             $input['user_id'] = Auth::id();
             $userAccount = $this->accountRepository->create($input);
 
-            return $this->sendResponse($this->makeResource($userAccount),
+            return $this->sendResponse($this->makeResource($userAccount->fresh()),
                 __('messages.created', ['module' => 'userAccount']),
                 HTTPCode::CREATED);
         } catch (Exception $exception) {

@@ -47,7 +47,7 @@ return [
             'prefix' => 'api/v1/auth',
 
             'middleware' => env('AUTH_MIDDLEWARE') ? explode(',',
-                env('AUTH_MIDDLEWARE')) : [],
+                env('AUTH_MIDDLEWARE')) : ['api','auth_active'],
         ],
 
         'log_out_attributes' => [
