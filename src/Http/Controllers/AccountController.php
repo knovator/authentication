@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Knovators\Authentication\Common\CommonService;
 use Knovators\Authentication\Http\Requests\CreateUserAccountRequest;
 use Knovators\Authentication\Http\Requests\PartiallyUpdateRequest;
-use Knovators\Authentication\Http\Requests\UpdateUserAccountRequest;
 use Knovators\Authentication\Http\Resources\UserAccount as UserAccountResource;
 use Knovators\Authentication\Models\UserAccount;
 use Knovators\Authentication\Repository\AccountRepository;
@@ -72,8 +73,15 @@ class AccountController extends Controller
     public function store(CreateUserAccountRequest $request) {
         $input = $request->all();
         try {
-            $input['user_id'] = Auth::id();
-            $userAccount = $this->accountRepository->create($input);
+            $user = Auth::user();
+            $userAccount = $user->userAccounts()->create($input);
+            if (isset($input['email'])) {
+                $key = mt_rand(100000, 999999);
+                $hashKey = Hash::make($input['email'] . $key);
+                $user->sendVerificationMail($hashKey);
+            } else {
+                CommonService::sendMessage($input);
+            }
 
             return $this->sendResponse($this->makeResource($userAccount->fresh()),
                 __('messages.created', ['module' => 'userAccount']),
@@ -95,6 +103,7 @@ class AccountController extends Controller
 
         return new UserAccountResource($userAccount);
     }
+
     /**
      * @param UserAccount $userAccount
      * @return JsonResponse
