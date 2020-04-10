@@ -3,6 +3,7 @@
 namespace Knovators\Authentication\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 /**
  * Class CreateUserAccountRequest
@@ -26,9 +27,13 @@ class CreateUserAccountRequest extends FormRequest
      * @return array
      */
     public function rules() {
+        $unique = Rule::unique('user_accounts')->where(function ($query) {
+            return $query->where('is_verified', true);
+        });
+
         return [
-            'email' => 'required_without:phone|email',
-            'phone' => 'required_without:email|numeric',
+            'email' => 'required_without:phone|email|' . $unique,
+            'phone' => 'required_without:email|numeric|' . $unique,
         ];
     }
 }

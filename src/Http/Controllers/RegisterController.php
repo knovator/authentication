@@ -11,7 +11,6 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use Knovators\Authentication\Common\CommonService;
 use Knovators\Authentication\Constants\Role as RoleConstant;
 use Knovators\Authentication\Models\User;
@@ -96,15 +95,12 @@ class RegisterController extends Controller
      * @return \Illuminate\Contracts\Validation\Validator
      */
     protected function validator(array $data) {
-        $unique = Rule::unique('user_accounts')->where(function ($query) {
-            return $query->where('is_verified', true);
-        });
 
         return Validator::make($data, [
             'first_name' => 'required|string|max:60',
             'last_name'  => 'required|string|max:60',
-            'email'      => 'required_without:phone|string|email|max:60|' . $unique,
-            'phone'      => 'required_without:email|numeric|digits:10|' . $unique,
+            'email'      => 'required_without:phone|string|email|max:60|unique:users,email,null,id,deleted_at,NULL',
+            'phone'      => 'required_without:email|numeric|digits:10|unique:users,phone,null,id,deleted_at,NULL',
             'password'   => 'required|string|min:6',
             'image_id'   => 'nullable|exists:files,id'
         ]);
