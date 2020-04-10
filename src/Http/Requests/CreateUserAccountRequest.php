@@ -30,8 +30,8 @@ class CreateUserAccountRequest extends FormRequest
      */
     public function rules() {
         return [
-            'email' => 'required_without:phone|string|email|max:60|unique:user_accounts,email,null,id,deleted_at,NULL',
-            'phone' => 'required_without:email|numeric|digits:10|unique:user_accounts,phone,null,id,deleted_at,NULL',
+            'email' => 'required_without:phone|string|email|max:60|unique:user_accounts,email',
+            'phone' => 'required_without:email|numeric|digits:10|unique:user_accounts,phone',
         ];
     }
 }
