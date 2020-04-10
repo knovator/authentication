@@ -44,7 +44,7 @@ return [
         ],
         'account_attributes' => [
 
-            'prefix' => 'api/v1/accounts',
+            'prefix' => 'api/v1/auth',
 
             'middleware' => env('AUTH_MIDDLEWARE') ? explode(',',
                 env('AUTH_MIDDLEWARE')) : [],
