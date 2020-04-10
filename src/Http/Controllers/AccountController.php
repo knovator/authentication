@@ -47,7 +47,7 @@ class AccountController extends Controller
             $userAccountList = $this->getUserAccounts()->get();
 
             return $this->sendResponse($userAccountList,
-                __('messages.retrieved', ['module' => 'userAccounts']),
+                __('messages.retrieved', ['module' => 'user accounts']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
             Log::error($exception);
@@ -84,7 +84,7 @@ class AccountController extends Controller
             }
 
             return $this->sendResponse($this->makeResource($userAccount->fresh()),
-                __('messages.created', ['module' => 'userAccount']),
+                __('messages.created', ['module' => 'user account']),
                 HTTPCode::CREATED);
         } catch (Exception $exception) {
             Log::error($exception);
@@ -113,7 +113,7 @@ class AccountController extends Controller
             $relations = [
             ];
 
-            return $this->destroyModelObject($relations, $userAccount, 'userAccount');
+            return $this->destroyModelObject($relations, $userAccount, 'user account');
 
         } catch (Exception $exception) {
             Log::error($exception);
@@ -138,7 +138,7 @@ class AccountController extends Controller
                 $userAccount->fresh();
 
                 return $this->sendResponse($this->makeResource($userAccount),
-                    __('messages.updated', ['module' => 'userAccount']),
+                    __('messages.updated', ['module' => 'user account']),
                     HTTPCode::OK);
             }
 
