@@ -4,6 +4,7 @@ namespace Knovators\Authentication\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Knovators\Support\Traits\APIResponse;
 
 /**
  * Class CreateUserAccountRequest
@@ -11,6 +12,8 @@ use Illuminate\Validation\Rule;
  */
 class CreateUserAccountRequest extends FormRequest
 {
+
+    use APIResponse;
 
     /**
      * Determine if the user is authorized to make this request.

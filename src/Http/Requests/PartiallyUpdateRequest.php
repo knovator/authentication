@@ -3,6 +3,7 @@
 namespace Knovators\Authentication\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Knovators\Support\Traits\APIResponse;
 
 /**
  * Class PartiallyUpdateRequest
@@ -11,6 +12,7 @@ use Illuminate\Foundation\Http\FormRequest;
 class PartiallyUpdateRequest extends FormRequest
 {
 
+    use APIResponse;
 
     /**
      * Determine if the user is authorized to make this request.
