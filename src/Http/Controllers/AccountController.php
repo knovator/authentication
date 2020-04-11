@@ -130,9 +130,11 @@ class AccountController extends Controller
         $input = $request->all();
         try {
             if ($userAccount->is_verified) {
-                Auth::user()->primaryAccount()->update('default', false);
+                $user = Auth::user();
+                $user->primaryAccount()->update('default', false);
                 /** @var Model $userAccount */
                 $userAccount->update($input);
+                $user->update(['email' => $userAccount->email]);
                 $userAccount->fresh();
 
                 return $this->sendResponse($this->makeResource($userAccount),
