@@ -78,7 +78,8 @@ class AccountController extends Controller
             if (isset($input['email'])) {
                 $key = mt_rand(100000, 999999);
                 $hashKey = Hash::make($input['email'] . $key);
-                $user->sendVerificationMail($hashKey);
+                /** @var UserAccount $userAccount */
+                $userAccount->sendVerificationMail($hashKey);
             } else {
                 CommonService::sendMessage($input);
             }
