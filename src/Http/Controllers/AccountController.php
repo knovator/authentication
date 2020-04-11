@@ -27,7 +27,7 @@ use Knovators\Support\Traits\DestroyObject;
 class AccountController extends Controller
 {
 
-    use APIResponse, DestroyObject;
+    use APIResponse;
     protected $accountRepository;
 
 
@@ -111,11 +111,11 @@ class AccountController extends Controller
      */
     public function destroy(UserAccount $userAccount) {
         try {
-            $relations = [
-            ];
+            Auth::user()->userAccounts()->where('id', $userAccount->id)->delete();
 
-            return $this->destroyModelObject($relations, $userAccount, 'user account');
-
+            return $this->sendResponse(null,
+                __('messages.deleted', ['module' => 'user account']),
+                HTTPCode::OK);
         } catch (Exception $exception) {
             Log::error($exception);
 
