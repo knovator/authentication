@@ -111,11 +111,16 @@ class AccountController extends Controller
      */
     public function destroy(UserAccount $userAccount) {
         try {
-            Auth::user()->userAccounts()->where('id', $userAccount->id)->delete();
-
+            $account = Auth::user()->userAccounts()->where('id', $userAccount->id);
+            if($account->get()->isNotEmpty()){
+                $account->delete();
+                return $this->sendResponse(null,
+                    __('messages.deleted', ['module' => 'user account']),
+                    HTTPCode::OK);
+            }
             return $this->sendResponse(null,
-                __('messages.deleted', ['module' => 'user account']),
-                HTTPCode::OK);
+                __('messages.not_found', ['module' => 'user account']),
+                HTTPCode::NOT_FOUND);
         } catch (Exception $exception) {
             Log::error($exception);
 

@@ -31,6 +31,7 @@ return [
     'invalid_otp'           => 'Please provide valid OTP.',
     'forget_password_phone' => 'We have sent OTP to this mobile number, verify it to reset your password',
     'resend_otp'            => 'OTP resent successfully in your number',
-    'verify_phone'          => 'Your phone number is not verified please verify first.'
+    'verify_phone'          => 'Your phone number is not verified please verify first.',
+    'not_found'             => 'user account not found'
 
 ];
