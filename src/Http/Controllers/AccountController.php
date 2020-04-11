@@ -44,7 +44,7 @@ class AccountController extends Controller
      */
     public function index() {
         try {
-            $userAccountList = $this->getUserAccounts()->get();
+            $userAccountList = Auth::user()->userAccounts()->select(['id','email','phone','is_verified','default'])->get();
 
             return $this->sendResponse($userAccountList,
                 __('authentication::messages.retrieved', ['module' => 'user accounts']),
@@ -55,14 +55,6 @@ class AccountController extends Controller
 
         return $this->sendResponse(null, __('authentication::messages.something_wrong'),
             HTTPCode::UNPROCESSABLE_ENTITY, $exception);
-
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getUserAccounts() {
-        return Auth::user()->with('userAccounts:id,email,phone,is_verified,default');
 
     }
 
