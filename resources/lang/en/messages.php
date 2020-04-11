@@ -13,7 +13,10 @@ return [
     |
     */
 
-
+    'created'                => ':module created successfully.',
+    'updated'                => ':module updated successfully.',
+    'deleted'                => ':module deleted successfully.',
+    'retrieved'              => ':module retrieved successfully.',
     'confirm_email'         => 'You need to confirm your email ID.',
     'account_deactivated'   => 'Your account is deactivated.please contact to admin.',
     'user_login_success'    => 'User log in successfully.',

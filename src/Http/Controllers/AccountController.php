@@ -47,13 +47,13 @@ class AccountController extends Controller
             $userAccountList = $this->getUserAccounts()->get();
 
             return $this->sendResponse($userAccountList,
-                __('messages.retrieved', ['module' => 'user accounts']),
+                __('authentication::messages.retrieved', ['module' => 'user accounts']),
                 HTTPCode::OK);
         } catch (Exception $exception) {
             Log::error($exception);
         }
 
-        return $this->sendResponse(null, __('messages.something_wrong'),
+        return $this->sendResponse(null, __('authentication::messages.something_wrong'),
             HTTPCode::UNPROCESSABLE_ENTITY, $exception);
 
     }
@@ -85,14 +85,14 @@ class AccountController extends Controller
             }
 
             return $this->sendResponse($this->makeResource($userAccount->fresh()),
-                __('messages.created', ['module' => 'user account']),
+                __('authentication::messages.created', ['module' => 'user account']),
                 HTTPCode::CREATED);
         } catch (Exception $exception) {
             Log::error($exception);
 
         }
 
-        return $this->sendResponse(null, __('messages.something_wrong'),
+        return $this->sendResponse(null, __('authentication::messages.something_wrong'),
             HTTPCode::UNPROCESSABLE_ENTITY, $exception);
     }
 
@@ -115,16 +115,16 @@ class AccountController extends Controller
             if($account->get()->isNotEmpty()){
                 $account->delete();
                 return $this->sendResponse(null,
-                    __('messages.deleted', ['module' => 'user account']),
+                    __('authentication::messages.deleted', ['module' => 'user account']),
                     HTTPCode::OK);
             }
             return $this->sendResponse(null,
-                __('messages.not_found', ['module' => 'user account']),
+                __('authentication::messages.not_found', ['module' => 'user account']),
                 HTTPCode::NOT_FOUND);
         } catch (Exception $exception) {
             Log::error($exception);
 
-            return $this->sendResponse(null, __('messages.something_wrong'),
+            return $this->sendResponse(null, __('authentication::messages.something_wrong'),
                 HTTPCode::UNPROCESSABLE_ENTITY);
         }
     }
@@ -144,18 +144,18 @@ class AccountController extends Controller
                 $userAccount->fresh();
 
                 return $this->sendResponse($this->makeResource($userAccount),
-                    __('messages.updated', ['module' => 'user account']),
+                    __('authentication::messages.updated', ['module' => 'user account']),
                     HTTPCode::OK);
             }
 
             return $this->sendResponse($this->makeResource($userAccount),
-                __('messages.not_verified'),
+                __('authentication::messages.not_verified'),
                 HTTPCode::UNPROCESSABLE_ENTITY);
         } catch (Exception $exception) {
             Log::error($exception);
         }
 
-        return $this->sendResponse(null, __('messages.something_wrong'),
+        return $this->sendResponse(null, __('authentication::messages.something_wrong'),
             HTTPCode::UNPROCESSABLE_ENTITY);
     }
 
