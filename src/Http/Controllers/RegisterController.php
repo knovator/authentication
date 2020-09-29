@@ -96,11 +96,12 @@ class RegisterController extends Controller
      * @return \Illuminate\Contracts\Validation\Validator
      */
     protected function validator(array $data) {
+
         return Validator::make($data, [
             'first_name' => 'required|string|max:60',
             'last_name'  => 'required|string|max:60',
-            'email'      => 'required|string|email|max:60|unique:users',
-            'phone'      => 'required|numeric|digits:10|unique:users',
+            'email'      => 'required_without:phone|string|email|max:60|unique:users,email,null,id,deleted_at,NULL',
+            'phone'      => 'required_without:email|numeric|digits:10|unique:users,phone,null,id,deleted_at,NULL',
             'password'   => 'required|string|min:6',
             'image_id'   => 'nullable|exists:files,id'
         ]);
@@ -122,14 +123,15 @@ class RegisterController extends Controller
             $user = $this->userRepository->create([
                 'first_name' => $data['first_name'],
                 'last_name'  => $data['last_name'],
-                'email'      => $data['email'],
-                'phone'      => $data['phone'],
+                'email'      => isset($data['email']) ? $data['email'] : null,
+                'phone'      => isset($data['phone']) ? $data['phone'] : null,
                 'password'   => Hash::make($data['password']),
             ]);
 
             $connection = 'assignRole' . config('authentication.db');
             $role = $this->roleRepository->getRole(strtoupper($request->route('role')));
             $this->$connection($user, $role);
+
             return $user;
 
         } catch (Exception $exception) {
@@ -180,6 +182,7 @@ class RegisterController extends Controller
         }
         if (isset($input['phone'])) {
             $phone = $user->phone;
+            CommonService::sendMessage($input);
             $this->createUserAccount($user, [
                 'phone'       => $phone,
                 'is_verified' => false,
@@ -224,15 +227,14 @@ class RegisterController extends Controller
     /**
      * @param $user
      * @param $role
-     * @throws Exception
      */
     private function assignRoleMongodb($user, $role) {
         try {
-            $user->update(['roles' => [$role->id]]);
+            /** @var User $user */
+            $user->roles()->associate($role);
             $user->save();
         } catch (Exception $exception) {
             throw $exception;
         }
     }
-
 }

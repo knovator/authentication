@@ -2,6 +2,7 @@
 
 namespace Knovators\Authentication\Http\Routes;
 
+use Knovators\Authentication\Models\UserAccount;
 use Knovators\Support\Routing\RouteRegistrar;
 
 /**
@@ -25,6 +26,8 @@ class AuthRoute extends RouteRegistrar
 
             $this->name('auth.forgot-password')
                  ->post('/forgot-password', 'AuthController@forgotPassword');
+            $this->name('auth.resendOtp')
+                 ->post('/resend-otp', 'AuthController@resendOtp');
 
             $this->name('auth.reset-password')
                  ->post('/reset-password', 'AuthController@resetPassword');
@@ -37,8 +40,13 @@ class AuthRoute extends RouteRegistrar
         });
 
 
+        $this->group($this->routeAttributes('account_attributes'), function () {
+            $this->resource('accounts', 'AccountController');
+            $this->name('accounts.partiallyUpdate')
+                 ->post('accounts/partiallyUpdate/{account}', 'AccountController@partiallyUpdate');
+        });
 
-
+        $this->model('account', UserAccount::class);
     }
 
 

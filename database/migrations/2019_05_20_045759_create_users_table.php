@@ -22,9 +22,6 @@ class CreateUsersTable extends Migration
             $table->string('last_name');
             $table->string('slug')->nullable();
             $table->string('email')->unique();
-            $table->string('email_verification_key', 60)->nullable();
-            $table->boolean('email_verified')->default(0);
-            $table->boolean('phone_verified')->default(0);
             $table->string('phone')->unique();
             $table->string('password');
             $table->tinyInteger('is_active')->default(1);

@@ -24,22 +24,22 @@ return [
     'route'         => [
         'auth_attributes'    => [
 
-            'prefix' => 'api/auth',
+            'prefix' => 'api/v1/auth',
 
             'middleware' => env('AUTH_MIDDLEWARE') ? explode(',',
                 env('AUTH_MIDDLEWARE')) : [],
         ],
         'account_attributes' => [
 
-            'prefix' => 'api/auth',
+            'prefix' => 'api/v1/auth',
 
             'middleware' => env('AUTH_MIDDLEWARE') ? explode(',',
-                env('AUTH_MIDDLEWARE')) : ['api', 'auth_active'],
+                env('AUTH_MIDDLEWARE')) : ['api','auth_active'],
         ],
 
         'log_out_attributes' => [
 
-            'prefix' => 'api/auth',
+            'prefix' => 'api/v1/auth',
 
             'middleware' => env('LOG_OUT_MIDDLEWARE') ? explode(',',
                 env('LOG_OUT_MIDDLEWARE')) : ['api'],

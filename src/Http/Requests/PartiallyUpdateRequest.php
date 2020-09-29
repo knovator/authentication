@@ -6,10 +6,10 @@ use Illuminate\Foundation\Http\FormRequest;
 use Knovators\Support\Traits\APIResponse;
 
 /**
- * Class ForgotPasswordRequest
+ * Class PartiallyUpdateRequest
  * @package Knovators\Authentication\Http\Requests
  */
-class ForgotPasswordRequest extends FormRequest
+class PartiallyUpdateRequest extends FormRequest
 {
 
     use APIResponse;
@@ -30,8 +30,7 @@ class ForgotPasswordRequest extends FormRequest
      */
     public function rules() {
         return [
-            'email' => 'required_without:phone|exists:user_accounts,email',
-            'phone' => 'required_without:email|exists:user_accounts,phone'
+            'default' => 'required|boolean'
         ];
     }
 }
