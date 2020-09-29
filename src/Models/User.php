@@ -3,11 +3,13 @@
 namespace Knovators\Authentication\Models;
 
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Knovators\Authentication\Common\CommonService;
 use Knovators\Authentication\Notifications\ResetPasswordNotification;
+use Knovators\Authentication\Notifications\VerificationUserNotification;
 use Knovators\Media\Models\Media;
 use Knovators\Support\Traits\HasModelEvent;
 use Knovators\Support\Traits\HasSlug;
@@ -20,7 +22,7 @@ use Laravel\Passport\HasApiTokens;
 class User extends Authenticatable
 {
 
-    use Notifiable, SoftDeletes, HasApiTokens, Notifiable, HasSlug, HasModelEvent;
+    use SoftDeletes, HasApiTokens, Notifiable, HasSlug, HasModelEvent;
     /**
      * The attributes that are mass assignable.
      *
@@ -35,7 +37,9 @@ class User extends Authenticatable
         'email_verification_key',
         'email_verified',
         'password',
+        'roles',
         'phone',
+        'phone_verified',
         'created_by',
         'deleted_by',
         'image_id'
@@ -55,10 +59,20 @@ class User extends Authenticatable
     protected $slugColumn = 'slug';
 
     protected $appends = ['full_name'];
+    protected $attributes = [
+        'is_active'      => 1,
+        'email_verified' => 0,
+        'phone_verified' => 0
+    ];
+
+    protected $casts = [
+        'is_active'      => 'boolean',
+        'email_verified' => 'boolean',
+        'phone_verified' => 'boolean'
+    ];
 
 
     protected $slugifyColumns = ['first_name', 'last_name', 'id'];
-
 
 
     /**
@@ -66,6 +80,13 @@ class User extends Authenticatable
      */
     public function emailVerified() {
         return $this->email_verified == 1;
+    }
+
+    /**
+     * @return bool
+     */
+    public function phoneVerified() {
+        return $this->phone_verified == 1;
     }
 
     /**
@@ -94,8 +115,13 @@ class User extends Authenticatable
      * @return mixed
      */
     public function roles() {
+        $config = config('authentication.db');
+        if ($config === 'mongodb') {
+            return $this->embedsMany(CommonService::getClass('role'));
+        }
 
-        return $this->belongsToMany(CommonService::getClass('role'), 'users_roles', 'user_id', 'role_id');
+        return $this->belongsToMany(CommonService::getClass('role'), 'users_roles', 'user_id',
+            'role_id');
     }
 
 
@@ -103,26 +129,36 @@ class User extends Authenticatable
      * @return mixed
      */
     public function orderByRoles() {
-
         return $this->roles()->orderBy('weight');
     }
 
-
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function image() {
-        return $this->belongsTo(Media::class, 'image_id', 'id')->select(['id', 'name','type','mime_type']);
+        return $this->belongsTo(Media::class, 'image_id', 'id')->select([
+            'id',
+            'name',
+            'type',
+            'mime_type'
+        ]);
     }
 
     /**
      * Send the password reset notification.
      *
-     * @param  string $token
+     * @param string $token
      * @return void
      */
     public function sendPasswordResetNotification($token) {
         $this->notify(new ResetPasswordNotification($token));
+    }
+
+    /**
+     * @param $hashKey
+     */
+    public function sendVerificationMail($hashKey) {
+        $this->notify(new VerificationUserNotification($this, $hashKey));
     }
 
 

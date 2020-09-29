@@ -26,6 +26,10 @@ class Permission extends Model
      * @return BelongsToMany
      */
     public function roles() {
+        $config = config('authentication.db');
+        if ($config === 'mongodb') {
+            return $this->embedsMany(CommonService::getClass('role'));
+        }
         return $this->belongsToMany(CommonService::getClass('role'), 'permissions_roles',
             'permission_id', 'role_id');
     }

@@ -2,6 +2,7 @@
 
 namespace Knovators\Authentication;
 
+use Knovators\Authentication\Commands\MongoDBPassportCommand;
 use Knovators\Authentication\Commands\StoreRoutes;
 use Knovators\Authentication\Providers\EloquentUserProvider;
 use Knovators\Support\PackageServiceProvider;
@@ -42,7 +43,7 @@ class AuthServiceProvider extends PackageServiceProvider
         $this->registerProviders([
             Providers\RouteServiceProvider::class,
         ]);
-        $this->registerCommands([StoreRoutes::class]);
+        $this->registerCommands([StoreRoutes::class,MongoDBPassportCommand::class]);
 
         $this->app->auth->provider('multiple_column', function ($app, array $config) {
             return new EloquentUserProvider($app['hash'], $config['model']);

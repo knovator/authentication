@@ -15,6 +15,7 @@ class Role extends Model
 {
 
     protected $table = 'roles';
+    protected $fillable = ['code', 'name'];
 
     /**
      * @param $query
@@ -35,6 +36,10 @@ class Role extends Model
      * @return mixed
      */
     public function permissions() {
+        $config = config('authentication.db');
+        if ($config === 'mongodb') {
+            return $this->embedsMany(CommonService::getClass('permission'));
+        }
         return $this->belongsToMany(CommonService::getClass('permission'), 'permissions_roles',
             'role_id', 'permission_id');
     }

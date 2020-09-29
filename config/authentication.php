@@ -8,6 +8,7 @@ use Knovators\Authentication\Http\Resources\User as UserResource;
 return [
 
     'front_url' => env('APP_URL'),
+    'db'        => env('DB_CONNECTION','mysql'),
 
     'models' => [
 

@@ -2,28 +2,33 @@
 
 namespace Knovators\Authentication\Notifications;
 
+use Knovators\Authentication\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /**
- * Class ResetPasswordNotification
+ * Class VerificationUserNotification
  * @package Knovators\Authentication\Notifications
  */
-class ResetPasswordNotification extends Notification
+class VerificationUserNotification extends Notification
 {
 
     use Queueable;
 
-    protected $token;
+    protected $user;
+
+    protected $hashKey;
 
     /**
      * Create a new notification instance.
      *
-     * @param $token
+     * @param User $user
+     * @param      $hashKey
      */
-    public function __construct($token) {
-        $this->token = $token;
+    public function __construct(User $user, $hashKey) {
+        $this->user = $user;
+        $this->hashKey = $hashKey;
     }
 
     /**
@@ -44,11 +49,12 @@ class ResetPasswordNotification extends Notification
      */
     public function toMail($notifiable) {
         return (new MailMessage)
-            ->subject('Forget password request from' . config('app.name'))
-            ->line('You are receiving this email because we received a password reset request for your account.')
-            ->action('Reset Password',
-                config('authentication.front_url') . '/reset-password?token=' . $this->token . '&email=' . $notifiable->email)
-            ->line('If you did not request a password reset, no further action is required.');
+            ->subject('Account verification - ' . config('app.name'))
+            ->greeting('Welcome to ' . config('app.name'))
+            ->line('Thanks for signing up for ' . config('app.name') . '! We\'re excited to help you learn. Please verify your account.')
+            ->action('VERIFY YOUR ACCOUNT NOW!',
+                route('auth.verify.post') . '/?type=email&email=' . $this->user->email . '&key=' . $this->hashKey)
+            ->line('Thank you for using our application!');
     }
 
     /**

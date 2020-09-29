@@ -22,7 +22,8 @@ return [
     'user_logout_access'  => 'You have been successfully logged out!',
     'invalid_url'         => 'Invalid url.',
     'password_reset'      => 'Password reset successfully',
-    'forget_password'           => 'Please check your mail, we have sent reset password link on your mail id.',
+    'forget_password'     => 'Please check your mail, we have sent reset password link on your mail id.',
+    'user_registered'     => 'User is registered successfully.',
     // Additional messages
     'something_wrong'     => 'Oops! something went wrong ,please try again later.',
 ];
