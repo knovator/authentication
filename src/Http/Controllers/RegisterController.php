@@ -2,6 +2,7 @@
 
 namespace Knovators\Authentication\Http\Controllers;
 
+use Exception;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Http\JsonResponse;
@@ -67,7 +68,7 @@ class RegisterController extends Controller
     /**
      * @param Request $request
      * @return JsonResponse|mixed
-     * @throws \Exception
+     * @throws Exception
      */
     public function register(Request $request) {
         try {
@@ -76,10 +77,10 @@ class RegisterController extends Controller
                 return $this->sendResponse(null, $validator->errors(),
                     HTTPCode::UNPROCESSABLE_ENTITY);
             }
-            event(new Registered($user = $this->create($request->all())));
+            event(new Registered($user = $this->create($request)));
 
             return $this->registered($request, $user);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             Log::error($exception);
 
             return $this->sendResponse(null, trans('authentication::messages.something_wrong'),
@@ -110,12 +111,13 @@ class RegisterController extends Controller
      *
      * @param array $data
      * @return User|JsonResponse
-     * @throws \Exception
+     * @throws Exception
      */
-    protected function create(array $data) {
+    protected function create($request) {
         try {
+            $data = $request->all();
             //TODO remove if the db is monhodb ot not
-            DB::beginTransaction();
+//            DB::beginTransaction();
 
             $user = $this->userRepository->create([
                 'first_name' => $data['first_name'],
@@ -126,7 +128,7 @@ class RegisterController extends Controller
             ]);
 
             $connection = 'assignRole' . config('authentication.db');
-            $role = $this->roleRepository->getRole(RoleConstant::USER);
+            $role = $this->roleRepository->getRole(strtoupper($request->route('role')));
             $this->$connection($user, $role);
             return $user;
 
@@ -141,23 +143,59 @@ class RegisterController extends Controller
      * @param Request $request
      * @param mixed   $user
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
     protected function registered(Request $request, $user) {
         try {
-            $key = mt_rand(100000, 999999);
-            $hashKey = Hash::make($user->email . $key);
-            $user->update([
-                'email_verification_key' => $key,
-            ]);
-            $user->sendVerificationMail($hashKey);
+            $user = $this->insertUserAccount($user->fresh(), $request->all());
             $user->new_token = null;
+
             return $this->sendResponse($this->makeResource($user),
                 trans('authentication::messages.user_registered'),
                 HTTPCode::CREATED);
         } catch (Exception $exception) {
             throw $exception;
         }
+    }
+
+    /**
+     * @param $user
+     * @param $input
+     * @return User
+     * @throws Exception
+     */
+    protected function insertUserAccount($user, $input) {
+        if (isset($input['email'])) {
+            $key = random_int(100000, 999999);
+            $email = $user->email;
+            $hashKey = Hash::make($email . $key);
+            /** @var User $user */
+            $this->createUserAccount($user, [
+                'email'                  => $email,
+                'default'                => true,
+                'is_verified'            => false,
+                'email_verification_key' => $key
+            ]);
+            $user->sendVerificationMail($hashKey);
+        }
+        if (isset($input['phone'])) {
+            $phone = $user->phone;
+            $this->createUserAccount($user, [
+                'phone'       => $phone,
+                'is_verified' => false,
+                'default'     => true
+            ]);
+        }
+
+        return $user;
+    }
+
+    /**
+     * @param User $user
+     * @param      $values
+     */
+    private function createUserAccount(User $user, $values) {
+        $user->userAccounts()->create($values);
     }
 
     /**
@@ -173,6 +211,7 @@ class RegisterController extends Controller
     /**
      * @param $user
      * @param $role
+     * @throws Exception
      */
     private function assignRoleMysql($user, $role) {
         try {
@@ -185,10 +224,12 @@ class RegisterController extends Controller
     /**
      * @param $user
      * @param $role
+     * @throws Exception
      */
     private function assignRoleMongodb($user, $role) {
         try {
             $user->update(['roles' => [$role->id]]);
+            $user->save();
         } catch (Exception $exception) {
             throw $exception;
         }

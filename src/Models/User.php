@@ -60,9 +60,9 @@ class User extends Authenticatable
 
     protected $appends = ['full_name'];
     protected $attributes = [
-        'is_active'      => 1,
-        'email_verified' => 0,
-        'phone_verified' => 0
+        'is_active'      => true,
+        'email_verified' => false,
+        'phone_verified' => false
     ];
 
     protected $casts = [
@@ -79,14 +79,14 @@ class User extends Authenticatable
      * @return bool
      */
     public function emailVerified() {
-        return $this->email_verified == 1;
+        return $this->email_verified === true;
     }
 
     /**
      * @return bool
      */
     public function phoneVerified() {
-        return $this->phone_verified == 1;
+        return $this->phone_verified === true;
     }
 
     /**
@@ -100,7 +100,7 @@ class User extends Authenticatable
      * @return bool
      */
     public function isActive() {
-        return $this->is_active == 1;
+        return $this->is_active === true;
     }
 
     /**
@@ -136,12 +136,7 @@ class User extends Authenticatable
      * @return BelongsTo
      */
     public function image() {
-        return $this->belongsTo(Media::class, 'image_id', 'id')->select([
-            'id',
-            'name',
-            'type',
-            'mime_type'
-        ]);
+        return $this->belongsTo(CommonService::getClass('media'), 'image_id', 'id');
     }
 
     /**

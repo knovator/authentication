@@ -20,7 +20,8 @@ class AuthRoute extends RouteRegistrar
 
             $this->name('auth.login')->post('login', 'LoginController@login');
 
-            $this->name('auth.register')->post('register', 'RegisterController@register');
+            $this->name('auth.register')->post('{role}/register', 'RegisterController@register')
+                 ->where('role', $this->getRoles());
 
             $this->name('auth.forgot-password')
                  ->post('/forgot-password', 'AuthController@forgotPassword');
@@ -60,6 +61,13 @@ class AuthRoute extends RouteRegistrar
      */
     private function config($key, $default = null) {
         return config("authentication.$key", $default);
+    }
+
+    /**
+     * @return mixed
+     */
+    private function getRoles() {
+        return $this->config('roles');
     }
 
 

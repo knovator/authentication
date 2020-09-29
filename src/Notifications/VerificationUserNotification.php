@@ -53,7 +53,7 @@ class VerificationUserNotification extends Notification
         return (new MailMessage)
             ->subject('Account verification - ' . config('app.name'))
             ->greeting('Welcome to ' . config('app.name'))
-            ->line('Thanks for signing up for ' . config('app.name') . '! We\'re excited to help you. Please verify your account.')
+            ->line('Thanks for signing up for ' . config('app.name') . '! We\'re happy to help you. Please verify your account.')
             ->action('VERIFY YOUR ACCOUNT NOW!',
                 route('auth.verify.post') . '/?type=email&email=' . $this->user->email . '&key=' . $this->hashKey)
             ->line('Thank you for using our application!');

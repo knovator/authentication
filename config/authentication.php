@@ -1,35 +1,46 @@
 <?php
 
+use Knovators\Authentication\Http\Resources\User as UserResource;
 use Knovators\Authentication\Models\Permission;
 use Knovators\Authentication\Models\Role;
 use Knovators\Authentication\Models\User;
-use Knovators\Authentication\Http\Resources\User as UserResource;
 
 return [
 
-    'front_url' => env('APP_URL'),
-    'db'        => env('DB_CONNECTION','mysql'),
-    'models' => [
-        'user' => User::class,
-        'role' => Role::class,
+    'front_url'     => env('APP_URL'),
+    'db'            => env('DB_CONNECTION', 'mysql'),
+    'models'        => [
+        'user'       => User::class,
+        'role'       => Role::class,
         'permission' => Permission::class
     ],
-    'resources' => [
+    'resources'     => [
         'user' => UserResource::class,
     ],
-    'permission' => [
+    'permission'    => [
         'except_modules' => ['log-viewer', 'passport', 'auth']
     ],
-    'login_columns'      => 'email,phone',
-    'app_fronend_domain' => env('FRONEND_APP_DOMAIN','localhost'),
-    'route' => [
-        'auth_attributes' => [
-            'prefix' => 'api/v1/auth',
+    'login_columns' => 'email,phone',
+    'route'         => [
+        'auth_attributes'    => [
+
+            'prefix' => 'api/auth',
+
             'middleware' => env('AUTH_MIDDLEWARE') ? explode(',',
                 env('AUTH_MIDDLEWARE')) : [],
         ],
+        'account_attributes' => [
+
+            'prefix' => 'api/auth',
+
+            'middleware' => env('AUTH_MIDDLEWARE') ? explode(',',
+                env('AUTH_MIDDLEWARE')) : ['api', 'auth_active'],
+        ],
+
         'log_out_attributes' => [
-            'prefix' => 'api/v1/auth',
+
+            'prefix' => 'api/auth',
+
             'middleware' => env('LOG_OUT_MIDDLEWARE') ? explode(',',
                 env('LOG_OUT_MIDDLEWARE')) : ['api'],
         ]

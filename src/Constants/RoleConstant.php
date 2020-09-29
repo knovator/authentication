@@ -4,12 +4,10 @@
 namespace Knovators\Authentication\Constants;
 
 /**
- * Class Role
+ * Class UserConstant
  * @package Knovators\Authentication\Constants
  */
-class Role
+class RoleConstant
 {
-
-    const ADMIN = 'ADMIN';
-    const USER = 'USER';
+    const USER = 'user';
 }

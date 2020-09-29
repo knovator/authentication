@@ -56,9 +56,7 @@ class StoreRoutes extends Command
      * @throws ValidatorException
      */
     public function handle() {
-
         foreach ($this->getAllRoutes() as $route) {
-
             /** @var \Illuminate\Routing\Route $route */
             $data['route_name'] = $route->getName();
 
@@ -67,10 +65,10 @@ class StoreRoutes extends Command
                 /** @var \Illuminate\Routing\Route $route */
                 $data['uri'] = $route->uri;
                 if ($data['module'] = strstr($data['route_name'], '.', true)) {
-                    $roleId = $this->roleRepository->getRole(RoleConstant::ADMIN)->value('id');
+                    $role = $this->roleRepository->getRole(RoleConstant::ADMIN);
                     $permission = $this->createPermission($data);
                     $storeRoles = 'storeRoles' . config('authentication.db');
-                    $this->$storeRoles($permission, $roleId);
+                    $this->$storeRoles($permission, $role);
                 }
             }
         }
@@ -109,7 +107,6 @@ class StoreRoutes extends Command
      * @throws ValidatorException
      */
     private function createPermission($data) {
-
         return $this->permissionRepository->updateOrCreate(['route_name' => $data['route_name']],
             $data);
 
@@ -117,21 +114,17 @@ class StoreRoutes extends Command
 
     /**
      * @param $permission
-     * @param $roleId
+     * @param $role
      */
-    protected function storeRolesmysql($permission, $roleId) {
-        if (!$permission->roles()->where('role_id', $roleId)->exists()) {
-            $permission->roles()->attach($roleId);
-        }
+    protected function storeRolesmysql($permission, $role) {
+        $permission->roles()->sync([$role->id]);
     }
 
     /**
      * @param $permission
-     * @param $roleId
+     * @param $role
      */
-    protected function storeRolesmongodb($permission, $roleId) {
-        if (!in_array($roleId, Arr::flatten($permission->roles->toArray()))) {
-            $permission->push('roles', [$roleId]);
-        }
+    protected function storeRolesmongodb($permission, $role) {
+        $role->permissions()->attach($permission);
     }
 }
