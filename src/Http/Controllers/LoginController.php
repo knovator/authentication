@@ -20,6 +20,7 @@ use Symfony\Component\HttpFoundation\Response;
  * Class LoginController
  * @package Knovators\Authentication\Http\Admin\Controllers
  */
+
 class LoginController extends Controller
 {
 
@@ -90,9 +91,7 @@ class LoginController extends Controller
         $user->permissions = collect($role->permissions->groupBy('module'))->map(function ($item) {
             return array_column($item->toArray(), 'route_name');
         });
-
         $user->load('image');
-
         return $this->sendResponse($this->makeResource($user),
             trans('authentication::messages.user_login_success'),
             HTTPCode::OK);

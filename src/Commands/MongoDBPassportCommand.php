@@ -8,6 +8,16 @@ use Illuminate\Support\Facades\File;
 /**
  * Class MongoDBPassportCommand
  * @package App\Console\Commands
+use Illuminate\Support\Facades\Route;
+use Knovators\Authentication\Constants\Role as RoleConstant;
+use Knovators\Authentication\Repository\PermissionRepository;
+use Knovators\Authentication\Repository\RoleRepository;
+use Prettus\Validator\Exceptions\ValidatorException;
+
+
+/**
+ * Class StoreRoutes
+ * @package Knovators\Authentication\Commands
  */
 class MongoDBPassportCommand extends Command
 {

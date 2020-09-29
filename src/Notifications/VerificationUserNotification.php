@@ -3,12 +3,14 @@
 namespace Knovators\Authentication\Notifications;
 
 use Knovators\Authentication\Models\User;
+use Knovators\Authentication\Models\MongoDbUser;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /**
  * Class VerificationUserNotification
+ * Class ResetPasswordNotification
  * @package Knovators\Authentication\Notifications
  */
 class VerificationUserNotification extends Notification
@@ -26,7 +28,7 @@ class VerificationUserNotification extends Notification
      * @param User $user
      * @param      $hashKey
      */
-    public function __construct(User $user, $hashKey) {
+    public function __construct($user, $hashKey) {
         $this->user = $user;
         $this->hashKey = $hashKey;
     }
@@ -51,7 +53,7 @@ class VerificationUserNotification extends Notification
         return (new MailMessage)
             ->subject('Account verification - ' . config('app.name'))
             ->greeting('Welcome to ' . config('app.name'))
-            ->line('Thanks for signing up for ' . config('app.name') . '! We\'re excited to help you learn. Please verify your account.')
+            ->line('Thanks for signing up for ' . config('app.name') . '! We\'re excited to help you. Please verify your account.')
             ->action('VERIFY YOUR ACCOUNT NOW!',
                 route('auth.verify.post') . '/?type=email&email=' . $this->user->email . '&key=' . $this->hashKey)
             ->line('Thank you for using our application!');

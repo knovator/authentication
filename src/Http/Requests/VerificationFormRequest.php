@@ -8,6 +8,8 @@ use Knovators\Support\Traits\APIResponse;
 
 /**
  * Class VerificationFormRequest
+/**
+ * Class ResetPasswordRequest
  * @package Knovators\Authentication\Http\Requests
  */
 class VerificationFormRequest extends FormRequest

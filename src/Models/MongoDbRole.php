@@ -3,24 +3,19 @@
 namespace Knovators\Authentication\Models;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Knovators\Authentication\Common\CommonService;
+use Jenssegers\Mongodb\Eloquent\Model;
 
 
 /**
  * Class Role
  * @package Knovators\Authentication\Models
  */
-class Role extends Model
+class MongoDbRole extends Model
 {
 
-    protected $table = 'roles';
-    protected $fillable = ['code', 'name'];
-
-    protected $fillable = [
-        'name',
-        'code',
-    ];
+    protected $collection = 'roles';
+     protected $fillable = ['code','name'];
 
     /**
      * @param $query
@@ -41,10 +36,6 @@ class Role extends Model
      * @return mixed
      */
     public function permissions() {
-        $config = config('authentication.db');
-        if ($config === 'mongodb') {
-            return $this->embedsMany(CommonService::getClass('permission'));
-        }
         return $this->belongsToMany(CommonService::getClass('permission'), 'permissions_roles',
             'role_id', 'permission_id');
     }

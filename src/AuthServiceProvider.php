@@ -43,6 +43,7 @@ class AuthServiceProvider extends PackageServiceProvider
         $this->registerProviders([
             Providers\RouteServiceProvider::class,
         ]);
+
         $this->registerCommands([StoreRoutes::class,MongoDBPassportCommand::class]);
 
         $this->app->auth->provider('multiple_column', function ($app, array $config) {
