@@ -117,9 +117,6 @@ class RegisterController extends Controller
     protected function create($request) {
         try {
             $data = $request->all();
-            //TODO remove if the db is monhodb ot not
-//            DB::beginTransaction();
-
             $user = $this->userRepository->create([
                 'first_name' => $data['first_name'],
                 'last_name'  => $data['last_name'],
@@ -131,9 +128,7 @@ class RegisterController extends Controller
             $connection = 'assignRole' . config('authentication.db');
             $role = $this->roleRepository->getRole(strtoupper($request->route('role')));
             $this->$connection($user, $role);
-
             return $user;
-
         } catch (Exception $exception) {
             throw $exception;
         }

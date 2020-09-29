@@ -39,7 +39,6 @@ class CommonService
                 return config('media.model');
             case ServiceType::PERMISSION:
                 return self::getClassByName('models.permission', self::getModel('permission'));
-                //TODO please check below update to production server.
             case 'media':
                 return self::getClassByName('models.media', self::getModel('media'));
             case ServiceType::USER_RESOURCE:
