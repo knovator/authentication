@@ -21,6 +21,7 @@ return [
         'except_modules' => ['log-viewer', 'passport', 'auth']
     ],
     'login_columns' => 'email,phone',
+    'roles'         => 'user',
     'route'         => [
         'auth_attributes'    => [
 
@@ -34,7 +35,7 @@ return [
             'prefix' => 'api/v1/auth',
 
             'middleware' => env('AUTH_MIDDLEWARE') ? explode(',',
-                env('AUTH_MIDDLEWARE')) : ['api','auth_active'],
+                env('AUTH_MIDDLEWARE')) : ['api', 'auth_active'],
         ],
 
         'log_out_attributes' => [
