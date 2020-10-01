@@ -21,6 +21,7 @@ return [
         'except_modules' => ['log-viewer', 'passport', 'auth']
     ],
     'login_columns' => 'email,phone',
+    //For use multiple roles please use pipe in between  of them, like user|admin
     'roles'         => 'user',
     'route'         => [
         'auth_attributes'    => [

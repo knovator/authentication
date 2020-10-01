@@ -3,7 +3,6 @@
 namespace Knovators\Authentication\Notifications;
 
 use Knovators\Authentication\Models\User;
-use Knovators\Authentication\Models\MongoDbUser;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;

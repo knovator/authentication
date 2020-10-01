@@ -29,7 +29,7 @@ class UserAccount extends Model
      * @return bool
      */
     public function isVerified() {
-        return $this->is_verified == 1;
+        return $this->is_verified === true;
     }
 
     /**

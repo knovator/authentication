@@ -3,14 +3,14 @@
 namespace Knovators\Authentication\Http\Routes;
 
 use Knovators\Authentication\Models\UserAccount;
-use Knovators\Support\Routing\RouteRegistrar;
+use Knovators\Support\Routing\RouteRegister;
 
 /**
  * Class MasterRoute
  *
  * @package  Knovators\Authentication\Http\Routes
  */
-class AuthRoute extends RouteRegistrar
+class AuthRoute extends RouteRegister
 {
 
     /**

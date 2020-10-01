@@ -5,12 +5,6 @@ namespace Knovators\Authentication\Common;
 
 use Exception;
 use Knovators\Authentication\Http\Resources\User as UserResource;
-use Knovators\Authentication\Models\Permission;
-use Knovators\Authentication\Models\Role;
-use Knovators\Authentication\Models\User;
-use Knovators\Authentication\Models\MongoDbUser;
-use Knovators\Authentication\Models\MongoDbRole;
-use Knovators\Authentication\Models\MongoDbPermission;
 use Illuminate\Http\Request;
 
 use Knovators\Authentication\Constants\ServiceType;
@@ -30,7 +24,6 @@ class CommonService
      */
     public static function getClass($classLabel) {
         switch ($classLabel) {
-
             case ServiceType::USER:
                 return self::getClassByName('models.user', self::getModel('user'));
             case ServiceType::ROLE:
@@ -74,7 +67,7 @@ class CommonService
     }
 
     /**
-     * @param $model
+     * @param $class
      * @return string
      */
     private static function getModel($class) {

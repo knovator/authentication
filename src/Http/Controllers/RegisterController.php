@@ -222,6 +222,7 @@ class RegisterController extends Controller
     /**
      * @param $user
      * @param $role
+     * @throws Exception
      */
     private function assignRoleMongodb($user, $role) {
         try {
