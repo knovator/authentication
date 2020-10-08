@@ -65,7 +65,8 @@ class MongoDBPassportCommand extends Command
         'vendor/knovators/authentication/src/Models',
         'vendor/knovators/media/src/Models',
         'vendor/knovators/image-resize/src/Models',
-        'vendor/knovators/masters/src/Models'
+        'vendor/knovators/masters/src/Models',
+        'vendor/knovators/seo/src/Models'
     ];
 
     /**
