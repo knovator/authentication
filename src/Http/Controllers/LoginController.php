@@ -23,7 +23,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class LoginController extends Controller
 {
-
     use APIResponse, AuthenticatesUsers;
 
 
