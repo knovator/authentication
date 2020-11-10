@@ -54,4 +54,6 @@ return [
                 env('ADMIN_MIDDLEWARE')) : ['auth:api','is_admin'],
         ]
     ],
+    'user_permission' => env('USER_PERMISSION') ?? false
+
 ];

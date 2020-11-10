@@ -24,15 +24,20 @@ class UserRepository extends BaseRepository
 
     public function getPermissions($user,$role)
     {
-        $user = $this->model->find($user)->first();
-        $user->load('permissions');
-        $userPermission = $user->permissions;
-        if ($userPermission->isEmpty()){
+            $user = $this->model->find($user)->first();
+            $user->load('permissions');
+            $userPermission = $user->permissions;
+            if ($userPermission->isEmpty()){
+               $this->getPermissionsByRole($role);
+            }       
+            return $userPermission->pluck('id')->toArray();       
+    }
+
+    public function getPermissionsByRole($role)
+    {
             $role->load('permissions');
             $rolePermission = $role->permissions;
             return $rolePermission->pluck('id')->toArray();
-        }else{
-            return $userPermission->pluck('id')->toArray();
-        }
+       
     }
 }

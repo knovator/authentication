@@ -50,8 +50,12 @@ class CheckAccess
                 $role = $user->orderByRoles()->first();
                 $admin = env('ADMIN_CODE') ? explode(',',env('ADMIN_CODE')) : ['ADMIN'] ;
                 if ($role &&  !in_array($role->code,$admin)){
-                    $userPermissions = $this->userRepository->getPermissions($user,$role);
-                    if (!empty($userPermissions) && ! in_array($permission->id , $userPermissions)){
+                    if (config("authentication.user_permission")){
+                        $userPermissions = $this->userRepository->getPermissions($user,$role);
+                    }
+                    else{
+                        $userPermissions = $this->userRepository->getPermissionsByRole($role);
+                    }if (!empty($userPermissions) && ! in_array($permission->id , $userPermissions)){
                             return $this->sendResponse(null, trans('authentication::messages.unauthorized_permission'),
                                 HTTPCode::UNAUTHORIZED);
                     }
