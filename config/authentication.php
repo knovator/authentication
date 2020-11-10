@@ -45,6 +45,13 @@ return [
 
             'middleware' => env('LOG_OUT_MIDDLEWARE') ? explode(',',
                 env('LOG_OUT_MIDDLEWARE')) : ['api'],
+        ],
+        'admin_attributes' => [
+
+            'prefix' => 'api/v1/auth',
+
+            'middleware' => env('ADMIN_MIDDLEWARE') ? explode(',',
+                env('ADMIN_MIDDLEWARE')) : ['auth:api','is_admin'],
         ]
     ],
 ];

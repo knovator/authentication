@@ -46,6 +46,12 @@ class AuthRoute extends RouteRegister
                  ->post('accounts/partiallyUpdate/{account}', 'AccountController@partiallyUpdate');
         });
 
+        $this->group($this->routeAttributes('admin_attributes'), function () {
+            $this->name('user.permission.add')->post('user/permission/{user}', 'PermissionController@assignPermission');
+            $this->name('user.permission.remove')->post('user/permission/remove/{user}', 'PermissionController@removePermission');
+            
+        });
+
         $this->model('account', UserAccount::class);
     }
 

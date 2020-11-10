@@ -22,4 +22,12 @@ class PermissionRepository extends BaseRepository
         return CommonService::getClass('permission');
     }
 
+
+    public function getIds($routeNames,$column){
+        $permissionIds = $this->model->whereIn('route_name',$routeNames)
+                                      ->pluck($column)
+                                      ->toArray();
+        return $permissionIds;
+    }
+
 }

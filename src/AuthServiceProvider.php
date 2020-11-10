@@ -59,6 +59,8 @@ class AuthServiceProvider extends PackageServiceProvider
         $this->publishConfig();
         $this->loadMigrations();
         $this->publishTranslations();
+        $this->app['router']->aliasMiddleware('is_admin', IsAdmin::class);
+        $this->app['router']->aliasMiddleware('is_authorized', CheckAccess::class);
     }
 
 

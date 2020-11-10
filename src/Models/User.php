@@ -162,6 +162,18 @@ class User extends Authenticatable
         return $this->hasMany(CommonService::getClass('user_account'), 'user_id', 'id');
     }
 
+     /**
+     * @return mixed
+     */
+    public function permissions() {
+        $config = config('authentication.db');
+        if ($config === 'mongodb') {
+            return $this->belongsToMany(CommonService::getClass('permission'), null,
+            'user_ids', 'permission_ids');
+        }
+        return $this->belongsToMany(CommonService::getClass('permission'), 'permissions_roles',
+            'user_id', 'permission_id');
+    }
 
 }
 

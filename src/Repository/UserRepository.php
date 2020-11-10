@@ -22,4 +22,17 @@ class UserRepository extends BaseRepository
         return CommonService::getClass('user');
     }
 
+    public function getPermissions($user,$role)
+    {
+        $user = $this->model->find($user)->first();
+        $user->load('permissions');
+        $userPermission = $user->permissions;
+        if ($userPermission->isEmpty()){
+            $role->load('permissions');
+            $rolePermission = $role->permissions;
+            return $rolePermission->pluck('id')->toArray();
+        }else{
+            return $userPermission->pluck('id')->toArray();
+        }
+    }
 }

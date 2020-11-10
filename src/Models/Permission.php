@@ -3,7 +3,7 @@
 namespace Knovators\Authentication\Models;
 
 
-use Illuminate\Database\Eloquent\Model;
+use Jenssegers\Mongodb\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Knovators\Authentication\Common\CommonService;
 
@@ -22,16 +22,32 @@ class Permission extends Model
     ];
     protected $table = 'permissions';
 
+
     /**
      * @return BelongsToMany
      */
     public function roles() {
         $config = config('authentication.db');
         if ($config === 'mongodb') {
-            return $this->embedsMany(CommonService::getClass('role'));
+            return $this->belongsToMany(CommonService::getClass('role'), null,
+            'permission_ids', 'role_ids');
         }
         return $this->belongsToMany(CommonService::getClass('role'), 'permissions_roles',
             'permission_id', 'role_id');
+    }
+
+
+     /**
+     * @return BelongsToMany
+     */
+    public function users() {
+        $config = config('authentication.db');
+        if ($config === 'mongodb') {
+            return $this->belongsToMany(CommonService::getClass('user'), null,
+            'permission_ids', 'user_ids');
+        }
+        return $this->belongsToMany(CommonService::getClass('user'), 'permissions_users',
+            'permission_id', 'user_id');
     }
 
 }
