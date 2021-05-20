@@ -4,6 +4,8 @@ namespace Knovators\Authentication;
 
 use Knovators\Authentication\Commands\MongoDBPassportCommand;
 use Knovators\Authentication\Commands\StoreRoutes;
+use Knovators\Authentication\Middleware\CheckAccess;
+use Knovators\Authentication\Middleware\IsAdmin;
 use Knovators\Authentication\Providers\EloquentUserProvider;
 use Knovators\Support\PackageServiceProvider;
 
