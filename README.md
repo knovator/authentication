@@ -13,14 +13,14 @@ Migration Added:
 Features:
 - Handle user role with permissions based Authentication
 
-Require the knovators/authentication package in your composer.json and update your dependencies:
+Require the knovator/authentication package in your composer.json and update your dependencies:
 
 You want to need add authentication repository in your composer.json file.
 
 ```"repositories": [
           {
               "type": "vcs",
-              "url": "git@git.knovator.in:knovators/authentication.git"
+              "url": "git@github.com:knovator/authentication.git"
           }
       ],
 ```
@@ -31,15 +31,15 @@ This package included
 ```laravel/passport``` and
 ```prettus/l5-repository``` packages.
 ```
-    composer require knovators/authentication
+    composer require knovator/authentication
  ```
 
-In your ```config/app.php``` add ```Knovators\Authentication\AuthServiceProvider::class``` to the end of the providers array:
+In your ```config/app.php``` add ```Knovator\Authentication\AuthServiceProvider::class``` to the end of the providers array:
 
 Publish Configuration:
 
-```php artisan vendor:publish --provider "Knovators\Authentication\AuthServiceProvider"```
+```php artisan vendor:publish --provider "Knovator\Authentication\AuthServiceProvider"```
 
 
 
-website : [https://git.knovator.in/knovators/authentication ]
+website : [https://github.com/knovator/authentication ]
