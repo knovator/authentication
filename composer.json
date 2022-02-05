@@ -1,5 +1,5 @@
 {
-    "name": "knovators/authentication",
+    "name": "knovator/authentication",
     "description": "This is authentication module description",
     "type": "library",
     "minimum-stability": "dev",
@@ -11,7 +11,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Knovators\\Authentication\\": "src/"
+            "Knovator\\Authentication\\": "src/"
         }
     }
 }
